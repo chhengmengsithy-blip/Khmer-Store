@@ -1,0 +1,48 @@
+{
+  "id": "FEAT-001",
+  "type": "chore",
+  "description": "Initialize Next.js 15 project with TypeScript, Tailwind CSS, Shadcn UI, and all core dependencies. Establish the full project architecture with folder structure, configuration files, design system tokens, and utility foundations.",
+  "status": "in_progress",
+  "steps": [
+    "Initialize Next.js 15 project with TypeScript and App Router using create-next-app with pnpm in /projects/sandbox/Khmer-Store (use --yes flags, src directory, app router, tailwind, no turbopack)",
+    "Install core dependencies: framer-motion, zustand, @supabase/supabase-js, @supabase/ssr, @react-three/fiber, @react-three/drei, @splinetool/react-spline, @splinetool/runtime, lucide-react, clsx, tailwind-merge, class-variance-authority, next-themes",
+    "Install dev dependencies: @types/node, prettier, prettier-plugin-tailwindcss, eslint-config-prettier",
+    "Initialize Shadcn UI with the following config: style=new-york, baseColor=zinc, cssVariables=true, tailwindcss config path, components alias @/components/ui, utils alias @/lib/utils",
+    "Add key Shadcn UI components: button, card, input, label, dialog, dropdown-menu, avatar, badge, separator, skeleton, toast, tabs, sheet, scroll-area, select, command",
+    "Create the full folder structure: src/components/{ui,layout,sections,marketplace,dashboard,auth,moderation,animations,effects,3d}, src/features/, src/hooks/, src/stores/, src/actions/, src/services/, src/lib/, src/middleware/, src/types/, src/config/, src/styles/, src/utils/, src/constants/",
+    "Create src/lib/utils.ts with cn() utility combining clsx and tailwind-merge",
+    "Create src/config/site.ts with site metadata (name: Khmer Store, description, URLs)",
+    "Create src/config/colors.ts exporting the color system: background #0F1115, surface #181A20, elevated #1F222A, soft-white #F5F5F2, muted #A1A1AA, border rgba(255,255,255,0.08), accent-gold #C6A769, accent-silver #D6D3D1",
+    "Create src/styles/globals.css with Tailwind directives, custom CSS variables for the color system, font imports for Playfair Display, Inter, Geist, and Manrope from Google Fonts",
+    "Update tailwind.config.ts to extend theme with custom colors from the design system, custom fonts (playfair, cormorant, inter, geist, manrope), custom animations",
+    "Create src/types/index.ts with core type definitions: User, Profile, Product, Category, Order, Seller, Review, Notification, etc.",
+    "Create src/constants/index.ts with app-wide constants: roles enum, verification statuses, order statuses, payment methods",
+    "Create src/lib/supabase/client.ts with browser Supabase client factory (using env vars NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY)",
+    "Create src/lib/supabase/server.ts with server-side Supabase client factory using @supabase/ssr and cookies",
+    "Create src/lib/supabase/middleware.ts with Supabase auth middleware helper",
+    "Create src/stores/auth-store.ts with Zustand store for client-side auth state (user, session, loading, actions)",
+    "Create src/stores/cart-store.ts with Zustand store for shopping cart (items, add, remove, clear, total)",
+    "Create src/hooks/use-mounted.ts, src/hooks/use-media-query.ts, src/hooks/use-scroll-position.ts utility hooks",
+    "Create .env.example with all required environment variables documented",
+    "Create src/middleware.ts with Next.js middleware skeleton for auth protection",
+    "Update src/app/layout.tsx with proper metadata, font loading (Inter + Playfair Display via next/font/google), ThemeProvider setup, dark mode as default",
+    "Update next.config.ts with image domains config, experimental features, headers for security"
+  ],
+  "acceptance_criteria": [
+    "pnpm install completes without errors",
+    "pnpm build completes successfully with no TypeScript errors",
+    "pnpm lint passes",
+    "All folder structure directories exist",
+    "Shadcn UI components are installed in src/components/ui/",
+    "Design system colors and fonts are configured in Tailwind config",
+    "Supabase client utilities exist with proper typing",
+    "Zustand stores are created with proper typing",
+    "Environment variables are documented in .env.example"
+  ],
+  "verification": [
+    "cd /projects/sandbox/Khmer-Store && pnpm build",
+    "cd /projects/sandbox/Khmer-Store && pnpm lint"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}

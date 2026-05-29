@@ -1,0 +1,41 @@
+{
+  "id": "FEAT-002",
+  "type": "feat",
+  "description": "Build the core UI shell: premium luxury header/navbar with navigation, hero section with 3D Spline integration placeholder, and landing page sections. Implement the animation system with Framer Motion. Create the full landing page experience.",
+  "status": "pending",
+  "steps": [
+    "Create src/components/animations/motion-wrapper.tsx - reusable Framer Motion wrapper components: FadeIn, SlideUp, ScaleIn, StaggerContainer with configurable delay/duration/easing. Use subtle, premium easing curves (no bounce).",
+    "Create src/components/animations/scroll-reveal.tsx - scroll-triggered reveal animation using Framer Motion useInView with threshold options",
+    "Create src/components/animations/page-transition.tsx - page transition wrapper using Framer Motion AnimatePresence",
+    "Create src/components/layout/header.tsx - luxury navbar with: logo (Khmer Store text in Playfair Display with gold accent), navigation links (Marketplace, Collections, Sellers, About), search trigger button, auth buttons (Sign In/Join styled as ghost/primary), mobile hamburger menu. Glass-morphism background on scroll. Framer Motion hover animations on nav items. Sticky positioning.",
+    "Create src/components/layout/mobile-nav.tsx - mobile slide-out navigation using Shadcn Sheet component with smooth animations",
+    "Create src/components/layout/footer.tsx - minimal luxury footer with columns: Platform (About, Careers, Press), Support (Help Center, Safety, Contact), Legal (Terms, Privacy, Cookies), Social links. Background surface color, gold accent on hover.",
+    "Create src/components/3d/hero-scene.tsx - React Three Fiber canvas with a simple elegant 3D scene: rotating geometric shape (torus knot or icosahedron) with metallic gold material, subtle ambient lighting, orbit controls disabled (auto-rotate). Wrap in Suspense with loading fallback. Use dynamic import with ssr:false.",
+    "Create src/components/3d/scene-loader.tsx - elegant loading placeholder with skeleton animation while 3D scene loads",
+    "Create src/components/sections/hero-section.tsx - full-viewport hero with: left side has large heading 'Discover Extraordinary' in Playfair Display, subheading describing luxury marketplace, CTA buttons (Explore Marketplace gold button, Become a Seller outline button). Right side shows 3D scene. Gradient overlay. Scroll indicator at bottom.",
+    "Create src/components/sections/featured-categories.tsx - horizontal scroll section showing luxury categories (Art, Jewelry, Fashion, Watches, Collectibles, Home) with elegant card design, hover scale animation, gold accent borders",
+    "Create src/components/sections/featured-products.tsx - grid of product cards (use placeholder data) with image placeholder, price, seller badge, favorite button. Stagger reveal animation on scroll.",
+    "Create src/components/sections/trust-section.tsx - trust indicators section: Verified Sellers badge count, Secure Escrow messaging, 24/7 Support, Satisfaction Guarantee. Icon + text layout with subtle animations.",
+    "Create src/components/sections/cta-section.tsx - call-to-action section encouraging sellers to join. Split layout with compelling copy and 'Start Selling' button.",
+    "Create src/components/marketplace/product-card.tsx - reusable product card component: image container with aspect ratio, hover zoom effect, product name, price in gold, seller name, rating stars, favorite heart button with animation, 'Add to Cart' button on hover",
+    "Update src/app/page.tsx to compose the full landing page: HeroSection, FeaturedCategories, FeaturedProducts, TrustSection, CTASection. All wrapped in scroll reveal animations.",
+    "Update src/app/layout.tsx to include Header and Footer in the layout shell",
+    "Create src/app/loading.tsx with an elegant loading screen (centered logo with pulse animation)"
+  ],
+  "acceptance_criteria": [
+    "pnpm build succeeds with all new components",
+    "Landing page renders with hero section, categories, products, trust section, and CTA",
+    "Header is sticky with glass-morphism effect",
+    "3D scene is lazy-loaded and does not block initial render",
+    "All animations use subtle, premium motion (no bounce/elastic)",
+    "Mobile navigation works via Sheet component",
+    "Product cards have hover interactions",
+    "Color system is consistently applied (dark background, gold accents, soft white text)"
+  ],
+  "verification": [
+    "cd /projects/sandbox/Khmer-Store && pnpm build",
+    "cd /projects/sandbox/Khmer-Store && pnpm lint"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}

@@ -1,0 +1,7 @@
+{
+  "task_id": "task-khmer-store-platform",
+  "task_description": "Build an ultra-premium luxury 3D marketplace platform called Khmer Store from scratch using Next.js 15, TypeScript, Tailwind CSS, Shadcn UI, Framer Motion, Zustand, Supabase, React Three Fiber, and Spline. Features luxury dark theme, 3D hero section, multi-role auth with KYC, marketplace with escrow payments, admin dashboard, and anti-fraud systems.",
+  "status": "in_progress",
+  "feature_order": ["FEAT-001", "FEAT-002", "FEAT-003", "FEAT-004", "FEAT-005"],
+  "blocked_reason": null
+}

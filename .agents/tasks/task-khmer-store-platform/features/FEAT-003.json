@@ -1,0 +1,44 @@
+{
+  "id": "FEAT-003",
+  "type": "feat",
+  "description": "Build the database schema with Supabase SQL migrations, authentication system with multi-provider support, identity verification/KYC flow UI, and role-based access control with Row-Level Security policies.",
+  "status": "pending",
+  "steps": [
+    "Create supabase/migrations/001_initial_schema.sql with all database tables: users_extended (profile data beyond auth.users), profiles (public profile info, display_name, avatar, bio, trust_score), sellers (business_name, description, verified, commission_rate, rating), products (title, description, price, currency, status, seller_id, category_id, stock, featured), product_media (product_id, url, type, order, alt_text), categories (name, slug, description, icon, parent_id for nesting), orders (buyer_id, seller_id, status, total, commission, escrow_status), transactions (order_id, type, amount, status, payment_method, stripe_id), wallets (user_id, balance, currency, frozen_amount), withdrawals (wallet_id, amount, status, method, processed_at), reviews (product_id, user_id, rating, comment, verified_purchase), favorites (user_id, product_id), notifications (user_id, type, title, body, read, action_url), messages (sender_id, receiver_id, content, read_at), verification_documents (user_id, type, file_url, status, reviewed_by, reviewed_at), fraud_monitoring (user_id, event_type, risk_score, details, resolved), moderation_logs (moderator_id, action, target_type, target_id, reason, notes), admin_actions (admin_id, action, details), coupons (code, discount_type, discount_value, min_order, max_uses, expires_at, active), analytics_events (user_id, event_type, metadata, created_at), reports (reporter_id, target_type, target_id, reason, status), ban_system (user_id, banned_by, reason, expires_at, permanent), device_sessions (user_id, device_fingerprint, ip_address, user_agent, last_seen). All tables use UUID primary keys, created_at/updated_at timestamps, and soft delete (deleted_at) where appropriate.",
+    "Create supabase/migrations/002_indexes.sql with performance indexes on frequently queried columns: products(category_id, seller_id, status), orders(buyer_id, seller_id, status), reviews(product_id), favorites(user_id), notifications(user_id, read), messages(sender_id, receiver_id), fraud_monitoring(user_id, risk_score)",
+    "Create supabase/migrations/003_rls_policies.sql with Row-Level Security policies: users can read own profile, update own profile; sellers can CRUD own products; buyers can read all published products; orders visible to buyer and seller involved; reviews readable by all, writable by verified purchasers; admin bypass policies for moderation; wallets only accessible by owner",
+    "Create supabase/migrations/004_functions.sql with database functions: calculate_seller_rating(), update_trust_score(), process_escrow_release(), increment_product_views(), check_fraud_score()",
+    "Create src/lib/supabase/database.types.ts with TypeScript types generated from the schema (manual type definitions matching the SQL schema)",
+    "Create src/features/auth/components/sign-in-form.tsx - elegant sign-in form with email/password fields, social auth buttons (Google, Facebook styled as luxury buttons), Phone OTP option, 'Forgot Password' link. Framer Motion entrance animation.",
+    "Create src/features/auth/components/sign-up-form.tsx - sign-up form with email, password, confirm password, terms acceptance checkbox. Social auth options. Progress indicator showing this is step 1 of verification.",
+    "Create src/features/auth/components/social-auth-buttons.tsx - reusable social auth button group (Google, Facebook, Phone) with brand colors and hover effects",
+    "Create src/features/auth/components/otp-verification.tsx - OTP input component (6 digits) with auto-focus, paste support, countdown timer for resend",
+    "Create src/features/auth/components/verification-flow.tsx - multi-step KYC verification wizard: Step 1 (Personal Info: full name, DOB, country, address), Step 2 (Identity Document: upload ID card or birth certificate with drag-drop zone), Step 3 (Selfie Verification: camera capture or upload), Step 4 (Review & Submit with 24hr wait messaging). Progress bar at top. Each step has elegant animations.",
+    "Create src/features/auth/components/verification-status.tsx - status display component showing PENDING_VERIFICATION, APPROVED, REJECTED states with appropriate messaging and next steps",
+    "Create src/features/auth/actions/auth-actions.ts - server actions for signIn, signUp, signOut, resetPassword, verifyOtp using Supabase Auth",
+    "Create src/features/auth/actions/verification-actions.ts - server actions for submitVerification, uploadDocument, getVerificationStatus",
+    "Create src/app/(auth)/sign-in/page.tsx - sign-in page with centered card layout, dark background, gold accents",
+    "Create src/app/(auth)/sign-up/page.tsx - sign-up page with the sign-up form",
+    "Create src/app/(auth)/verify/page.tsx - verification flow page with the multi-step wizard",
+    "Create src/app/(auth)/layout.tsx - auth layout with centered content, minimal header (logo only), no footer",
+    "Update src/middleware.ts to implement route protection: public routes (/, /sign-in, /sign-up), protected routes (/dashboard/*, /marketplace/checkout), verification-required routes. Redirect unauthed users to sign-in, unverified users to /verify.",
+    "Create src/constants/roles.ts with role hierarchy enum and permission mappings: GUEST, PENDING_USER, VERIFIED_BUYER, VERIFIED_SELLER, MODERATOR, SUPPORT_STAFF, ADMIN, SUPER_ADMIN",
+    "Create src/lib/auth/permissions.ts with permission checking utilities: hasRole(), canAccess(), isVerified(), isSeller(), isAdmin()"
+  ],
+  "acceptance_criteria": [
+    "pnpm build succeeds with all auth components and database types",
+    "SQL migration files are syntactically valid",
+    "Auth pages render with proper luxury styling",
+    "Verification flow has all 4 steps with proper navigation",
+    "Middleware correctly defines route protection rules",
+    "Role system has complete hierarchy with permission utilities",
+    "TypeScript types match the database schema",
+    "All forms have proper validation patterns"
+  ],
+  "verification": [
+    "cd /projects/sandbox/Khmer-Store && pnpm build",
+    "cd /projects/sandbox/Khmer-Store && pnpm lint"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}

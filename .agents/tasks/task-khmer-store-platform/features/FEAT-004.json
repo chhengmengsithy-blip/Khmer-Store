@@ -1,0 +1,53 @@
+{
+  "id": "FEAT-004",
+  "type": "feat",
+  "description": "Build the marketplace pages (product listing, search, filtering, product detail page), seller profiles, checkout flow, and the buyer/seller dashboard with wallet UI.",
+  "status": "pending",
+  "steps": [
+    "Create src/features/marketplace/components/search-overlay.tsx - full-screen search overlay with Command component (Shadcn), recent searches, trending searches, category suggestions. Framer Motion slide-down animation. Keyboard shortcut (Cmd+K).",
+    "Create src/features/marketplace/components/filter-sidebar.tsx - marketplace filters: category tree, price range slider, condition (New/Used/Like New), seller verification toggle, rating filter, sort options (Newest, Price Low-High, Price High-Low, Most Popular)",
+    "Create src/features/marketplace/components/product-grid.tsx - responsive grid layout (4 cols desktop, 2 cols tablet, 1 col mobile) with product cards, infinite scroll or load more button, skeleton loading state",
+    "Create src/features/marketplace/components/product-detail.tsx - full product detail view: image gallery with thumbnails, product info (title, price, description, condition, shipping), seller card with rating and verified badge, 'Add to Cart' and 'Buy Now' buttons, related products section, reviews section",
+    "Create src/features/marketplace/components/image-gallery.tsx - product image gallery with main image, thumbnail strip, zoom on hover, lightbox mode",
+    "Create src/features/marketplace/components/review-section.tsx - product reviews display with rating distribution bar chart, individual review cards with avatar and date, write review form for verified purchasers",
+    "Create src/app/marketplace/page.tsx - marketplace listing page with filter sidebar, product grid, search bar at top, category breadcrumbs",
+    "Create src/app/marketplace/[productId]/page.tsx - product detail page composing ProductDetail, ImageGallery, ReviewSection",
+    "Create src/app/marketplace/layout.tsx - marketplace layout with search header variant",
+    "Create src/features/seller/components/seller-profile-card.tsx - seller profile display: avatar, business name, verified badge, rating, member since, total sales, response time",
+    "Create src/features/seller/components/seller-products-grid.tsx - grid of products by a specific seller with sorting",
+    "Create src/app/sellers/[sellerId]/page.tsx - public seller profile page with their products",
+    "Create src/features/checkout/components/checkout-flow.tsx - multi-step checkout: Step 1 (Review Cart), Step 2 (Shipping Address), Step 3 (Payment Method selection), Step 4 (Order Confirmation). Progress indicator at top.",
+    "Create src/features/checkout/components/cart-summary.tsx - cart sidebar/panel showing items, quantities, subtotal, fees, total",
+    "Create src/features/checkout/components/payment-method-selector.tsx - payment method selection: Stripe card, PayPal, Wallet Balance. Each with appropriate icons and info.",
+    "Create src/app/checkout/page.tsx - checkout page with the multi-step flow",
+    "Create src/features/dashboard/components/dashboard-sidebar.tsx - dashboard navigation sidebar: Overview, Orders, Products (sellers), Wallet, Messages, Settings, Verification Status. Active state with gold accent.",
+    "Create src/features/dashboard/components/dashboard-stats.tsx - overview stats cards: Total Orders, Total Spent/Earned, Pending Items, Wallet Balance. With trend indicators.",
+    "Create src/features/dashboard/components/orders-table.tsx - orders list with status badges (Pending, Processing, Shipped, Delivered, Disputed), date, amount, actions",
+    "Create src/features/dashboard/components/wallet-ui.tsx - wallet interface: current balance display (large number with currency), transaction history list, deposit/withdraw buttons, pending escrow amount",
+    "Create src/features/dashboard/components/seller-product-form.tsx - product creation/edit form for sellers: title, description, price, category select, condition, images upload (drag-drop multi), stock quantity, shipping options",
+    "Create src/features/dashboard/components/notifications-panel.tsx - notifications dropdown/panel with grouped notifications, read/unread states, action links",
+    "Create src/app/dashboard/page.tsx - main dashboard page with stats overview",
+    "Create src/app/dashboard/orders/page.tsx - orders list page",
+    "Create src/app/dashboard/wallet/page.tsx - wallet page",
+    "Create src/app/dashboard/products/page.tsx - seller products management page",
+    "Create src/app/dashboard/products/new/page.tsx - new product creation page",
+    "Create src/app/dashboard/settings/page.tsx - user settings page (profile edit, notification preferences, security settings)",
+    "Create src/app/dashboard/layout.tsx - dashboard layout with sidebar navigation"
+  ],
+  "acceptance_criteria": [
+    "pnpm build succeeds with all marketplace and dashboard components",
+    "Marketplace page has functional filter sidebar and product grid layout",
+    "Product detail page shows all product information with image gallery",
+    "Checkout flow has all 4 steps with proper state management",
+    "Dashboard has working sidebar navigation between pages",
+    "Wallet UI displays balance and transaction history",
+    "Seller product form has all required fields",
+    "All pages follow the luxury dark theme with gold accents"
+  ],
+  "verification": [
+    "cd /projects/sandbox/Khmer-Store && pnpm build",
+    "cd /projects/sandbox/Khmer-Store && pnpm lint"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}

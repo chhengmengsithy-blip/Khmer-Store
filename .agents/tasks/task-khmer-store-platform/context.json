@@ -1,0 +1,16 @@
+{
+  "project_type": "Next.js 15 App Router full-stack marketplace platform",
+  "language": "TypeScript",
+  "build_system": "pnpm with Next.js 15, Tailwind CSS v4, Shadcn UI",
+  "test_framework": "Vitest (unit) + Playwright (e2e) - to be set up",
+  "build_command": "cd /projects/sandbox/Khmer-Store && pnpm build",
+  "test_command": "cd /projects/sandbox/Khmer-Store && pnpm lint",
+  "verification_instructions": "1. Run pnpm build to verify TypeScript compilation and Next.js build. 2. Run pnpm lint to check code quality.",
+  "snapshot_or_generated_files": null,
+  "setup_instructions": "1. cd /projects/sandbox/Khmer-Store. 2. pnpm install. 3. pnpm build.",
+  "environment_constraints": "COMMON_DEPENDENCIES network mode - can access npm registry and common package sources. Node.js v22 available. pnpm available. No Docker daemon needed for build validation.",
+  "contribution_requirements": "Greenfield project - establishing conventions from scratch.",
+  "key_patterns": "Feature-based architecture. App Router with server components by default. Zustand for client state. Supabase for backend. Framer Motion for animations. React Three Fiber for 3D. Shadcn UI for component primitives.",
+  "relevant_files": [],
+  "directory_structure": "src/app/ (routes), src/components/ (ui, layout, sections, marketplace, dashboard, auth, moderation, animations, effects, 3d), src/features/, src/hooks/, src/stores/, src/actions/, src/services/, src/lib/, src/middleware/, src/types/, src/config/, src/styles/, src/utils/, src/constants/"
+}

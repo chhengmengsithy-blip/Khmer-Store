@@ -1,0 +1,53 @@
+{
+  "id": "FEAT-005",
+  "type": "feat",
+  "description": "Build the admin/moderation dashboard, payment/escrow system architecture, anti-fraud/security systems, and deployment configuration. Complete the platform with trust & safety features.",
+  "status": "pending",
+  "steps": [
+    "Create src/features/admin/components/admin-sidebar.tsx - admin navigation: Dashboard, Users, Verifications, Products, Orders, Fraud Monitoring, Reports, Moderation Logs, Financial, Settings. Different from buyer/seller dashboard.",
+    "Create src/features/admin/components/admin-stats.tsx - admin overview stats: Total Users, Pending Verifications, Active Disputes, Revenue Today, Fraud Alerts, Active Listings",
+    "Create src/features/admin/components/user-management-table.tsx - admin user table with: avatar, name, email, role badge, verification status, trust score, actions (view, ban, warn, change role). Pagination and search.",
+    "Create src/features/admin/components/verification-queue.tsx - KYC verification queue: user info, submitted documents (ID, selfie), submission date, approve/reject buttons with reason field, 24hr minimum wait indicator",
+    "Create src/features/admin/components/fraud-dashboard.tsx - fraud monitoring: risk score alerts, suspicious activity feed, device fingerprint conflicts, multi-account detection alerts, action buttons (investigate, ban, clear)",
+    "Create src/features/admin/components/moderation-panel.tsx - content moderation: reported products/users list, report reason, evidence, moderator actions (remove, warn, ban), moderation history log",
+    "Create src/features/admin/components/financial-dashboard.tsx - financial overview: total revenue chart placeholder, commission earned, pending payouts, escrow balance, withdrawal requests queue",
+    "Create src/app/admin/page.tsx - admin dashboard overview",
+    "Create src/app/admin/users/page.tsx - user management page",
+    "Create src/app/admin/verifications/page.tsx - verification queue page",
+    "Create src/app/admin/fraud/page.tsx - fraud monitoring page",
+    "Create src/app/admin/moderation/page.tsx - moderation page",
+    "Create src/app/admin/financial/page.tsx - financial dashboard page",
+    "Create src/app/admin/layout.tsx - admin layout with admin sidebar, restricted to ADMIN/SUPER_ADMIN roles",
+    "Create src/services/escrow-service.ts - escrow system service layer: createEscrow(), holdFunds(), releaseFunds(), initiateDispute(), processRefund(), calculateCommission(). Type-safe interfaces for the full escrow lifecycle.",
+    "Create src/services/payment-service.ts - payment service abstraction: processPayment(), createPaymentIntent(), verifyWebhook(), getPaymentMethods(). Supports Stripe and PayPal method types.",
+    "Create src/services/fraud-service.ts - fraud detection service: calculateRiskScore(), checkDeviceFingerprint(), detectMultiAccount(), flagSuspiciousActivity(), getfraudAlerts()",
+    "Create src/services/notification-service.ts - notification service: sendNotification(), markAsRead(), getUserNotifications(), sendEmailNotification() templates",
+    "Create src/lib/security/rate-limiter.ts - rate limiting utility using in-memory token bucket (configurable per endpoint), with types for RateLimitConfig and RateLimitResult",
+    "Create src/lib/security/device-fingerprint.ts - device fingerprinting utility: generateFingerprint() from user agent, screen, timezone, language; compareFingerprints() for similarity scoring",
+    "Create src/lib/security/ip-monitor.ts - IP monitoring utility: trackLogin(), detectSuspiciousPattern(), getLoginHistory(), flagNewDevice()",
+    "Create src/lib/security/captcha.ts - CAPTCHA integration helper with verification function (supports hCaptcha/reCAPTCHA)",
+    "Create src/app/api/webhooks/stripe/route.ts - Stripe webhook handler route (POST) with signature verification, event routing for payment_intent.succeeded, payment_intent.failed, etc.",
+    "Create src/app/api/webhooks/paypal/route.ts - PayPal webhook handler route with signature verification",
+    "Create vercel.json with deployment configuration: regions, environment variable references, headers (security headers: CSP, HSTS, X-Frame-Options), rewrites if needed",
+    "Create .env.example updated with all environment variables: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY, PAYPAL_CLIENT_ID, PAYPAL_SECRET, HCAPTCHA_SECRET, NEXT_PUBLIC_HCAPTCHA_SITE_KEY, NEXT_PUBLIC_APP_URL",
+    "Create src/middleware.ts update - add rate limiting headers, security headers, admin route protection, seller route protection based on role checks"
+  ],
+  "acceptance_criteria": [
+    "pnpm build succeeds with all admin and security components",
+    "Admin dashboard has all required pages accessible from sidebar",
+    "Escrow service has complete lifecycle methods with proper TypeScript types",
+    "Payment service abstracts multiple providers behind a unified interface",
+    "Fraud service has risk scoring and detection utilities",
+    "Rate limiter is configurable per endpoint",
+    "Webhook routes handle signature verification",
+    "vercel.json is valid deployment configuration",
+    "All security headers are defined",
+    "Middleware properly gates admin and seller routes"
+  ],
+  "verification": [
+    "cd /projects/sandbox/Khmer-Store && pnpm build",
+    "cd /projects/sandbox/Khmer-Store && pnpm lint"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}
