@@ -2,7 +2,7 @@
   "id": "FEAT-005",
   "type": "feat",
   "description": "Build the admin/moderation dashboard, payment/escrow system architecture, anti-fraud/security systems, and deployment configuration. Complete the platform with trust & safety features.",
-  "status": "pending",
+  "status": "in_progress",
   "steps": [
     "Create src/features/admin/components/admin-sidebar.tsx - admin navigation: Dashboard, Users, Verifications, Products, Orders, Fraud Monitoring, Reports, Moderation Logs, Financial, Settings. Different from buyer/seller dashboard.",
     "Create src/features/admin/components/admin-stats.tsx - admin overview stats: Total Users, Pending Verifications, Active Disputes, Revenue Today, Fraud Alerts, Active Listings",
