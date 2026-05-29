@@ -2,7 +2,7 @@
   "id": "FEAT-006",
   "type": "fix",
   "description": "Address code review findings: webhook signature verification, admin route gating, rate limiter documentation, KYC flow wiring, escrow concurrency guard, and RLS helper fallback.",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "Fix Stripe webhook to compute HMAC-SHA256 signature using Node.js crypto module",
     "Fix PayPal webhook to implement proper certificate-based verification pattern",
@@ -27,5 +27,5 @@
     "cd /projects/sandbox/Khmer-Store && NODE_OPTIONS='' pnpm lint"
   ],
   "blocked_reason": null,
-  "findings": null
+  "findings": "All 6 actionable review issues addressed. Build and lint pass cleanly. Issue 7 (no tests) was documented as acceptable for initial scaffold - no action taken. The PayPal webhook verification requires the PAYPAL_WEBHOOK_ID env var which was added to .env.example. The RLS helper uses a sentinel UUID (all zeros) as fallback which will never match any real row, effectively denying access until the trigger creates the users_extended row (which happens immediately on signup via the new trigger)."
 }
