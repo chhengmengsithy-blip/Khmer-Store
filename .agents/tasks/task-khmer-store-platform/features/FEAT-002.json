@@ -2,7 +2,7 @@
   "id": "FEAT-002",
   "type": "feat",
   "description": "Build the core UI shell: premium luxury header/navbar with navigation, hero section with 3D Spline integration placeholder, and landing page sections. Implement the animation system with Framer Motion. Create the full landing page experience.",
-  "status": "pending",
+  "status": "in_progress",
   "steps": [
     "Create src/components/animations/motion-wrapper.tsx - reusable Framer Motion wrapper components: FadeIn, SlideUp, ScaleIn, StaggerContainer with configurable delay/duration/easing. Use subtle, premium easing curves (no bounce).",
     "Create src/components/animations/scroll-reveal.tsx - scroll-triggered reveal animation using Framer Motion useInView with threshold options",
