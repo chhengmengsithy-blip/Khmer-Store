@@ -2,7 +2,7 @@
   "id": "FEAT-003",
   "type": "feat",
   "description": "Build the database schema with Supabase SQL migrations, authentication system with multi-provider support, identity verification/KYC flow UI, and role-based access control with Row-Level Security policies.",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "Create supabase/migrations/001_initial_schema.sql with all database tables: users_extended (profile data beyond auth.users), profiles (public profile info, display_name, avatar, bio, trust_score), sellers (business_name, description, verified, commission_rate, rating), products (title, description, price, currency, status, seller_id, category_id, stock, featured), product_media (product_id, url, type, order, alt_text), categories (name, slug, description, icon, parent_id for nesting), orders (buyer_id, seller_id, status, total, commission, escrow_status), transactions (order_id, type, amount, status, payment_method, stripe_id), wallets (user_id, balance, currency, frozen_amount), withdrawals (wallet_id, amount, status, method, processed_at), reviews (product_id, user_id, rating, comment, verified_purchase), favorites (user_id, product_id), notifications (user_id, type, title, body, read, action_url), messages (sender_id, receiver_id, content, read_at), verification_documents (user_id, type, file_url, status, reviewed_by, reviewed_at), fraud_monitoring (user_id, event_type, risk_score, details, resolved), moderation_logs (moderator_id, action, target_type, target_id, reason, notes), admin_actions (admin_id, action, details), coupons (code, discount_type, discount_value, min_order, max_uses, expires_at, active), analytics_events (user_id, event_type, metadata, created_at), reports (reporter_id, target_type, target_id, reason, status), ban_system (user_id, banned_by, reason, expires_at, permanent), device_sessions (user_id, device_fingerprint, ip_address, user_agent, last_seen). All tables use UUID primary keys, created_at/updated_at timestamps, and soft delete (deleted_at) where appropriate.",
     "Create supabase/migrations/002_indexes.sql with performance indexes on frequently queried columns: products(category_id, seller_id, status), orders(buyer_id, seller_id, status), reviews(product_id), favorites(user_id), notifications(user_id, read), messages(sender_id, receiver_id), fraud_monitoring(user_id, risk_score)",
@@ -40,5 +40,5 @@
     "cd /projects/sandbox/Khmer-Store && pnpm lint"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "Build and lint pass cleanly. Next.js 16.2.6 shows a deprecation warning about middleware convention preferring 'proxy' but it still works. The otp-verification component needed a refactor to avoid calling setState directly inside an effect (react-hooks/set-state-in-effect rule). The database.types.ts empty Enums type needed Record<string, never> instead of {} to satisfy @typescript-eslint/no-empty-object-type. Auth pages render at /sign-in, /sign-up, /verify using the (auth) route group layout."
 }
