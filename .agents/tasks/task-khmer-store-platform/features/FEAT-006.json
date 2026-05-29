@@ -1,0 +1,31 @@
+{
+  "id": "FEAT-006",
+  "type": "fix",
+  "description": "Address code review findings: webhook signature verification, admin route gating, rate limiter documentation, KYC flow wiring, escrow concurrency guard, and RLS helper fallback.",
+  "status": "in_progress",
+  "steps": [
+    "Fix Stripe webhook to compute HMAC-SHA256 signature using Node.js crypto module",
+    "Fix PayPal webhook to implement proper certificate-based verification pattern",
+    "Fix middleware admin route gating fail-open logic and add server-side role check utility",
+    "Add development/single-instance documentation comment to rate limiter and TODO for Redis. Wire rate limiter in middleware for API routes.",
+    "Wire verification-flow.tsx handleSubmit to call server actions from verification-actions.ts",
+    "Add SELECT ... FOR UPDATE in process_escrow_release function in 004_functions.sql",
+    "Add COALESCE fallback in the get_user_extended_id() helper in 003_rls_policies.sql"
+  ],
+  "acceptance_criteria": [
+    "pnpm build succeeds",
+    "pnpm lint passes",
+    "Webhook routes properly verify signatures using crypto HMAC",
+    "Middleware denies admin access when cookie is absent",
+    "Rate limiter has clear documentation about limitations and a TODO for Redis",
+    "Verification flow calls server actions",
+    "Escrow release has concurrency guard",
+    "RLS helper handles missing users_extended row"
+  ],
+  "verification": [
+    "cd /projects/sandbox/Khmer-Store && NODE_OPTIONS='' pnpm build",
+    "cd /projects/sandbox/Khmer-Store && NODE_OPTIONS='' pnpm lint"
+  ],
+  "blocked_reason": null,
+  "findings": null
+}

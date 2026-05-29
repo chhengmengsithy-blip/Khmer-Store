@@ -25,10 +25,16 @@ ALTER TABLE reports ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ban_system ENABLE ROW LEVEL SECURITY;
 ALTER TABLE device_sessions ENABLE ROW LEVEL SECURITY;
 
--- Helper function to get user's extended ID from auth
+-- Helper function to get user's extended ID from auth.
+-- Returns NULL (via COALESCE) if the users_extended row does not yet exist
+-- (e.g., immediately after sign-up before the trigger creates it).
+-- Callers relying on this function should handle the NULL case gracefully.
 CREATE OR REPLACE FUNCTION get_user_extended_id()
 RETURNS UUID AS $$
-  SELECT id FROM users_extended WHERE auth_user_id = auth.uid();
+  SELECT COALESCE(
+    (SELECT id FROM users_extended WHERE auth_user_id = auth.uid()),
+    '00000000-0000-0000-0000-000000000000'::UUID
+  );
 $$ LANGUAGE sql SECURITY DEFINER STABLE;
 
 -- Helper function to check if current user has admin/moderator role

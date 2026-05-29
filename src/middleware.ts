@@ -1,5 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
+import {
+  checkRateLimit,
+  getRateLimitHeaders,
+  RATE_LIMIT_CONFIGS,
+} from "@/lib/security/rate-limiter";
 
 // Routes that are always publicly accessible
 const PUBLIC_ROUTES = [
@@ -83,6 +88,21 @@ function isSellerRoute(pathname: string): boolean {
   );
 }
 
+function isApiRoute(pathname: string): boolean {
+  return pathname.startsWith("/api/");
+}
+
+/**
+ * Determine the rate limit config for a given pathname.
+ */
+function getRateLimitConfigForPath(pathname: string) {
+  if (pathname.startsWith("/api/webhooks/")) return RATE_LIMIT_CONFIGS.api_webhook;
+  if (pathname.startsWith("/api/auth") || pathname.startsWith("/api/sign")) return RATE_LIMIT_CONFIGS.api_auth;
+  if (pathname.startsWith("/api/payment")) return RATE_LIMIT_CONFIGS.api_payment;
+  if (pathname.startsWith("/api/upload")) return RATE_LIMIT_CONFIGS.api_upload;
+  return RATE_LIMIT_CONFIGS.api_general;
+}
+
 /**
  * Add security headers to the response.
  */
@@ -102,20 +122,6 @@ function addSecurityHeaders(response: NextResponse): NextResponse {
   return response;
 }
 
-/**
- * Add rate limit indicator headers to the response.
- */
-function addRateLimitHeaders(
-  response: NextResponse,
-  request: NextRequest
-): NextResponse {
-  // Track request metadata for downstream rate limiting
-  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
-  response.headers.set("X-Client-IP", ip);
-  response.headers.set("X-Request-Timestamp", Date.now().toString());
-  return response;
-}
-
 export async function middleware(request: NextRequest) {
   // Update the session (refresh tokens if needed)
   const response = await updateSession(request);
@@ -123,7 +129,30 @@ export async function middleware(request: NextRequest) {
 
   // Add security headers to all responses
   addSecurityHeaders(response);
-  addRateLimitHeaders(response, request);
+
+  // Apply rate limiting for API routes
+  if (isApiRoute(pathname)) {
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+    const rateLimitKey = `${ip}:${pathname}`;
+    const config = getRateLimitConfigForPath(pathname);
+    const result = checkRateLimit(rateLimitKey, config);
+
+    // Add rate limit headers to the response
+    const rateLimitHeaders = getRateLimitHeaders(result);
+    for (const [key, value] of Object.entries(rateLimitHeaders)) {
+      response.headers.set(key, value);
+    }
+
+    if (!result.allowed) {
+      return NextResponse.json(
+        { error: "Too many requests" },
+        {
+          status: 429,
+          headers: rateLimitHeaders,
+        }
+      );
+    }
+  }
 
   // Skip auth checks for public routes
   if (isPublicRoute(pathname)) {
@@ -143,24 +172,24 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(signInUrl);
     }
 
-    // Admin route protection - check for admin role cookie/claim
-    // Full role verification happens at the page level with server-side DB lookup.
-    // Middleware provides the first line of defense using role metadata from the session.
+    // Admin route protection - deny access if user-role cookie is absent or not admin.
+    // This is the first line of defense. Server-side role verification via
+    // requireAdminRole() must also be called in admin page components/route handlers.
     if (isAdminRoute(pathname)) {
       const userRole = request.cookies.get("user-role")?.value;
-      if (userRole && userRole !== "admin" && userRole !== "super_admin") {
+      if (!userRole || (userRole !== "admin" && userRole !== "super_admin")) {
         return NextResponse.redirect(new URL("/dashboard", request.url));
       }
     }
 
-    // Seller route protection
+    // Seller route protection - deny access if user-role cookie is absent or insufficient.
     if (isSellerRoute(pathname)) {
       const userRole = request.cookies.get("user-role")?.value;
       if (
-        userRole &&
-        userRole !== "seller" &&
-        userRole !== "admin" &&
-        userRole !== "super_admin"
+        !userRole ||
+        (userRole !== "seller" &&
+          userRole !== "admin" &&
+          userRole !== "super_admin")
       ) {
         return NextResponse.redirect(new URL("/dashboard", request.url));
       }

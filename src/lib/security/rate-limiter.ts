@@ -1,8 +1,16 @@
 /**
- * Rate Limiter
+ * Rate Limiter - Development / Single-Instance Use Only
  *
  * In-memory token bucket rate limiter, configurable per endpoint.
- * For production, consider using Redis-backed implementation.
+ * Bucket state is stored in a per-process Map, which means:
+ * - State is lost on process restart or redeployment
+ * - In serverless environments (e.g., Vercel), each Lambda instance maintains
+ *   its own isolated state, so rate limits are not enforced globally
+ * - Suitable for development, testing, and single-instance deployments only
+ *
+ * TODO: For production multi-instance deployments, replace with a Redis-backed
+ * rate limiter (e.g., Upstash @upstash/ratelimit or ioredis + sliding window)
+ * to share state across all instances and survive restarts.
  */
 
 export interface RateLimitConfig {
@@ -56,7 +64,9 @@ export const RATE_LIMIT_CONFIGS: Record<string, RateLimitConfig> = {
   },
 };
 
-// In-memory store (per-process; use Redis for multi-instance deployments)
+// In-memory store - per-process only. Each serverless invocation or new process
+// starts with an empty map. See module-level comment for production alternatives.
+// TODO: Replace with Redis (Upstash or ioredis) for production use.
 const buckets = new Map<string, TokenBucket>();
 
 function getOrCreateBucket(key: string, config: RateLimitConfig): TokenBucket {

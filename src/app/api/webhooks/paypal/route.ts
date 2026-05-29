@@ -1,16 +1,67 @@
 import { NextResponse } from "next/server";
+import { createVerify } from "crypto";
 
 /**
  * PayPal Webhook Handler
  *
- * Processes PayPal webhook notifications with signature verification.
+ * Processes PayPal webhook notifications with certificate-based signature verification.
  * Events handled: PAYMENT.CAPTURE.COMPLETED, PAYMENT.CAPTURE.DENIED,
  * CUSTOMER.DISPUTE.CREATED, CUSTOMER.DISPUTE.RESOLVED
+ *
+ * PayPal signs webhooks using SHA256withRSA. Verification steps:
+ * 1. Fetch PayPal's signing certificate from the cert_url header
+ * 2. Construct the expected message: transmission_id|transmission_time|webhook_id|crc32(body)
+ * 3. Verify the signature against the certificate using SHA256withRSA
  */
 
-const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID || "";
-const PAYPAL_SECRET = process.env.PAYPAL_SECRET || "";
+const PAYPAL_WEBHOOK_ID = process.env.PAYPAL_WEBHOOK_ID || "";
 
+/**
+ * Compute CRC32 checksum of a string.
+ * Used as part of PayPal's signature verification protocol.
+ */
+function crc32(str: string): number {
+  let crc = 0xffffffff;
+  for (let i = 0; i < str.length; i++) {
+    crc ^= str.charCodeAt(i);
+    for (let j = 0; j < 8; j++) {
+      crc = crc & 1 ? (crc >>> 1) ^ 0xedb88320 : crc >>> 1;
+    }
+  }
+  return (crc ^ 0xffffffff) >>> 0;
+}
+
+/**
+ * Fetch and validate PayPal's signing certificate.
+ * Only certificates from paypal.com domains are accepted to prevent MITM attacks.
+ */
+async function fetchPayPalCertificate(certUrl: string): Promise<string | null> {
+  // Validate that cert URL is from PayPal (prevents attacker-controlled certificates)
+  try {
+    const url = new URL(certUrl);
+    if (!url.hostname.endsWith(".paypal.com") && !url.hostname.endsWith(".symantec.com")) {
+      return null;
+    }
+    if (url.protocol !== "https:") {
+      return null;
+    }
+  } catch {
+    return null;
+  }
+
+  try {
+    const response = await fetch(certUrl);
+    if (!response.ok) return null;
+    return await response.text();
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Verify PayPal webhook signature using SHA256withRSA.
+ * Constructs the expected message and verifies against the provided signature.
+ */
 async function verifyPayPalSignature(
   request: Request,
   body: string
@@ -19,21 +70,37 @@ async function verifyPayPalSignature(
   const transmissionTime = request.headers.get("paypal-transmission-time");
   const certUrl = request.headers.get("paypal-cert-url");
   const transmissionSig = request.headers.get("paypal-transmission-sig");
+  const authAlgo = request.headers.get("paypal-auth-algo") || "SHA256withRSA";
 
   if (!transmissionId || !transmissionTime || !certUrl || !transmissionSig) {
     return false;
   }
 
-  // In production, verify the webhook signature by:
-  // 1. Fetching PayPal's certificate from certUrl
-  // 2. Computing expected signature
-  // 3. Comparing with transmissionSig
-  // For now, validate required headers are present
-  void body;
-  void PAYPAL_CLIENT_ID;
-  void PAYPAL_SECRET;
+  if (!PAYPAL_WEBHOOK_ID) {
+    // Webhook ID must be configured to verify signatures
+    return false;
+  }
 
-  return true;
+  // Fetch and validate the signing certificate
+  const certificate = await fetchPayPalCertificate(certUrl);
+  if (!certificate) {
+    return false;
+  }
+
+  // Construct the expected message per PayPal's specification:
+  // transmissionId|transmissionTime|webhookId|crc32(body)
+  const bodyCrc = crc32(body);
+  const expectedMessage = `${transmissionId}|${transmissionTime}|${PAYPAL_WEBHOOK_ID}|${bodyCrc}`;
+
+  // Verify the signature using SHA256withRSA (or the algorithm specified in the header)
+  try {
+    const algorithm = authAlgo === "SHA256withRSA" ? "RSA-SHA256" : "RSA-SHA256";
+    const verifier = createVerify(algorithm);
+    verifier.update(expectedMessage);
+    return verifier.verify(certificate, transmissionSig, "base64");
+  } catch {
+    return false;
+  }
 }
 
 async function handlePaymentCaptureCompleted(resource: Record<string, unknown>) {
@@ -71,7 +138,7 @@ export async function POST(request: Request) {
   try {
     const body = await request.text();
 
-    // Verify webhook signature
+    // Verify webhook signature using certificate-based verification
     const isValid = await verifyPayPalSignature(request, body);
     if (!isValid) {
       return NextResponse.json(

@@ -69,15 +69,18 @@ DECLARE
   v_order RECORD;
   v_seller_wallet_id UUID;
 BEGIN
-  SELECT * INTO v_order FROM orders WHERE id = p_order_id;
+  -- Lock the order row to prevent concurrent double-release.
+  -- Any parallel invocation will block here until this transaction completes.
+  SELECT * INTO v_order FROM orders WHERE id = p_order_id FOR UPDATE;
   IF NOT FOUND THEN RETURN false; END IF;
   IF v_order.escrow_status != 'held' THEN RETURN false; END IF;
 
-  -- Get seller's wallet
+  -- Get seller's wallet (also lock it to prevent balance race conditions)
   SELECT w.id INTO v_seller_wallet_id
   FROM wallets w
   JOIN sellers s ON w.user_id = s.user_id
-  WHERE s.id = v_order.seller_id;
+  WHERE s.id = v_order.seller_id
+  FOR UPDATE OF w;
 
   IF v_seller_wallet_id IS NULL THEN RETURN false; END IF;
 
@@ -153,3 +156,22 @@ BEGIN
   RETURN risk;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Auto-create users_extended row on new auth.users sign-up.
+-- This ensures get_user_extended_id() always resolves for authenticated users,
+-- preventing RLS policies from silently denying access to newly registered users.
+CREATE OR REPLACE FUNCTION handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO users_extended (auth_user_id, role, verification_status, trust_score)
+  VALUES (NEW.id, 'buyer', 'pending', 0)
+  ON CONFLICT (auth_user_id) DO NOTHING;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Trigger on auth.users insert (fires after Supabase Auth creates the user)
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION handle_new_user();

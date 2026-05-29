@@ -1,44 +1,67 @@
 import { NextResponse } from "next/server";
+import { createHmac, timingSafeEqual } from "crypto";
 
 /**
  * Stripe Webhook Handler
  *
- * Processes Stripe webhook events with signature verification.
+ * Processes Stripe webhook events with HMAC-SHA256 signature verification.
  * Events handled: payment_intent.succeeded, payment_intent.failed,
  * charge.refunded, charge.dispute.created
  */
 
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || "";
 
-async function verifyStripeSignature(
+/**
+ * Verify the Stripe webhook signature using HMAC-SHA256.
+ * Implements the same algorithm as Stripe SDK's constructEvent():
+ * 1. Extract timestamp and signature from the stripe-signature header
+ * 2. Build the signed payload: `${timestamp}.${payload}`
+ * 3. Compute HMAC-SHA256 using the webhook secret
+ * 4. Compare computed signature to the one in the header using timing-safe comparison
+ */
+function verifyStripeSignature(
   payload: string,
   signature: string
-): Promise<boolean> {
+): boolean {
   if (!STRIPE_WEBHOOK_SECRET || !signature) {
     return false;
   }
 
-  // In production, use stripe.webhooks.constructEvent() from the Stripe SDK
-  // which validates the signature using the webhook secret.
-  // For now, verify the signature header format is correct.
   const parts = signature.split(",");
-  const timestamp = parts.find((p) => p.startsWith("t="));
-  const sig = parts.find((p) => p.startsWith("v1="));
+  const timestampPart = parts.find((p) => p.startsWith("t="));
+  const sigPart = parts.find((p) => p.startsWith("v1="));
 
-  if (!timestamp || !sig) {
+  if (!timestampPart || !sigPart) {
     return false;
   }
 
-  // Verify timestamp is within tolerance (5 minutes)
-  const ts = parseInt(timestamp.replace("t=", ""), 10);
+  const timestamp = timestampPart.replace("t=", "");
+  const expectedSig = sigPart.replace("v1=", "");
+
+  // Verify timestamp is within tolerance (5 minutes) to prevent replay attacks
+  const ts = parseInt(timestamp, 10);
   const age = Math.abs(Date.now() / 1000 - ts);
   if (age > 300) {
     return false;
   }
 
-  // In production: compute HMAC and compare to sig value
-  void payload;
-  return true;
+  // Compute the expected signature
+  const signedPayload = `${timestamp}.${payload}`;
+  const computedSig = createHmac("sha256", STRIPE_WEBHOOK_SECRET)
+    .update(signedPayload, "utf8")
+    .digest("hex");
+
+  // Use timing-safe comparison to prevent timing attacks
+  try {
+    const expectedBuffer = Buffer.from(expectedSig, "hex");
+    const computedBuffer = Buffer.from(computedSig, "hex");
+    if (expectedBuffer.length !== computedBuffer.length) {
+      return false;
+    }
+    return timingSafeEqual(expectedBuffer, computedBuffer);
+  } catch {
+    return false;
+  }
 }
 
 async function handlePaymentIntentSucceeded(data: Record<string, unknown>) {
@@ -78,8 +101,8 @@ export async function POST(request: Request) {
     const payload = await request.text();
     const signature = request.headers.get("stripe-signature") || "";
 
-    // Verify webhook signature
-    const isValid = await verifyStripeSignature(payload, signature);
+    // Verify webhook signature using HMAC-SHA256
+    const isValid = verifyStripeSignature(payload, signature);
     if (!isValid) {
       return NextResponse.json(
         { error: "Invalid signature" },

@@ -5,6 +5,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  submitVerification,
+  uploadDocument,
+} from "@/features/auth/actions/verification-actions";
 
 type VerificationStep = 1 | 2 | 3 | 4;
 
@@ -26,6 +30,7 @@ export function VerificationFlow() {
   const [documentFile, setDocumentFile] = useState<File | null>(null);
   const [selfieFile, setSelfieFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleNext = () => {
     if (step < 4) setStep((step + 1) as VerificationStep);
@@ -37,8 +42,54 @@ export function VerificationFlow() {
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
-    // Submission logic handled by server action in production
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    setError(null);
+
+    try {
+      // 1. Submit personal information via server action
+      const personalFormData = new FormData();
+      personalFormData.append("fullName", personalInfo.fullName);
+      personalFormData.append("dateOfBirth", personalInfo.dateOfBirth);
+      personalFormData.append("country", personalInfo.country);
+      personalFormData.append("address", personalInfo.address);
+
+      const verificationResult = await submitVerification(personalFormData);
+      if (verificationResult.error) {
+        setError(verificationResult.error);
+        setIsSubmitting(false);
+        return;
+      }
+
+      // 2. Upload ID document
+      if (documentFile) {
+        const docFormData = new FormData();
+        docFormData.append("file", documentFile);
+        docFormData.append("type", "identity_document");
+
+        const docResult = await uploadDocument(docFormData);
+        if (docResult.error) {
+          setError(docResult.error);
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
+      // 3. Upload selfie
+      if (selfieFile) {
+        const selfieFormData = new FormData();
+        selfieFormData.append("file", selfieFile);
+        selfieFormData.append("type", "selfie");
+
+        const selfieResult = await uploadDocument(selfieFormData);
+        if (selfieResult.error) {
+          setError(selfieResult.error);
+          setIsSubmitting(false);
+          return;
+        }
+      }
+    } catch {
+      setError("An unexpected error occurred. Please try again.");
+    }
+
     setIsSubmitting(false);
   };
 
@@ -385,6 +436,12 @@ export function VerificationFlow() {
                 receive a notification once the review is complete.
               </p>
             </div>
+
+            {error && (
+              <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-4">
+                <p className="text-sm text-red-400">{error}</p>
+              </div>
+            )}
 
             <div className="flex gap-3">
               <Button
