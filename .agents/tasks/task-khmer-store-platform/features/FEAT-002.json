@@ -2,7 +2,7 @@
   "id": "FEAT-002",
   "type": "feat",
   "description": "Build the core UI shell: premium luxury header/navbar with navigation, hero section with 3D Spline integration placeholder, and landing page sections. Implement the animation system with Framer Motion. Create the full landing page experience.",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "Create src/components/animations/motion-wrapper.tsx - reusable Framer Motion wrapper components: FadeIn, SlideUp, ScaleIn, StaggerContainer with configurable delay/duration/easing. Use subtle, premium easing curves (no bounce).",
     "Create src/components/animations/scroll-reveal.tsx - scroll-triggered reveal animation using Framer Motion useInView with threshold options",
@@ -37,5 +37,5 @@
     "cd /projects/sandbox/Khmer-Store && pnpm lint"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "1. @types/three was missing and had to be installed as a dev dependency for the Three.js type imports to work. 2. Framer Motion easing arrays must be typed as [number, number, number, number] tuples to satisfy TypeScript. 3. Next.js ESLint rules require using next/link Link component instead of plain <a> tags for internal navigation. 4. NODE_OPTIONS env var with proxy-bootstrap.js must be unset for pnpm build/lint to work (same as FEAT-001). 5. The 3D scene uses dynamic import with ssr:false as required to avoid SSR issues with Three.js."
 }
