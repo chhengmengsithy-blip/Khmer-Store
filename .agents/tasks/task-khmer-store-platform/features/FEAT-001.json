@@ -2,7 +2,7 @@
   "id": "FEAT-001",
   "type": "chore",
   "description": "Initialize Next.js 15 project with TypeScript, Tailwind CSS, Shadcn UI, and all core dependencies. Establish the full project architecture with folder structure, configuration files, design system tokens, and utility foundations.",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "Initialize Next.js 15 project with TypeScript and App Router using create-next-app with pnpm in /projects/sandbox/Khmer-Store (use --yes flags, src directory, app router, tailwind, no turbopack)",
     "Install core dependencies: framer-motion, zustand, @supabase/supabase-js, @supabase/ssr, @react-three/fiber, @react-three/drei, @splinetool/react-spline, @splinetool/runtime, lucide-react, clsx, tailwind-merge, class-variance-authority, next-themes",
@@ -44,5 +44,5 @@
     "cd /projects/sandbox/Khmer-Store && pnpm lint"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "1. Google Fonts (fonts.googleapis.com) is not accessible in COMMON_DEPENDENCIES network mode, so next/font/google cannot be used at build time. Fonts are configured via CSS fallback stacks instead (Inter and Playfair Display as font-family names in CSS variables). 2. Shadcn UI registry (ui.shadcn.com) is blocked, so all 16 components were created manually with standard implementations. 3. Next.js 16.2.6 was installed (latest). The middleware file convention shows a deprecation warning suggesting 'proxy' instead, but works fine. 4. React 19 ESLint rules are strict about setState in effects - useSyncExternalStore is the correct pattern for useMounted and useMediaQuery hooks. 5. The create-next-app tool rejects directory names with capital letters for npm naming - worked around by creating in temp dir and copying."
 }
