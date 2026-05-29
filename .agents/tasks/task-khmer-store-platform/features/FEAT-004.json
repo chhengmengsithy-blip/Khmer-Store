@@ -2,7 +2,7 @@
   "id": "FEAT-004",
   "type": "feat",
   "description": "Build the marketplace pages (product listing, search, filtering, product detail page), seller profiles, checkout flow, and the buyer/seller dashboard with wallet UI.",
-  "status": "pending",
+  "status": "in_progress",
   "steps": [
     "Create src/features/marketplace/components/search-overlay.tsx - full-screen search overlay with Command component (Shadcn), recent searches, trending searches, category suggestions. Framer Motion slide-down animation. Keyboard shortcut (Cmd+K).",
     "Create src/features/marketplace/components/filter-sidebar.tsx - marketplace filters: category tree, price range slider, condition (New/Used/Like New), seller verification toggle, rating filter, sort options (Newest, Price Low-High, Price High-Low, Most Popular)",
