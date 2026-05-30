@@ -58,7 +58,7 @@ export function DashboardSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="flex w-full flex-col gap-2 lg:w-60">
+    <aside className="flex w-full flex-col gap-2 lg:w-60" role="navigation" aria-label="Dashboard navigation">
       <nav className="space-y-1">
         {navItems.map((item) => {
           const isActive =
@@ -70,10 +70,10 @@ export function DashboardSidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all",
+                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-gold/50 focus-visible:rounded-lg",
                 isActive
                   ? "bg-accent-gold/10 text-accent-gold font-medium border-l-2 border-accent-gold"
-                  : "text-muted-foreground hover:bg-white/5 hover:text-soft-white"
+                  : "text-muted-foreground hover:bg-white/5 hover:text-soft-white hover:translate-x-0.5"
               )}
             >
               <item.icon className="h-4 w-4" />
@@ -85,7 +85,10 @@ export function DashboardSidebar() {
 
       <Separator className="my-2 bg-white/5" />
 
-      <button className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-white/5 hover:text-red-400">
+      <button
+        className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-white/5 hover:text-red-400"
+        aria-label="Sign out"
+      >
         <LogOut className="h-4 w-4" />
         Sign Out
       </button>
