@@ -1,5 +1,6 @@
 "use server";
 
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 
 interface ActionResult {
@@ -10,16 +11,23 @@ interface ActionResult {
 
 /**
  * Generate a URL-safe slug from a title string.
- * Appends a timestamp suffix for uniqueness.
+ * Falls back to "product" if the title contains only non-Latin characters.
+ * Uses a random UUID segment as suffix for uniqueness.
  */
 function generateSlug(title: string): string {
-  const base = title
+  let base = title
     .toLowerCase()
     .trim()
     .replace(/[^a-z0-9\s-]/g, "")
     .replace(/\s+/g, "-")
-    .replace(/-+/g, "-");
-  const suffix = Date.now().toString(36);
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+
+  if (!base) {
+    base = "product";
+  }
+
+  const suffix = crypto.randomUUID().slice(0, 8);
   return `${base}-${suffix}`;
 }
 
@@ -72,6 +80,14 @@ export async function createProduct(formData: FormData): Promise<ActionResult> {
     return { error: "Title is required." };
   }
 
+  if (title.length > 200) {
+    return { error: "Title must be 200 characters or fewer." };
+  }
+
+  if (description.length > 10000) {
+    return { error: "Description must be 10,000 characters or fewer." };
+  }
+
   const price = parseFloat(priceRaw || "0");
   if (isNaN(price) || price <= 0) {
     return { error: "Price must be greater than zero." };
@@ -84,6 +100,18 @@ export async function createProduct(formData: FormData): Promise<ActionResult> {
 
   const slug = generateSlug(title);
 
+  // Read optional category and condition for metadata
+  const category = (formData.get("category") as string) || "";
+  const condition = (formData.get("condition") as string) || "";
+
+  const metadata: Record<string, string> = {};
+  if (category) {
+    metadata.category = category;
+  }
+  if (condition) {
+    metadata.condition = condition;
+  }
+
   // Insert the product
   const { data: product, error: insertError } = await supabase
     .from("products")
@@ -95,6 +123,7 @@ export async function createProduct(formData: FormData): Promise<ActionResult> {
       price,
       stock,
       status,
+      metadata: Object.keys(metadata).length > 0 ? metadata : null,
     })
     .select("id")
     .single();
@@ -161,7 +190,9 @@ export async function registerAsSeller(
     return { error: sellerInsertError.message };
   }
 
-  // Upgrade role from buyer to seller
+  // Upgrade role from buyer to seller (hardcoded to "seller" only).
+  // Note: RLS allows users to update their own row without column restriction,
+  // but this action only ever sets "seller" and only if current role is "buyer".
   if (extUser.role === "buyer") {
     const { error: roleError } = await supabase
       .from("users_extended")
@@ -171,6 +202,16 @@ export async function registerAsSeller(
     if (roleError) {
       return { error: roleError.message };
     }
+
+    // Refresh the user-role cookie so middleware sees the new role immediately
+    const cookieStore = await cookies();
+    cookieStore.set("user-role", "seller", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax" as const,
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7,
+    });
   }
 
   return { success: true };

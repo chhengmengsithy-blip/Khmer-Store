@@ -1,0 +1,28 @@
+{
+  "id": "FEAT-002",
+  "type": "fix",
+  "description": "Address semantic review issues: stale cookie after seller registration, category/condition not persisted, text length validation, slug collision for non-Latin titles, and role escalation safeguard comment",
+  "status": "in_progress",
+  "steps": [
+    "In registerAsSeller (product-actions.ts), after role upgrade, refresh the user-role cookie by importing cookies from next/headers and setting it directly.",
+    "In seller-product-form.tsx handleSubmit, add category and condition to FormData. In createProduct, read them and store category in metadata.category and condition in metadata.condition.",
+    "In createProduct, add validation for title max 200 chars and description max 10000 chars.",
+    "Improve generateSlug: if base is empty after stripping non-alphanumeric chars (e.g. Khmer script), use 'product' as the base. Use crypto.randomUUID().slice(0, 8) as suffix instead of Date.now().",
+    "Add a comment in registerAsSeller noting the role escalation is acceptable for now since only 'seller' is hardcoded."
+  ],
+  "acceptance_criteria": [
+    "registerAsSeller sets user-role cookie to 'seller' after successful role upgrade",
+    "createProduct reads category and condition from FormData and stores them in metadata JSONB",
+    "createProduct rejects title > 200 chars and description > 10000 chars",
+    "generateSlug falls back to 'product' when base is empty and uses UUID suffix",
+    "seller-product-form.tsx includes category and condition in submitted FormData",
+    "pnpm lint passes with no errors",
+    "npx tsc --noEmit passes with no type errors"
+  ],
+  "verification": [
+    "Run: unset NODE_OPTIONS && pnpm lint",
+    "Run: unset NODE_OPTIONS && npx tsc --noEmit"
+  ],
+  "blocked_reason": null,
+  "findings": null
+}

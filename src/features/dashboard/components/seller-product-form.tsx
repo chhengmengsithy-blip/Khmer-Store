@@ -66,6 +66,8 @@ export function SellerProductForm() {
     formData.set("price", price);
     formData.set("stock", stock);
     formData.set("status", status);
+    formData.set("category", category);
+    formData.set("condition", condition);
 
     const result = await createProduct(formData);
 
