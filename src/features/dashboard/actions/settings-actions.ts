@@ -7,7 +7,7 @@ interface ActionResult {
   error?: string;
 }
 
-interface ProfileResult {
+interface ProfileData {
   full_name: string;
   display_name: string;
   email: string;
@@ -15,10 +15,13 @@ interface ProfileResult {
   country: string;
   bio: string;
   avatar_url: string;
-  error?: string;
 }
 
-export async function getProfile(): Promise<ProfileResult | { error: string }> {
+type ProfileResult =
+  | { success: true; data: ProfileData }
+  | { success: false; error: string };
+
+export async function getProfile(): Promise<ProfileResult> {
   const supabase = await createClient();
 
   const {
@@ -27,7 +30,7 @@ export async function getProfile(): Promise<ProfileResult | { error: string }> {
   } = await supabase.auth.getUser();
 
   if (authError || !user) {
-    return { error: "Not authenticated" };
+    return { success: false, error: "Not authenticated" };
   }
 
   // Look up users_extended to get the extended user id
@@ -38,7 +41,7 @@ export async function getProfile(): Promise<ProfileResult | { error: string }> {
     .single();
 
   if (extError || !extUser) {
-    return { error: "User record not found." };
+    return { success: false, error: "User record not found." };
   }
 
   // Fetch profile using the users_extended id
@@ -49,13 +52,16 @@ export async function getProfile(): Promise<ProfileResult | { error: string }> {
     .single();
 
   return {
-    full_name: profile?.full_name ?? "",
-    display_name: profile?.display_name ?? "",
-    email: user.email ?? "",
-    phone: profile?.phone ?? "",
-    country: profile?.country ?? "",
-    bio: profile?.bio ?? "",
-    avatar_url: profile?.avatar_url ?? "",
+    success: true,
+    data: {
+      full_name: profile?.full_name ?? "",
+      display_name: profile?.display_name ?? "",
+      email: user.email ?? "",
+      phone: profile?.phone ?? "",
+      country: profile?.country ?? "",
+      bio: profile?.bio ?? "",
+      avatar_url: profile?.avatar_url ?? "",
+    },
   };
 }
 
@@ -87,6 +93,23 @@ export async function updateProfile(formData: FormData): Promise<ActionResult> {
   const phone = (formData.get("phone") as string) || "";
   const country = (formData.get("country") as string) || "";
   const bio = (formData.get("bio") as string) || "";
+
+  // Input length validation
+  if (full_name.length > 100) {
+    return { error: "Full name must be 100 characters or fewer." };
+  }
+  if (display_name.length > 100) {
+    return { error: "Display name must be 100 characters or fewer." };
+  }
+  if (phone.length > 30) {
+    return { error: "Phone number must be 30 characters or fewer." };
+  }
+  if (country.length > 100) {
+    return { error: "Country must be 100 characters or fewer." };
+  }
+  if (bio.length > 5000) {
+    return { error: "Bio must be 5000 characters or fewer." };
+  }
 
   const { error: upsertError } = await supabase
     .from("profiles")

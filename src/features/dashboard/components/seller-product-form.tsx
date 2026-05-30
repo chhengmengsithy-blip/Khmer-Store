@@ -64,13 +64,32 @@ export function SellerProductForm() {
     const files = e.target.files;
     if (!files) return;
 
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
     const remaining = 6 - selectedFiles.length;
-    const newFiles = Array.from(files).slice(0, remaining);
+    const allFiles = Array.from(files).slice(0, remaining);
 
-    const newPreviews = newFiles.map((file) => URL.createObjectURL(file));
+    const validFiles: File[] = [];
+    const rejectedFiles: string[] = [];
 
-    setSelectedFiles((prev) => [...prev, ...newFiles]);
-    setPreviews((prev) => [...prev, ...newPreviews]);
+    for (const file of allFiles) {
+      if (file.size > MAX_FILE_SIZE) {
+        rejectedFiles.push(file.name);
+      } else {
+        validFiles.push(file);
+      }
+    }
+
+    if (rejectedFiles.length > 0) {
+      setError(
+        `The following file(s) exceed the 5MB size limit and were not added: ${rejectedFiles.join(", ")}`
+      );
+    }
+
+    if (validFiles.length > 0) {
+      const newPreviews = validFiles.map((file) => URL.createObjectURL(file));
+      setSelectedFiles((prev) => [...prev, ...validFiles]);
+      setPreviews((prev) => [...prev, ...newPreviews]);
+    }
 
     // Reset input so the same file can be selected again if removed
     if (fileInputRef.current) {
