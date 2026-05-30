@@ -23,6 +23,7 @@ export function SignInForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setEmailTouched(true);
     setIsLoading(true);
 
     try {

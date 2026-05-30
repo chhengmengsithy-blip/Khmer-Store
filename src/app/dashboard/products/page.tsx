@@ -3,7 +3,6 @@
 import React from "react";
 import Link from "next/link";
 import { Plus, Eye, Pencil, Package } from "lucide-react";
-import { FadeIn } from "@/components/animations/motion-wrapper";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -25,7 +24,7 @@ const statusColors: Record<string, string> = {
 
 export default function ProductsPage() {
   return (
-    <FadeIn className="space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-bold text-soft-white">Products</h2>
@@ -104,6 +103,6 @@ export default function ProductsPage() {
         ))}
       </div>
       )}
-    </FadeIn>
+    </div>
   );
 }

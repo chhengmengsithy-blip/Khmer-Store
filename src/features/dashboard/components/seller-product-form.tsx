@@ -114,6 +114,7 @@ export function SellerProductForm() {
   const handleSubmit = async (status: "draft" | "published") => {
     setLoading(true);
     setError(null);
+    setTouched({ title: true, price: true });
 
     const formData = new FormData();
     formData.set("title", title);

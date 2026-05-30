@@ -2,7 +2,6 @@
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Loader2, Camera, Shield, Bell } from "lucide-react";
-import { FadeIn } from "@/components/animations/motion-wrapper";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -106,7 +105,7 @@ export function SettingsClient({
 
   // Password validation
   const newPasswordError = touched.newPassword
-    ? validateMinLength(newPassword, 6, "Password")
+    ? validateMinLength(newPassword, 8, "Password")
     : null;
   const confirmPasswordError = touched.confirmPassword
     ? validatePasswordMatch(newPassword, confirmPassword)
@@ -234,6 +233,7 @@ export function SettingsClient({
   };
 
   const handleSaveProfile = async () => {
+    setTouched((prev) => ({ ...prev, fullName: true, displayName: true }));
     setProfileLoading(true);
     setProfileError(null);
 
@@ -256,6 +256,7 @@ export function SettingsClient({
   };
 
   const handleUpdatePassword = async () => {
+    setTouched((prev) => ({ ...prev, newPassword: true, confirmPassword: true }));
     setPasswordLoading(true);
     setPasswordError(null);
 
@@ -271,8 +272,8 @@ export function SettingsClient({
       return;
     }
 
-    if (newPassword.length < 6) {
-      setPasswordError("New password must be at least 6 characters.");
+    if (newPassword.length < 8) {
+      setPasswordError("New password must be at least 8 characters.");
       setPasswordLoading(false);
       return;
     }
@@ -407,7 +408,7 @@ export function SettingsClient({
   };
 
   return (
-    <FadeIn className="space-y-6">
+    <div className="space-y-6">
       <div>
         <h2 className="text-xl font-bold text-soft-white">Settings</h2>
         <p className="text-sm text-muted-foreground">
@@ -820,6 +821,6 @@ export function SettingsClient({
           </div>
         </TabsContent>
       </Tabs>
-    </FadeIn>
+    </div>
   );
 }
