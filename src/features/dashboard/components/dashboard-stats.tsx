@@ -44,7 +44,7 @@ export function DashboardStats() {
       {stats.map((stat) => (
         <div
           key={stat.label}
-          className="rounded-xl border border-white/[0.06] bg-surface p-5 space-y-3"
+          className="rounded-xl border border-white/[0.06] bg-surface p-5 space-y-3 transition-all duration-300 hover:border-accent-gold/20 hover:shadow-md hover:shadow-accent-gold/5"
         >
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">{stat.label}</span>

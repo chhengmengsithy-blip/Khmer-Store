@@ -149,6 +149,7 @@ function OrderRow({
             variant="ghost"
             size="sm"
             className="h-7 w-7 p-0 text-muted-foreground hover:text-soft-white"
+            aria-label="View order details"
           >
             <Eye className="h-4 w-4" />
           </Button>

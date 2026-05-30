@@ -26,7 +26,8 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <motion.div
-      className="group relative overflow-hidden rounded-xl border border-white/[0.06] bg-surface transition-colors hover:border-accent-gold/20"
+      role="article"
+      className="group relative overflow-hidden rounded-xl border border-white/[0.06] bg-surface transition-colors hover:border-accent-gold/20 hover:shadow-lg hover:shadow-accent-gold/5"
       whileHover={{ y: -4 }}
       transition={{ duration: 0.3, ease: premiumEasing }}
     >
@@ -84,6 +85,7 @@ export function ProductCard({ product }: ProductCardProps) {
             <span className="text-xs text-muted-foreground">
               {product.rating}
             </span>
+            <span className="sr-only">Rating: {product.rating} out of 5</span>
           </div>
         </div>
       </div>

@@ -17,7 +17,8 @@ export function HeroSection() {
 
       <div className="relative mx-auto grid w-full max-w-7xl grid-cols-1 items-center gap-12 px-6 py-32 lg:grid-cols-2">
         {/* Left: Content */}
-        <div className="flex flex-col gap-6">
+        <div className="relative flex flex-col gap-6">
+          <div className="absolute -top-20 -left-20 h-72 w-72 rounded-full bg-accent-gold/5 blur-3xl" aria-hidden="true" />
           <motion.h1
             className="font-playfair text-4xl font-bold leading-tight text-soft-white sm:text-5xl lg:text-6xl"
             initial={{ opacity: 0, y: 30 }}
@@ -74,6 +75,7 @@ export function HeroSection() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.2, duration: 0.6 }}
+        aria-hidden="true"
       >
         <motion.div
           animate={{ y: [0, 8, 0] }}

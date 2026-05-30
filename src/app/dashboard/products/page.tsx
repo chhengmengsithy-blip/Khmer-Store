@@ -57,7 +57,7 @@ export default function ProductsPage() {
         {mockProducts.map((product) => (
           <div
             key={product.id}
-            className="rounded-xl border border-white/[0.06] bg-surface p-4 space-y-3"
+            className="group rounded-xl border border-white/[0.06] bg-surface p-4 space-y-3 transition-all duration-300 hover:border-accent-gold/20 hover:shadow-lg hover:shadow-accent-gold/5 hover:-translate-y-0.5"
           >
             <div className="aspect-video rounded-lg bg-elevated" />
             <div className="flex items-start justify-between">
@@ -85,6 +85,7 @@ export default function ProductsPage() {
                 variant="ghost"
                 size="sm"
                 className="flex-1 text-xs text-muted-foreground hover:text-soft-white gap-1"
+                aria-label="View product"
               >
                 <Eye className="h-3 w-3" />
                 View
@@ -93,6 +94,7 @@ export default function ProductsPage() {
                 variant="ghost"
                 size="sm"
                 className="flex-1 text-xs text-muted-foreground hover:text-soft-white gap-1"
+                aria-label="Edit product"
               >
                 <Pencil className="h-3 w-3" />
                 Edit

@@ -275,7 +275,7 @@ export function MessagesClient({
           </h3>
         </div>
 
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto" role="list">
           {conversations.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full p-6 text-center">
               <EmptyState
@@ -341,6 +341,7 @@ export function MessagesClient({
               <button
                 onClick={() => setSelectedPartner(null)}
                 className="md:hidden text-muted-foreground hover:text-soft-white transition-colors"
+                aria-label="Go back"
               >
                 <ArrowLeft className="h-5 w-5" />
               </button>
@@ -424,6 +425,7 @@ export function MessagesClient({
                   onClick={handleSendMessage}
                   disabled={sendingMessage || !messageInput.trim()}
                   className="bg-accent-gold text-background hover:bg-accent-gold/90 h-10 w-10 p-0 shrink-0"
+                  aria-label="Send message"
                 >
                   {sendingMessage ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
