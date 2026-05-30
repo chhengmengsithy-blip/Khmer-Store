@@ -1,0 +1,7 @@
+{
+  "task_id": "task-v4-professional-upgrade",
+  "task_description": "Upgrade Khmer Store from V3 to V4 - a fully professional, polished marketplace website. Redesign all pages with premium UI, add shared components, upgrade the admin panel, and ensure professional-grade design across the entire application.",
+  "status": "in_progress",
+  "feature_order": ["FEAT-001", "FEAT-002", "FEAT-003", "FEAT-004", "FEAT-005"],
+  "blocked_reason": null
+}

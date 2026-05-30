@@ -1,0 +1,27 @@
+{
+  "id": "FEAT-003",
+  "type": "feat",
+  "description": "Professional Marketplace, Listing Detail, and Post Listing pages - Upgrade the core marketplace experience with sidebar filters, professional listing detail with image gallery, and multi-step post listing form.",
+  "status": "pending",
+  "steps": [
+    "Rewrite src/app/marketplace/page.tsx - Professional layout: Top bar with breadcrumbs + results count + view toggle (grid/list icons). Left sidebar (collapsible on mobile as a sheet/drawer): category tree with expandable subcategories, price range inputs (min/max with PriceInput component), condition checkboxes (New, Like New, Used), location dropdown. Main area: responsive grid (2/3/4 cols) of professional ListingCards. Sort dropdown in top-right (Latest, Price Low-High, Price High-Low, Most Viewed). Add pagination component at bottom. Mobile: filters accessible via a 'Filters' button that opens a bottom sheet.",
+    "Create src/app/marketplace/layout.tsx - Marketplace layout that adds a page-level metadata export with title 'Marketplace | Khmer Store' and description.",
+    "Rewrite src/app/listing/[id]/page.tsx - Professional detail page: Breadcrumbs at top. Image carousel/gallery (main large image + thumbnail strip below, clicking thumbnail switches main image - implement as client component src/features/listings/components/image-gallery.tsx). Two-column layout on desktop: Left (2/3): image gallery, title + price, condition badge, meta info row (location, time, views), separator, Description section, Specifications section (condition, category, posted date in a grid). Right (1/3 sticky): Price card with large price, 'Contact Seller' button (gold), 'Message Seller' button (outline), phone number reveal button. Seller card: avatar, name, member since, listing count, 'View Profile' link. Safety tips card (short bullet points). Share button with copy-link functionality. Similar listings carousel at bottom.",
+    "Create src/features/listings/components/image-gallery.tsx - Client component: Main image display with navigation arrows (left/right). Thumbnail strip below. Click thumbnail to select. Shows image count badge (e.g., '1/5'). Handles single image gracefully. Placeholder when no images.",
+    "Rewrite src/app/post/page.tsx - Professional multi-step form: Step indicator (1-5 progress bar with step labels). Step 1: Choose category (visual grid of category cards, click to select, highlight selected). Step 2: Details (title, description with character count, price with PriceInput, condition radio cards). Step 3: Photos (ImageUpload component, drag & drop, reorder, max 10 images, tip text about good photos). Step 4: Location (location input, contact name, contact phone). Step 5: Review & Publish (summary of all entered data, edit buttons to go back to specific steps, Publish button). Add 'Save as Draft' button (uses localStorage to persist form state). Navigation: Back/Next buttons at bottom of each step. Form state managed with useState or useReducer.",
+    "Update src/app/listing/[id]/favorite-button.tsx - Add animation on toggle (heart scale + color transition), show toast on add/remove from favorites.",
+    "Update src/app/listing/[id]/report-dialog.tsx - Better styling to match V4 theme, add reason selection radio buttons before text description."
+  ],
+  "acceptance_criteria": [
+    "Running 'unset NODE_OPTIONS && npx --yes next build' succeeds with no errors",
+    "Marketplace page has sidebar filters layout, sort dropdown, and pagination",
+    "Listing detail page has image gallery, two-column layout, seller card, and similar listings",
+    "Post listing page has 5-step flow with progress indicator and review step",
+    "ImageGallery component exists at src/features/listings/components/image-gallery.tsx"
+  ],
+  "verification": [
+    "Run 'unset NODE_OPTIONS && npx --yes next build' in /projects/sandbox/Khmer-Store and confirm zero errors"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}

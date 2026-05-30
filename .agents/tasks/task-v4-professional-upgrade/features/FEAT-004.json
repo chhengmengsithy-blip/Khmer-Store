@@ -1,0 +1,29 @@
+{
+  "id": "FEAT-004",
+  "type": "feat",
+  "description": "Professional Dashboard, Settings, Messages, and Static Pages - Upgrade the user-facing pages with professional UI including dashboard stats, settings with all options, redesigned messages with conversation UI, and polished static pages.",
+  "status": "pending",
+  "steps": [
+    "Rewrite src/app/dashboard/page.tsx - Professional dashboard: Clean stat cards row (StatsCard components) with icons and trend indicators (My Listings, Total Views, Favorites Received, Messages). Quick actions bar (Post New Listing gold button, Browse Marketplace, View Messages). Account completion progress bar (calculates % based on: has avatar, has name, has phone, has location). My Listings section with status badges (Active green, Pending yellow, Sold blue, Removed red) and quick action buttons (Edit, Mark Sold, Delete with ConfirmDialog). Recent messages preview (last 3 conversations). Performance mini-section showing this week views vs last week.",
+    "Rewrite src/app/dashboard/settings/page.tsx - Professional settings page with sections: (1) Profile section - avatar upload with circular preview and camera icon overlay, full name, phone, location, bio textarea. (2) Account section - email display (read-only), password change (current + new + confirm fields, calls Supabase auth.updateUser). (3) Notifications section - toggle switches for: email notifications, message alerts, listing updates, marketing emails (UI-only toggles stored in localStorage). (4) Privacy section - toggles for: show phone number publicly, show location on listings, allow messages from non-buyers. (5) Danger Zone - Delete account button (red) with ConfirmDialog that explains consequences.",
+    "Create src/app/dashboard/layout.tsx - Dashboard layout with sidebar navigation: vertical nav links (Overview, My Listings, Favorites, Messages, Settings) with icons. On mobile: horizontal scroll tabs at top instead of sidebar. Shows user greeting at top of sidebar.",
+    "Rewrite src/app/messages/page.tsx - Professional messaging UI: Left panel (1/3): conversation list with user avatars, last message preview truncated, unread count badges, timestamp. Search conversations input at top. Right panel (2/3): chat header (user name, avatar, 'View listing' link if conversation has listing context), message bubbles (sent=right gold-tinted, received=left elevated bg), timestamp groupings ('Today', 'Yesterday', date). Message input bar: text input, send button. Listing reference card pinned at top of conversation (small card showing listing title + image + price). Empty state when no conversation selected ('Select a conversation' with illustration). Empty state when no conversations exist.",
+    "Rewrite src/app/about/page.tsx - Professional about page: Hero with company description. Mission/Vision cards. Team section placeholder (3 team member cards with avatar placeholders). Stats section. Values grid (Trust, Safety, Community, Innovation).",
+    "Rewrite src/app/contact/page.tsx - Professional contact page: Contact form (name, email, subject, message) with proper validation. Contact info cards (Email, Phone, Address with icons). Map placeholder (styled div with location pin). FAQ accordion section (5 common questions).",
+    "Rewrite src/app/terms/page.tsx - Professional terms page with proper heading hierarchy, numbered sections, table of contents sidebar on desktop, last updated date.",
+    "Rewrite src/app/privacy/page.tsx - Professional privacy page matching terms page style with proper sections (Data Collection, Usage, Sharing, Security, Rights, Contact)."
+  ],
+  "acceptance_criteria": [
+    "Running 'unset NODE_OPTIONS && npx --yes next build' succeeds with no errors",
+    "Dashboard shows stat cards, quick actions, account completion, and listings with status badges",
+    "Settings page has all 5 sections (Profile, Account, Notifications, Privacy, Danger Zone)",
+    "Messages page has two-panel layout with conversation list and chat view",
+    "About, Contact, Terms, Privacy pages are all professionally redesigned",
+    "Dashboard has its own layout with sidebar navigation"
+  ],
+  "verification": [
+    "Run 'unset NODE_OPTIONS && npx --yes next build' in /projects/sandbox/Khmer-Store and confirm zero errors"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}
