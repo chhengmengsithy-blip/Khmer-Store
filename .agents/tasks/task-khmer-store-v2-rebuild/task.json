@@ -1,0 +1,14 @@
+{
+  "task_id": "task-khmer-store-v2-rebuild",
+  "task_description": "Rebuild Khmer Store as V2 - a classified ads marketplace like khmer24.com. Remove 3D, remove all fake data, fix all broken links/buttons, add proper pages with empty states, graceful Supabase fallback.",
+  "status": "completed",
+  "feature_order": ["FEAT-001", "FEAT-002"],
+  "blocked_reason": null,
+  "verification": {
+    "build": "pass",
+    "tests": "pass",
+    "test_quality": "skipped",
+    "docker_build": "skipped",
+    "summary": "pnpm build succeeds with 15 routes generated (0 errors). pnpm lint passes with 0 errors (2 warnings about img elements). No fake data found in codebase. No dead links to removed pages. All 3D libraries removed from package.json."
+  }
+}

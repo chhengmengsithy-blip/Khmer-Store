@@ -50,15 +50,21 @@ export default function AdminCategoriesPage() {
   const [formDescription, setFormDescription] = useState("");
   const [saving, setSaving] = useState(false);
 
+  useEffect(() => {
+    let mounted = true;
+    getAllCategories().then((data) => {
+      if (mounted) {
+        setCategories(data as CategoryItem[]);
+        setLoading(false);
+      }
+    });
+    return () => { mounted = false; };
+  }, []);
+
   async function loadCategories() {
     const data = await getAllCategories();
     setCategories(data as CategoryItem[]);
-    setLoading(false);
   }
-
-  useEffect(() => {
-    loadCategories();
-  }, []);
 
   function resetForm() {
     setFormName("");

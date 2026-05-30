@@ -1,9 +1,7 @@
 import Link from "next/link";
-import { Package, Eye, Heart, Trash2, Pencil } from "lucide-react";
+import { Package, Eye, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { EmptyState } from "@/components/shared/empty-state";
-import { ListingCard } from "@/components/shared/listing-card";
 import { getUserListings } from "@/features/listings/actions/listing-actions";
 import { getUserFavorites } from "@/features/listings/actions/favorite-actions";
 import { createClient } from "@/lib/supabase/server";
