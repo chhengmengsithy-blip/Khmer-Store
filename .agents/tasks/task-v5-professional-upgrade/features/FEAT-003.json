@@ -2,7 +2,7 @@
   "id": "FEAT-003",
   "type": "feat",
   "description": "SEO, performance, and documentation finalization. Add proper metadata to all pages, robots.txt/sitemap improvements, JSON-LD structured data, and update README.md to professional V5 documentation.",
-  "status": "pending",
+  "status": "completed",
   "steps": [
     "Update src/app/robots.ts to include proper rules: allow all for / with sitemap reference to ${siteConfig.url}/sitemap.xml. Disallow /admin, /dashboard, /messages, /api paths.",
     "Update src/app/sitemap.ts to generate a complete sitemap including all public pages: /, /marketplace, /about, /contact, /terms, /privacy, /sign-in, /sign-up, /forgot-password. Also include category pages: /category/vehicles, /category/property, etc. for all 9 categories from the constants.",
@@ -22,5 +22,5 @@
   ],
   "verification": ["Run `unset NODE_OPTIONS && pnpm build` and confirm successful compilation"],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "All changes build cleanly. robots.ts now disallows /admin/, /dashboard/, /messages/, and /api/. Sitemap includes all 9 category pages plus static routes (about, contact, terms, privacy, forgot-password). Added metadata exports to about, terms, privacy pages directly, and created layout.tsx for contact and post pages (client components). README rewritten for V5 with full tech stack, setup guide, and deployment instructions. ogImage updated to /logo.svg. .env.example now has descriptive comments. not-found.tsx already had good UX with links to home and marketplace."
 }
