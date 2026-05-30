@@ -1,43 +1,51 @@
 "use client";
 
 import React from "react";
-import { DashboardSidebar } from "@/features/dashboard/components/dashboard-sidebar";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
-import { Menu } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { LayoutDashboard, Package, Settings } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+const sidebarLinks = [
+  { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
+  { label: "My Listings", href: "/dashboard", icon: Package },
+  { label: "Settings", href: "/dashboard/settings", icon: Settings },
+];
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-6">
-        {/* Mobile Header */}
-        <div className="mb-6 flex items-center justify-between lg:hidden">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="outline" size="icon" className="border-white/10">
-                <Menu className="h-4 w-4" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-72 bg-background border-white/[0.06] p-6">
-              <DashboardSidebar />
-            </SheetContent>
-          </Sheet>
-          <h1 className="text-lg font-bold text-soft-white">Dashboard</h1>
-          <div className="w-10" />
-        </div>
+  const pathname = usePathname();
 
-        {/* Desktop Layout */}
+  return (
+    <div className="min-h-screen pt-20 bg-background">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-6">
         <div className="flex gap-8">
-          {/* Sidebar - hidden on mobile */}
-          <div className="hidden lg:block">
-            <div className="sticky top-24">
-              <DashboardSidebar />
-            </div>
-          </div>
+          {/* Sidebar - desktop */}
+          <aside className="hidden w-56 shrink-0 lg:block">
+            <nav className="sticky top-24 space-y-1">
+              {sidebarLinks.map((link) => {
+                const isActive = pathname === link.href;
+                return (
+                  <Link
+                    key={link.label}
+                    href={link.href}
+                    className={cn(
+                      "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-colors",
+                      isActive
+                        ? "bg-accent-gold/10 text-accent-gold"
+                        : "text-muted-foreground hover:bg-elevated hover:text-soft-white"
+                    )}
+                  >
+                    <link.icon className="h-4 w-4" />
+                    {link.label}
+                  </Link>
+                );
+              })}
+            </nav>
+          </aside>
 
           {/* Main Content */}
           <main className="flex-1 min-w-0">{children}</main>

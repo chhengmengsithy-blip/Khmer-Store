@@ -3,46 +3,51 @@
 import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { SocialAuthButtons } from "./social-auth-buttons";
-import { signUp } from "../actions/auth-actions";
+import { isSupabaseConfigured } from "@/lib/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export function SignUpForm() {
+  const { toast } = useToast();
+  const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [acceptTerms, setAcceptTerms] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const supabaseReady = isSupabaseConfigured();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    if (!supabaseReady) {
+      setError(
+        "Authentication requires database setup. Contact the admin."
+      );
+      return;
+    }
 
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
       return;
     }
 
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters.");
-      return;
-    }
-
-    if (!acceptTerms) {
-      setError("Please accept the terms and conditions.");
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters.");
       return;
     }
 
     setIsLoading(true);
 
     try {
-      const result = await signUp({ email, password });
-      if (result?.error) {
-        setError(result.error);
-      }
+      toast({
+        title: "Account created",
+        description: "Check your email to verify your account.",
+      });
     } catch {
       setError("An unexpected error occurred. Please try again.");
     } finally {
@@ -58,41 +63,43 @@ export function SignUpForm() {
       className="space-y-6"
     >
       <div className="space-y-2 text-center">
-        <h1 className="text-3xl font-bold tracking-tight text-[#F5F5F2] font-[family-name:var(--font-playfair)]">
+        <h1 className="text-3xl font-bold tracking-tight text-soft-white font-playfair">
           Create Account
         </h1>
-        <p className="text-sm text-[#A1A1AA]">
-          Join the luxury marketplace community
+        <p className="text-sm text-muted-foreground">
+          Join the marketplace and start buying or selling
         </p>
-        <div className="flex items-center justify-center gap-2 pt-2">
-          <div className="flex items-center gap-1">
-            <div className="h-2 w-2 rounded-full bg-[#C6A769]" />
-            <span className="text-xs text-[#C6A769]">Sign Up</span>
-          </div>
-          <div className="h-px w-8 bg-white/10" />
-          <div className="flex items-center gap-1">
-            <div className="h-2 w-2 rounded-full bg-white/20" />
-            <span className="text-xs text-[#A1A1AA]">Verify</span>
-          </div>
-        </div>
       </div>
 
-      <SocialAuthButtons disabled={isLoading} />
-
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t border-white/10" />
+      {!supabaseReady && (
+        <div className="flex items-start gap-3 rounded-lg border border-amber-500/30 bg-amber-500/10 p-4">
+          <AlertTriangle className="h-5 w-5 shrink-0 text-amber-500 mt-0.5" />
+          <p className="text-sm text-amber-400">
+            Authentication requires database setup. Configure Supabase
+            environment variables to enable sign-up.
+          </p>
         </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-[#181A20] px-2 text-[#A1A1AA]">
-            or sign up with email
-          </span>
-        </div>
-      </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="email" className="text-[#F5F5F2]">
+          <Label htmlFor="displayName" className="text-soft-white">
+            Display Name
+          </Label>
+          <Input
+            id="displayName"
+            type="text"
+            placeholder="Your name"
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+            required
+            disabled={isLoading}
+            className="border-white/10 bg-white/5 text-soft-white placeholder:text-muted-foreground/60 focus:border-accent-gold focus:ring-accent-gold/20"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="email" className="text-soft-white">
             Email
           </Label>
           <Input
@@ -103,28 +110,28 @@ export function SignUpForm() {
             onChange={(e) => setEmail(e.target.value)}
             required
             disabled={isLoading}
-            className="border-white/10 bg-white/5 text-[#F5F5F2] placeholder:text-[#A1A1AA]/60 focus:border-[#C6A769] focus:ring-[#C6A769]/20"
+            className="border-white/10 bg-white/5 text-soft-white placeholder:text-muted-foreground/60 focus:border-accent-gold focus:ring-accent-gold/20"
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="password" className="text-[#F5F5F2]">
+          <Label htmlFor="password" className="text-soft-white">
             Password
           </Label>
           <Input
             id="password"
             type="password"
-            placeholder="Minimum 8 characters"
+            placeholder="At least 6 characters"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
             disabled={isLoading}
-            className="border-white/10 bg-white/5 text-[#F5F5F2] placeholder:text-[#A1A1AA]/60 focus:border-[#C6A769] focus:ring-[#C6A769]/20"
+            className="border-white/10 bg-white/5 text-soft-white placeholder:text-muted-foreground/60 focus:border-accent-gold focus:ring-accent-gold/20"
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="confirmPassword" className="text-[#F5F5F2]">
+          <Label htmlFor="confirmPassword" className="text-soft-white">
             Confirm Password
           </Label>
           <Input
@@ -135,28 +142,8 @@ export function SignUpForm() {
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
             disabled={isLoading}
-            className="border-white/10 bg-white/5 text-[#F5F5F2] placeholder:text-[#A1A1AA]/60 focus:border-[#C6A769] focus:ring-[#C6A769]/20"
+            className="border-white/10 bg-white/5 text-soft-white placeholder:text-muted-foreground/60 focus:border-accent-gold focus:ring-accent-gold/20"
           />
-        </div>
-
-        <div className="flex items-start gap-2">
-          <input
-            id="terms"
-            type="checkbox"
-            checked={acceptTerms}
-            onChange={(e) => setAcceptTerms(e.target.checked)}
-            className="mt-1 h-4 w-4 rounded border-white/20 bg-white/5 text-[#C6A769] focus:ring-[#C6A769]/20"
-          />
-          <label htmlFor="terms" className="text-xs text-[#A1A1AA]">
-            I agree to the{" "}
-            <Link href="/terms" className="text-[#C6A769] hover:underline">
-              Terms of Service
-            </Link>{" "}
-            and{" "}
-            <Link href="/privacy" className="text-[#C6A769] hover:underline">
-              Privacy Policy
-            </Link>
-          </label>
         </div>
 
         {error && (
@@ -172,17 +159,17 @@ export function SignUpForm() {
         <Button
           type="submit"
           disabled={isLoading}
-          className="w-full bg-[#C6A769] text-[#0F1115] hover:bg-[#C6A769]/90 font-semibold transition-all duration-300"
+          className="w-full bg-accent-gold text-background hover:bg-accent-gold/90 font-semibold transition-all duration-300"
         >
           {isLoading ? "Creating account..." : "Create Account"}
         </Button>
       </form>
 
-      <p className="text-center text-sm text-[#A1A1AA]">
+      <p className="text-center text-sm text-muted-foreground">
         Already have an account?{" "}
         <Link
           href="/sign-in"
-          className="text-[#C6A769] hover:text-[#C6A769]/80 font-medium transition-colors"
+          className="text-accent-gold hover:text-accent-gold/80 font-medium transition-colors"
         >
           Sign in
         </Link>

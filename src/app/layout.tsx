@@ -4,6 +4,8 @@ import "./globals.css";
 import { siteConfig } from "@/config/site";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
+import { MobileNav } from "@/components/layout/mobile-nav";
+import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
   title: {
@@ -54,8 +56,10 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Header />
-          {children}
+          <main className="pb-16 md:pb-0">{children}</main>
           <Footer />
+          <MobileNav />
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>
