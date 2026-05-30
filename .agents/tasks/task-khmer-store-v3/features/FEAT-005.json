@@ -2,7 +2,7 @@
   "id": "FEAT-005",
   "type": "chore",
   "description": "Final polish pass: update README.md with V3 setup instructions, ensure all pages are consistent with the dark theme design system, verify navigation links are correct, and add any missing static pages. Clean up any leftover V2 files.",
-  "status": "pending",
+  "status": "in_progress",
   "steps": [
     "Rewrite README.md with V3 setup instructions: 1) Create Supabase project at supabase.com, 2) Go to SQL Editor and run the contents of supabase/migrations/001_schema.sql, 3) Copy project URL and anon key from Settings > API, 4) Create .env.local with the 3 env vars from .env.example, 5) Enable Google OAuth in Authentication > Providers > Google, 6) Run pnpm install && pnpm dev, 7) Open http://localhost:3000",
     "Update src/app/about/page.tsx: ensure it has proper content about Khmer Store marketplace, uses the dark theme design system with ScrollReveal animations",

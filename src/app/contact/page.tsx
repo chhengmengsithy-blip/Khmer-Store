@@ -1,6 +1,6 @@
 "use client";
 
-import { Mail, MapPin } from "lucide-react";
+import { Mail, MapPin, Phone, Globe, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,9 +14,10 @@ export default function ContactPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     toast({
-      title: "Message sent",
+      title: "Message sent!",
       description: "We will get back to you as soon as possible.",
     });
+    (e.target as HTMLFormElement).reset();
   };
 
   return (
@@ -90,7 +91,7 @@ export default function ContactPage() {
             </CardContent>
           </Card>
 
-          {/* Contact Info */}
+          {/* Contact Info Sidebar */}
           <div className="space-y-6">
             <div className="flex items-start gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent-gold/10">
@@ -105,6 +106,17 @@ export default function ContactPage() {
             </div>
             <div className="flex items-start gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent-gold/10">
+                <Phone className="h-5 w-5 text-accent-gold" />
+              </div>
+              <div>
+                <h3 className="font-medium text-soft-white">Phone</h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  +855 12 345 678
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent-gold/10">
                 <MapPin className="h-5 w-5 text-accent-gold" />
               </div>
               <div>
@@ -112,6 +124,27 @@ export default function ContactPage() {
                 <p className="mt-1 text-sm text-muted-foreground">
                   Phnom Penh, Cambodia
                 </p>
+              </div>
+            </div>
+
+            {/* Social Links */}
+            <div className="pt-4 border-t border-white/[0.08]">
+              <h3 className="font-medium text-soft-white mb-4">Follow Us</h3>
+              <div className="flex items-center gap-3">
+                <a
+                  href="#"
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-white/5 text-muted-foreground transition-colors hover:bg-accent-gold/10 hover:text-accent-gold"
+                  aria-label="Website"
+                >
+                  <Globe className="h-5 w-5" />
+                </a>
+                <a
+                  href="#"
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-white/5 text-muted-foreground transition-colors hover:bg-accent-gold/10 hover:text-accent-gold"
+                  aria-label="Telegram"
+                >
+                  <Send className="h-5 w-5" />
+                </a>
               </div>
             </div>
           </div>

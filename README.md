@@ -1,36 +1,124 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Khmer Store V3
+
+Cambodia's premier online marketplace. Buy and sell vehicles, property, electronics, jobs, and more.
+
+## Tech Stack
+
+- **Framework:** Next.js 15 (App Router)
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS v4 + Shadcn UI
+- **Database:** Supabase (PostgreSQL)
+- **Auth:** Supabase Auth (Email + Google OAuth)
+- **Storage:** Supabase Storage
+- **State:** Zustand
+- **Animations:** Framer Motion
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+ 
+- pnpm (recommended) or npm
+- A [Supabase](https://supabase.com) account
+
+### 1. Clone and Install
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/chhengmengsithy-blip/Khmer-Store.git
+cd Khmer-Store
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Set Up Supabase
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Create a new project at [supabase.com](https://supabase.com)
+2. Go to **SQL Editor** and run the contents of `supabase/migrations/001_schema.sql`
+3. This creates all tables, RLS policies, triggers, and seeds 9 categories
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 3. Configure Environment Variables
 
-## Learn More
+Copy `.env.example` to `.env.local` and fill in your values:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+cp .env.example .env.local
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Required variables:
+- `NEXT_PUBLIC_SUPABASE_URL` - Your Supabase project URL (Settings > API)
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Your Supabase anon/public key (Settings > API)
+- `NEXT_PUBLIC_SITE_URL` - Your app URL (http://localhost:3000 for local dev)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 4. Enable Google OAuth (Optional)
 
-## Deploy on Vercel
+1. Go to Supabase Dashboard > Authentication > Providers
+2. Enable Google provider
+3. Add your Google OAuth credentials (Client ID and Secret from Google Cloud Console)
+4. Add `http://localhost:3000/auth/callback` to authorized redirect URIs
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 5. Create Storage Buckets
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+In Supabase Dashboard > Storage:
+1. Create a bucket called `listings` (public)
+2. Create a bucket called `avatars` (public)
+
+### 6. Run Development Server
+
+```bash
+pnpm dev
+```
+
+Open [http://localhost:3000](http://localhost:3000)
+
+## Features
+
+### User Features
+- Browse marketplace with search, category filters, and sorting
+- Post listings with image uploads
+- User dashboard with stats, listings management, and favorites
+- Real-time messaging between buyers and sellers
+- Profile settings with avatar upload
+
+### Authentication
+- Email + Password sign up/sign in
+- Google OAuth login
+- Password reset via email
+- Email verification
+- Protected routes with automatic redirect
+
+### Admin Panel (/admin)
+- Dashboard with platform statistics
+- User management (roles, deletion)
+- Listing moderation (approve, reject, remove)
+- Category management (CRUD, reorder)
+- Report management (resolve, dismiss)
+
+To access the admin panel, set your user's `role` to `'admin'` in the `profiles` table.
+
+## Project Structure
+
+```
+src/
+├── app/              # Next.js App Router pages
+│   ├── (auth)/       # Auth pages (sign-in, sign-up, verify, etc.)
+│   ├── admin/        # Admin panel
+│   ├── dashboard/    # User dashboard
+│   └── ...           # Public pages
+├── components/
+│   ├── ui/           # Shadcn UI primitives
+│   ├── layout/       # Header, Footer, Mobile Nav
+│   ├── providers/    # Auth provider
+│   └── shared/       # Reusable components
+├── features/
+│   ├── auth/         # Auth forms and actions
+│   ├── admin/        # Admin components and actions
+│   ├── listings/     # Listing actions
+│   └── messages/     # Message actions
+├── lib/supabase/     # Supabase client helpers
+├── stores/           # Zustand stores
+├── types/            # TypeScript types
+└── constants/        # Static data (categories)
+```
+
+## License
+
+Private project.

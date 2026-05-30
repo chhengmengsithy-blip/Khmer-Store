@@ -100,6 +100,32 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Stats Bar */}
+      <section className="py-10 sm:py-12">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6">
+          <ScrollReveal>
+            <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-16">
+              <div className="text-center">
+                <p className="text-2xl font-bold text-accent-gold sm:text-3xl">1,000+</p>
+                <p className="mt-1 text-sm text-muted-foreground">Listings</p>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl font-bold text-accent-gold sm:text-3xl">500+</p>
+                <p className="mt-1 text-sm text-muted-foreground">Users</p>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl font-bold text-accent-gold sm:text-3xl">9</p>
+                <p className="mt-1 text-sm text-muted-foreground">Categories</p>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl font-bold text-accent-gold sm:text-3xl">24/7</p>
+                <p className="mt-1 text-sm text-muted-foreground">Available</p>
+              </div>
+            </div>
+          </ScrollReveal>
+        </div>
+      </section>
+
       {/* Featured Listings */}
       <section className="py-12 sm:py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
