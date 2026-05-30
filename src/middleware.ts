@@ -11,10 +11,14 @@ const PUBLIC_ROUTES = [
   "/contact",
   "/terms",
   "/privacy",
+  "/auth/callback",
+  "/forgot-password",
+  "/reset-password",
+  "/verify",
 ];
 
 // Routes that require authentication
-const PROTECTED_ROUTE_PREFIXES = ["/dashboard", "/messages", "/post"];
+const PROTECTED_ROUTE_PREFIXES = ["/dashboard", "/messages", "/post", "/admin"];
 
 function isPublicRoute(pathname: string): boolean {
   if (PUBLIC_ROUTES.includes(pathname)) return true;
@@ -24,6 +28,9 @@ function isPublicRoute(pathname: string): boolean {
 
   // Allow marketplace browsing
   if (pathname.startsWith("/marketplace")) return true;
+
+  // Allow auth callback paths
+  if (pathname.startsWith("/auth/callback")) return true;
 
   return false;
 }

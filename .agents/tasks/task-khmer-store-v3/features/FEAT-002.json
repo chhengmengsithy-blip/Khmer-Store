@@ -2,7 +2,7 @@
   "id": "FEAT-002",
   "type": "feat",
   "description": "Implement complete V3 auth system with Google OAuth, password reset, email verification, auth callback route, and proper auth state management. Update the auth store to sync with Supabase session, add AuthProvider component, update header to show authenticated user menu, and ensure protected routes work correctly.",
-  "status": "pending",
+  "status": "in_progress",
   "steps": [
     "Update src/features/auth/actions/auth-actions.ts: fix signUp to pass full_name in user metadata (options.data.full_name), add signInWithGoogle action that calls supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo } }), update resetPassword to use proper redirect URL, remove verifyOtp (not needed for V3). Error message when Supabase is not configured should be: 'Please configure Supabase environment variables to use authentication'",
     "Create src/app/auth/callback/route.ts - Next.js route handler that exchanges the auth code for a session (using supabase.auth.exchangeCodeForSession) and redirects to /dashboard. This handles both OAuth and email verification callbacks.",

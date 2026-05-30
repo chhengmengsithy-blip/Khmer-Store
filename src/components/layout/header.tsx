@@ -16,6 +16,10 @@ import {
   Flower2,
   Dumbbell,
   Gamepad2,
+  User,
+  Settings,
+  LogOut,
+  LayoutDashboard,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -23,6 +27,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -36,6 +41,8 @@ import { Separator } from "@/components/ui/separator";
 import { useScrollPosition } from "@/hooks/use-scroll-position";
 import { cn } from "@/lib/utils";
 import { categories } from "@/constants/categories";
+import { useAuthStore } from "@/stores/auth-store";
+import { signOut } from "@/features/auth/actions/auth-actions";
 
 const iconMap: Record<string, LucideIcon> = {
   Car,
@@ -55,6 +62,7 @@ export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
+  const { user } = useAuthStore();
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,6 +71,10 @@ export function Header() {
     } else {
       router.push("/marketplace");
     }
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
   };
 
   return (
@@ -141,14 +153,70 @@ export function Header() {
             <Link href="/post">Post Listing</Link>
           </Button>
 
-          {/* Sign In */}
-          <Button
-            variant="ghost"
-            asChild
-            className="text-sm text-muted-foreground hover:text-soft-white"
-          >
-            <Link href="/sign-in">Sign In</Link>
-          </Button>
+          {/* Auth - conditional rendering */}
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="flex items-center gap-2 text-sm text-muted-foreground hover:text-soft-white"
+                >
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-accent-gold/20 text-accent-gold">
+                    <User className="h-4 w-4" />
+                  </div>
+                  <span className="hidden lg:inline max-w-[120px] truncate">
+                    {user.email}
+                  </span>
+                  <ChevronDown className="h-3 w-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                className="w-56 bg-elevated border-white/10"
+              >
+                <div className="px-2 py-1.5">
+                  <p className="text-sm font-medium text-soft-white truncate">
+                    {user.email}
+                  </p>
+                </div>
+                <DropdownMenuSeparator className="bg-white/10" />
+                <DropdownMenuItem asChild>
+                  <Link
+                    href="/dashboard"
+                    className="flex items-center gap-2 cursor-pointer"
+                  >
+                    <LayoutDashboard className="h-4 w-4" />
+                    <span>Dashboard</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link
+                    href="/dashboard/settings"
+                    className="flex items-center gap-2 cursor-pointer"
+                  >
+                    <Settings className="h-4 w-4" />
+                    <span>Settings</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator className="bg-white/10" />
+                <DropdownMenuItem
+                  onClick={handleSignOut}
+                  className="flex items-center gap-2 cursor-pointer text-red-400 focus:text-red-400"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span>Sign Out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button
+              variant="ghost"
+              asChild
+              className="text-sm text-muted-foreground hover:text-soft-white"
+            >
+              <Link href="/sign-in">Sign In</Link>
+            </Button>
+          )}
         </div>
 
         {/* Mobile: Search icon + Hamburger */}
@@ -221,23 +289,72 @@ export function Header() {
           </nav>
           <Separator className="my-4 bg-white/[0.08]" />
           <div className="flex flex-col gap-3 px-4">
-            <Button
-              variant="ghost"
-              asChild
-              className="justify-start text-sm text-muted-foreground hover:text-soft-white"
-            >
-              <Link href="/sign-in" onClick={() => setMobileOpen(false)}>
-                Sign In
-              </Link>
-            </Button>
-            <Button
-              asChild
-              className="bg-accent-gold text-background hover:bg-accent-gold/90"
-            >
-              <Link href="/sign-up" onClick={() => setMobileOpen(false)}>
-                Sign Up
-              </Link>
-            </Button>
+            {user ? (
+              <>
+                <div className="flex items-center gap-2 py-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-gold/20 text-accent-gold">
+                    <User className="h-4 w-4" />
+                  </div>
+                  <span className="text-sm text-soft-white truncate">
+                    {user.email}
+                  </span>
+                </div>
+                <Button
+                  variant="ghost"
+                  asChild
+                  className="justify-start text-sm text-muted-foreground hover:text-soft-white"
+                >
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    Dashboard
+                  </Link>
+                </Button>
+                <Button
+                  variant="ghost"
+                  asChild
+                  className="justify-start text-sm text-muted-foreground hover:text-soft-white"
+                >
+                  <Link
+                    href="/dashboard/settings"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    Settings
+                  </Link>
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="justify-start text-sm text-red-400 hover:text-red-400"
+                  onClick={() => {
+                    setMobileOpen(false);
+                    handleSignOut();
+                  }}
+                >
+                  Sign Out
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  variant="ghost"
+                  asChild
+                  className="justify-start text-sm text-muted-foreground hover:text-soft-white"
+                >
+                  <Link href="/sign-in" onClick={() => setMobileOpen(false)}>
+                    Sign In
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  className="bg-accent-gold text-background hover:bg-accent-gold/90"
+                >
+                  <Link href="/sign-up" onClick={() => setMobileOpen(false)}>
+                    Sign Up
+                  </Link>
+                </Button>
+              </>
+            )}
           </div>
         </SheetContent>
       </Sheet>
