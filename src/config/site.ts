@@ -1,5 +1,6 @@
 export const siteConfig = {
   name: "Khmer Store",
+  title: "Khmer Store — Luxury Cambodian Marketplace",
   description:
     "A luxury marketplace platform showcasing premium Cambodian products and artisanal craftsmanship.",
   url: "https://khmerstore.com",

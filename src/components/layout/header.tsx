@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useScrollPosition } from "@/hooks/use-scroll-position";
 import { cn } from "@/lib/utils";
 import { MobileNav } from "./mobile-nav";
+import { Logo } from "@/components/brand/logo";
 
 const navLinks = [
   { label: "Marketplace", href: "/marketplace" },
@@ -35,9 +36,8 @@ export function Header() {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <span className="font-playfair text-xl font-bold text-soft-white">
-            Khmer<span className="text-accent-gold">Store</span>
-          </span>
+          <Logo iconOnly className="md:hidden" size="sm" />
+          <Logo className="hidden md:inline-flex" size="md" />
         </Link>
 
         {/* Desktop Navigation */}
