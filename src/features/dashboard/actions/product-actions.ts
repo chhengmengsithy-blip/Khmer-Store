@@ -135,6 +135,45 @@ export async function createProduct(formData: FormData): Promise<ActionResult> {
   return { success: true, productId: product.id };
 }
 
+export async function insertProductMedia(
+  productId: string,
+  mediaUrls: { url: string; displayOrder: number }[]
+): Promise<ActionResult> {
+  const supabase = await createClient();
+
+  // Authenticate user
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return { error: "You must be signed in to add product media." };
+  }
+
+  if (!productId || mediaUrls.length === 0) {
+    return { error: "Product ID and at least one media URL are required." };
+  }
+
+  const rows = mediaUrls.map((item) => ({
+    product_id: productId,
+    url: item.url,
+    type: "image" as const,
+    display_order: item.displayOrder,
+    alt_text: null,
+  }));
+
+  const { error: insertError } = await supabase
+    .from("product_media")
+    .insert(rows);
+
+  if (insertError) {
+    return { error: insertError.message };
+  }
+
+  return { success: true };
+}
+
 export async function registerAsSeller(
   formData: FormData
 ): Promise<ActionResult> {

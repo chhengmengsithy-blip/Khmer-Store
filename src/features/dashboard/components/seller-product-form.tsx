@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Upload, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +13,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { createProduct } from "@/features/dashboard/actions/product-actions";
+import {
+  createProduct,
+  insertProductMedia,
+} from "@/features/dashboard/actions/product-actions";
+import { createClient } from "@/lib/supabase/client";
 
 const categories = [
   { id: "fashion", name: "Fashion & Apparel" },
@@ -40,19 +44,44 @@ export function SellerProductForm() {
   const [stock, setStock] = useState("");
   const [category, setCategory] = useState("");
   const [condition, setCondition] = useState("");
-  const [imageSlots, setImageSlots] = useState<string[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [previews, setPreviews] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  const addImageSlot = () => {
-    if (imageSlots.length < 6) {
-      setImageSlots([...imageSlots, `image-${Date.now()}`]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Clean up object URLs on unmount
+  useEffect(() => {
+    return () => {
+      previews.forEach((url) => URL.revokeObjectURL(url));
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleFilesSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    const remaining = 6 - selectedFiles.length;
+    const newFiles = Array.from(files).slice(0, remaining);
+
+    const newPreviews = newFiles.map((file) => URL.createObjectURL(file));
+
+    setSelectedFiles((prev) => [...prev, ...newFiles]);
+    setPreviews((prev) => [...prev, ...newPreviews]);
+
+    // Reset input so the same file can be selected again if removed
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
   };
 
-  const removeImageSlot = (id: string) => {
-    setImageSlots(imageSlots.filter((slot) => slot !== id));
+  const removeImage = (index: number) => {
+    URL.revokeObjectURL(previews[index]);
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+    setPreviews((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (status: "draft" | "published") => {
@@ -71,25 +100,97 @@ export function SellerProductForm() {
 
     const result = await createProduct(formData);
 
-    setLoading(false);
-
     if (result.error) {
+      setLoading(false);
       setError(result.error);
-    } else {
-      setSuccess(
-        status === "published"
-          ? "Product published successfully!"
-          : "Product saved as draft."
-      );
-      // Reset form
-      setTitle("");
-      setDescription("");
-      setPrice("");
-      setStock("");
-      setCategory("");
-      setCondition("");
-      setImageSlots([]);
+      return;
     }
+
+    const productId = result.productId!;
+
+    // Upload images to Supabase Storage using browser client
+    if (selectedFiles.length > 0) {
+      const supabase = createClient();
+      const uploadedUrls: { url: string; displayOrder: number }[] = [];
+      const failedUploads: string[] = [];
+      const timestamp = new Date().getTime();
+
+      for (let i = 0; i < selectedFiles.length; i++) {
+        const file = selectedFiles[i];
+        const fileExt = file.name.split(".").pop();
+        const fileName = `${productId}/${i}_${timestamp}.${fileExt}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("product-images")
+          .upload(fileName, file);
+
+        if (uploadError) {
+          failedUploads.push(file.name);
+          continue;
+        }
+
+        const { data: urlData } = supabase.storage
+          .from("product-images")
+          .getPublicUrl(fileName);
+
+        uploadedUrls.push({
+          url: urlData.publicUrl,
+          displayOrder: i,
+        });
+      }
+
+      // Insert media records via server action
+      if (uploadedUrls.length > 0) {
+        const mediaResult = await insertProductMedia(productId, uploadedUrls);
+        if (mediaResult.error) {
+          failedUploads.push(`Database error: ${mediaResult.error}`);
+        }
+      }
+
+      if (failedUploads.length > 0 && uploadedUrls.length === 0) {
+        // All uploads failed but product was created
+        setLoading(false);
+        setSuccess(
+          status === "published"
+            ? "Product published, but image upload failed. You can add images later."
+            : "Product saved as draft, but image upload failed. You can add images later."
+        );
+        // Reset form
+        resetForm();
+        return;
+      }
+
+      if (failedUploads.length > 0) {
+        // Some uploads failed
+        setLoading(false);
+        setSuccess(
+          `Product ${status === "published" ? "published" : "saved as draft"} with ${uploadedUrls.length} image(s). ${failedUploads.length} image(s) failed to upload.`
+        );
+        resetForm();
+        return;
+      }
+    }
+
+    setLoading(false);
+    setSuccess(
+      status === "published"
+        ? "Product published successfully!"
+        : "Product saved as draft."
+    );
+    resetForm();
+  };
+
+  const resetForm = () => {
+    setTitle("");
+    setDescription("");
+    setPrice("");
+    setStock("");
+    setCategory("");
+    setCondition("");
+    // Revoke all preview URLs
+    previews.forEach((url) => URL.revokeObjectURL(url));
+    setSelectedFiles([]);
+    setPreviews([]);
   };
 
   return (
@@ -199,18 +300,33 @@ export function SellerProductForm() {
         <p className="text-xs text-muted-foreground">
           Upload up to 6 images. First image will be the cover.
         </p>
+
+        {/* Hidden file input */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          multiple
+          className="hidden"
+          onChange={handleFilesSelected}
+          disabled={loading}
+        />
+
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {imageSlots.map((slot) => (
+          {previews.map((previewUrl, index) => (
             <div
-              key={slot}
-              className="relative aspect-square rounded-lg border border-white/[0.06] bg-elevated"
+              key={`preview-${index}`}
+              className="relative aspect-square rounded-lg border border-white/[0.06] bg-elevated overflow-hidden"
             >
-              <div className="flex h-full items-center justify-center bg-accent-gold/5 rounded-lg">
-                <span className="text-xs text-muted-foreground">Image</span>
-              </div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={previewUrl}
+                alt={`Preview ${index + 1}`}
+                className="h-full w-full object-cover rounded-lg"
+              />
               <button
                 type="button"
-                onClick={() => removeImageSlot(slot)}
+                onClick={() => removeImage(index)}
                 className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white"
                 disabled={loading}
               >
@@ -218,10 +334,10 @@ export function SellerProductForm() {
               </button>
             </div>
           ))}
-          {imageSlots.length < 6 && (
+          {selectedFiles.length < 6 && (
             <button
               type="button"
-              onClick={addImageSlot}
+              onClick={() => fileInputRef.current?.click()}
               className="flex aspect-square items-center justify-center rounded-lg border-2 border-dashed border-white/10 transition-colors hover:border-accent-gold/30"
               disabled={loading}
             >
