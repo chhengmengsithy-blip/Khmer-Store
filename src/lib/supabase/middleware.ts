@@ -1,10 +1,29 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+/**
+ * Whether Supabase credentials are configured via environment variables.
+ * When false, the app runs in "preview mode" so the site can still load and
+ * deploy without a configured Supabase project.
+ */
+export function isSupabaseConfigured(): boolean {
+  return Boolean(
+    process.env.NEXT_PUBLIC_SUPABASE_URL &&
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  );
+}
+
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
   });
+
+  // If Supabase isn't configured yet, skip session handling so the site can
+  // still render. This prevents MIDDLEWARE_INVOCATION_FAILED on deploys that
+  // don't yet have the env vars set.
+  if (!isSupabaseConfigured()) {
+    return supabaseResponse;
+  }
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

@@ -7,8 +7,14 @@ interface VerificationResult {
   success?: boolean;
 }
 
-export async function submitVerification(formData: FormData): Promise<VerificationResult> {
+export async function submitVerification(
+  formData: FormData
+): Promise<VerificationResult> {
   const supabase = await createClient();
+
+  if (!supabase) {
+    return { error: "Service is not configured." };
+  }
 
   const {
     data: { user },
@@ -27,22 +33,18 @@ export async function submitVerification(formData: FormData): Promise<Verificati
     return { error: "Please fill in all required fields." };
   }
 
-  // Update user profile with personal information
-  const { error: profileError } = await supabase
-    .from("profiles")
-    .upsert({
-      user_id: user.id,
-      full_name: fullName,
-      date_of_birth: dateOfBirth,
-      country,
-      address,
-    });
+  const { error: profileError } = await supabase.from("profiles").upsert({
+    user_id: user.id,
+    full_name: fullName,
+    date_of_birth: dateOfBirth,
+    country,
+    address,
+  });
 
   if (profileError) {
     return { error: "Failed to save personal information." };
   }
 
-  // Update verification status
   const { error: statusError } = await supabase
     .from("users_extended")
     .update({ verification_status: "pending_verification" })
@@ -55,8 +57,14 @@ export async function submitVerification(formData: FormData): Promise<Verificati
   return { success: true };
 }
 
-export async function uploadDocument(formData: FormData): Promise<VerificationResult> {
+export async function uploadDocument(
+  formData: FormData
+): Promise<VerificationResult> {
   const supabase = await createClient();
+
+  if (!supabase) {
+    return { error: "Service is not configured." };
+  }
 
   const {
     data: { user },
@@ -73,7 +81,6 @@ export async function uploadDocument(formData: FormData): Promise<VerificationRe
     return { error: "Please provide a file and document type." };
   }
 
-  // Upload file to Supabase Storage
   const fileExt = file.name.split(".").pop();
   const fileName = `${user.id}/${documentType}_${Date.now()}.${fileExt}`;
 
@@ -89,7 +96,6 @@ export async function uploadDocument(formData: FormData): Promise<VerificationRe
     .from("verification-documents")
     .getPublicUrl(fileName);
 
-  // Record document in database
   const { error: dbError } = await supabase
     .from("verification_documents")
     .insert({
@@ -112,6 +118,8 @@ export async function getVerificationStatus(): Promise<{
 } | null> {
   const supabase = await createClient();
 
+  if (!supabase) return null;
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -126,7 +134,6 @@ export async function getVerificationStatus(): Promise<{
 
   if (!data) return null;
 
-  // Check for rejection reason from latest document review
   const { data: latestDoc } = await supabase
     .from("verification_documents")
     .select("status, rejection_reason")

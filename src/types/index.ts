@@ -1,21 +1,4 @@
-export type UserRole = "buyer" | "seller" | "admin" | "moderator";
-
-export type VerificationStatus =
-  | "pending"
-  | "verified"
-  | "rejected"
-  | "suspended";
-
-export type OrderStatus =
-  | "pending"
-  | "confirmed"
-  | "processing"
-  | "shipped"
-  | "delivered"
-  | "cancelled"
-  | "refunded";
-
-export type PaymentMethod = "card" | "bank_transfer" | "crypto" | "cod";
+export type UserRole = "user" | "admin";
 
 export interface User {
   id: string;
@@ -25,16 +8,20 @@ export interface User {
   updated_at: string;
 }
 
-export interface Profile {
+export interface Listing {
   id: string;
   user_id: string;
-  full_name: string;
-  avatar_url: string | null;
-  phone: string | null;
-  address: string | null;
-  city: string | null;
-  country: string | null;
-  bio: string | null;
+  category_id: string;
+  title: string;
+  slug: string;
+  description: string;
+  price: number;
+  currency: string;
+  location: string;
+  contact_phone: string;
+  images: string[];
+  condition: "new" | "used" | "like_new";
+  is_active: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -43,95 +30,27 @@ export interface Category {
   id: string;
   name: string;
   slug: string;
-  description: string | null;
-  image_url: string | null;
+  icon: string;
   parent_id: string | null;
-  created_at: string;
+  description: string | null;
 }
 
-export interface Product {
-  id: string;
-  seller_id: string;
-  category_id: string;
-  name: string;
-  slug: string;
-  description: string;
-  price: number;
-  compare_at_price: number | null;
-  currency: string;
-  images: string[];
-  stock: number;
-  is_active: boolean;
-  is_featured: boolean;
-  metadata: Record<string, unknown> | null;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Seller {
+export interface UserProfile {
   id: string;
   user_id: string;
-  store_name: string;
-  store_slug: string;
-  store_description: string | null;
-  store_logo: string | null;
-  store_banner: string | null;
-  verification_status: VerificationStatus;
-  rating: number;
-  total_sales: number;
+  display_name: string;
+  avatar_url: string | null;
+  phone: string | null;
+  location: string | null;
   created_at: string;
-  updated_at: string;
 }
 
-export interface Order {
+export interface Message {
   id: string;
-  buyer_id: string;
-  seller_id: string;
-  status: OrderStatus;
-  total: number;
-  currency: string;
-  payment_method: PaymentMethod;
-  shipping_address: string;
-  tracking_number: string | null;
-  notes: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface OrderItem {
-  id: string;
-  order_id: string;
-  product_id: string;
-  quantity: number;
-  unit_price: number;
-  total_price: number;
-}
-
-export interface Review {
-  id: string;
-  product_id: string;
-  buyer_id: string;
-  rating: number;
-  comment: string | null;
-  images: string[];
-  is_verified_purchase: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Notification {
-  id: string;
-  user_id: string;
-  type: string;
-  title: string;
-  message: string;
+  listing_id: string;
+  sender_id: string;
+  receiver_id: string;
+  content: string;
   is_read: boolean;
-  metadata: Record<string, unknown> | null;
   created_at: string;
-}
-
-export interface CartItem {
-  product_id: string;
-  product: Product;
-  quantity: number;
 }
