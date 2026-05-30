@@ -258,7 +258,7 @@ export default function AdminDashboardPage() {
             </div>
             <div className="pt-3 mt-3 border-t border-white/[0.06]">
               <p className="text-xs text-muted-foreground">
-                App Version: <span className="text-soft-white">V4.0.0</span>
+                App Version: <span className="text-soft-white">V5.0.0</span>
               </p>
             </div>
           </CardContent>

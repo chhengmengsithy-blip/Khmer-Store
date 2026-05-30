@@ -49,6 +49,7 @@ import { cn } from "@/lib/utils";
 import { categories } from "@/constants/categories";
 import { useAuthStore } from "@/stores/auth-store";
 import { signOut } from "@/features/auth/actions/auth-actions";
+import { Logo, LogoIcon } from "@/components/shared/logo";
 
 const iconMap: Record<string, LucideIcon> = {
   Car,
@@ -103,9 +104,8 @@ export function Header() {
         <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6">
           {/* Logo */}
           <Link href="/" className="flex shrink-0 items-center gap-2">
-            <span className="font-playfair text-xl font-bold text-soft-white">
-              Khmer<span className="text-accent-gold">Store</span>
-            </span>
+            <LogoIcon className="h-7 w-7 md:hidden" />
+            <Logo className="hidden md:flex" />
           </Link>
 
           {/* Search bar - desktop */}
@@ -338,7 +338,7 @@ export function Header() {
         >
           <SheetHeader>
             <SheetTitle className="font-playfair text-lg text-soft-white">
-              Khmer<span className="text-accent-gold">Store</span>
+              <Logo />
             </SheetTitle>
           </SheetHeader>
           <nav className="mt-6 flex flex-col gap-1">

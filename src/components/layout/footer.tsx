@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Globe, Send, Camera } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/shared/logo";
 
 const footerLinks = {
   Marketplace: [
@@ -58,9 +59,7 @@ export function Footer() {
           {/* Brand Column */}
           <div className="col-span-2 md:col-span-2">
             <Link href="/" className="inline-block">
-              <span className="font-playfair text-xl font-bold text-soft-white">
-                Khmer<span className="text-accent-gold">Store</span>
-              </span>
+              <Logo />
             </Link>
             <p className="mt-3 max-w-xs text-sm text-muted-foreground">
               Cambodia&apos;s premier marketplace for buying and selling. Connect

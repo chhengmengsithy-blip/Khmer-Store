@@ -1,0 +1,7 @@
+{
+  "task_id": "task-v5-professional-upgrade",
+  "task_description": "Complete V5 professional upgrade of Khmer Store: create logo, fix all frontend/backend issues, add missing pages, improve database schema, polish admin panel, add SEO/metadata, and update documentation.",
+  "status": "in_progress",
+  "feature_order": ["FEAT-001", "FEAT-002", "FEAT-003"],
+  "blocked_reason": null
+}

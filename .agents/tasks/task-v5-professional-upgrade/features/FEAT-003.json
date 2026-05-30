@@ -1,0 +1,26 @@
+{
+  "id": "FEAT-003",
+  "type": "feat",
+  "description": "SEO, performance, and documentation finalization. Add proper metadata to all pages, robots.txt/sitemap improvements, JSON-LD structured data, and update README.md to professional V5 documentation.",
+  "status": "pending",
+  "steps": [
+    "Update src/app/robots.ts to include proper rules: allow all for / with sitemap reference to ${siteConfig.url}/sitemap.xml. Disallow /admin, /dashboard, /messages, /api paths.",
+    "Update src/app/sitemap.ts to generate a complete sitemap including all public pages: /, /marketplace, /about, /contact, /terms, /privacy, /sign-in, /sign-up, /forgot-password. Also include category pages: /category/vehicles, /category/property, etc. for all 9 categories from the constants.",
+    "Add metadata exports to pages that are missing them: src/app/about/page.tsx (title: 'About Us'), src/app/contact/page.tsx (title: 'Contact Us'), src/app/terms/page.tsx (title: 'Terms of Service'), src/app/privacy/page.tsx (title: 'Privacy Policy'), src/app/marketplace/page.tsx (title: 'Marketplace'), src/app/post/page.tsx (title: 'Post a Listing'). For client components that can't export metadata, add the metadata in a layout.tsx or head component where appropriate.",
+    "Add a marketplace layout.tsx metadata export in src/app/marketplace/layout.tsx with title 'Marketplace' and description.",
+    "Update README.md to be a professional V5 document with: project description, tech stack (with mention of each tech), getting started guide (clone, install, env setup, Supabase setup, run), database setup instructions (run migration), admin setup (set role to admin in profiles table), deployment guide (Vercel with env vars), project structure overview, features list, and license (Private). Keep it clean and well-formatted.",
+    "Update .env.example to include NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, and NEXT_PUBLIC_SITE_URL with comments explaining each.",
+    "Update src/config/site.ts to ensure the ogImage path references a valid path (can be /logo.svg since we created it in FEAT-001).",
+    "Add a proper not-found page (src/app/not-found.tsx should already exist) - verify it has good UX with link back to homepage and marketplace."
+  ],
+  "acceptance_criteria": [
+    "robots.ts generates proper robots.txt with disallowed paths",
+    "sitemap.ts generates a sitemap with all public routes plus category pages",
+    "README.md is comprehensive and professional",
+    ".env.example has all required variables with comments",
+    "Build succeeds with all metadata properly configured"
+  ],
+  "verification": ["Run `unset NODE_OPTIONS && pnpm build` and confirm successful compilation"],
+  "blocked_reason": null,
+  "findings": ""
+}

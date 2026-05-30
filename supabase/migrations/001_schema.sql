@@ -232,3 +232,28 @@ BEGIN
   UPDATE listings SET views_count = views_count + 1 WHERE id = listing_id;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- ============================================================
+-- PERFORMANCE INDEXES
+-- ============================================================
+
+CREATE INDEX idx_listings_category_id ON listings(category_id);
+CREATE INDEX idx_listings_user_id ON listings(user_id);
+CREATE INDEX idx_listings_status ON listings(status);
+CREATE INDEX idx_listings_created_at ON listings(created_at DESC);
+CREATE INDEX idx_messages_sender_id ON messages(sender_id);
+CREATE INDEX idx_messages_receiver_id ON messages(receiver_id);
+CREATE INDEX idx_favorites_user_id ON favorites(user_id);
+CREATE INDEX idx_reports_status ON reports(status);
+
+-- ============================================================
+-- ADMIN POLICIES (ADDITIONAL)
+-- ============================================================
+
+CREATE POLICY "profiles_admin_all" ON profiles
+  FOR ALL TO authenticated
+  USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin'));
+
+CREATE POLICY "messages_admin_select" ON messages
+  FOR SELECT TO authenticated
+  USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin'));
