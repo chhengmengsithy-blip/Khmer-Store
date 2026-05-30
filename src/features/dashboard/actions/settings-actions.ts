@@ -133,6 +133,47 @@ export async function updateProfile(formData: FormData): Promise<ActionResult> {
   return { success: true };
 }
 
+export async function updateAvatar(avatarUrl: string): Promise<ActionResult> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return { error: "Not authenticated" };
+  }
+
+  // Look up users_extended to get the extended user id
+  const { data: extUser, error: extError } = await supabase
+    .from("users_extended")
+    .select("id")
+    .eq("auth_user_id", user.id)
+    .single();
+
+  if (extError || !extUser) {
+    return { error: "User record not found." };
+  }
+
+  const { error: updateError } = await supabase
+    .from("profiles")
+    .upsert(
+      {
+        user_id: extUser.id,
+        avatar_url: avatarUrl,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id" }
+    );
+
+  if (updateError) {
+    return { error: updateError.message };
+  }
+
+  return { success: true };
+}
+
 export async function updatePassword(formData: FormData): Promise<ActionResult> {
   const supabase = await createClient();
 
