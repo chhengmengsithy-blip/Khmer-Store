@@ -231,7 +231,7 @@ export default function AdminSettingsPage() {
             <div>
               <p className="text-xs text-muted-foreground mb-1">App Version</p>
               <Badge className="bg-accent-gold/10 text-accent-gold border-accent-gold/20">
-                V4.0.0
+                V5.0.0
               </Badge>
             </div>
             <div>

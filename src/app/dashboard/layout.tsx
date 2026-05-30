@@ -15,8 +15,8 @@ import { useAuthStore } from "@/stores/auth-store";
 
 const navLinks = [
   { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
-  { label: "My Listings", href: "/dashboard#listings", icon: Package },
-  { label: "Favorites", href: "/dashboard#favorites", icon: Heart },
+  { label: "My Listings", href: "/dashboard/listings", icon: Package },
+  { label: "Favorites", href: "/dashboard/favorites", icon: Heart },
   { label: "Messages", href: "/messages", icon: MessageSquare },
   { label: "Settings", href: "/dashboard/settings", icon: Settings },
 ];

@@ -2,7 +2,7 @@
   "id": "FEAT-002",
   "type": "fix",
   "description": "Fix all frontend pages, add missing routes (dashboard/listings, dashboard/favorites), ensure proper error handling, loading states, and responsive design across all pages. Fix admin panel to be fully functional.",
-  "status": "pending",
+  "status": "in_progress",
   "steps": [
     "Create src/app/dashboard/listings/page.tsx - a dedicated page for managing user's listings. Show a table/list of all listings with status badges, edit/delete actions using ConfirmDialog for deletion. Include search filtering. Use getUserListings() and deleteListing() server actions. Follow the dashboard page pattern.",
     "Create src/app/dashboard/favorites/page.tsx - a dedicated page showing user's favorited listings. Use getUserFavorites() to get favorites. Display as a grid of ListingCard components with unfavorite action. Show EmptyState when no favorites.",
