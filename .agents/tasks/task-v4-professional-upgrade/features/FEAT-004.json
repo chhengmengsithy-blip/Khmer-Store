@@ -2,7 +2,7 @@
   "id": "FEAT-004",
   "type": "feat",
   "description": "Professional Dashboard, Settings, Messages, and Static Pages - Upgrade the user-facing pages with professional UI including dashboard stats, settings with all options, redesigned messages with conversation UI, and polished static pages.",
-  "status": "pending",
+  "status": "completed",
   "steps": [
     "Rewrite src/app/dashboard/page.tsx - Professional dashboard: Clean stat cards row (StatsCard components) with icons and trend indicators (My Listings, Total Views, Favorites Received, Messages). Quick actions bar (Post New Listing gold button, Browse Marketplace, View Messages). Account completion progress bar (calculates % based on: has avatar, has name, has phone, has location). My Listings section with status badges (Active green, Pending yellow, Sold blue, Removed red) and quick action buttons (Edit, Mark Sold, Delete with ConfirmDialog). Recent messages preview (last 3 conversations). Performance mini-section showing this week views vs last week.",
     "Rewrite src/app/dashboard/settings/page.tsx - Professional settings page with sections: (1) Profile section - avatar upload with circular preview and camera icon overlay, full name, phone, location, bio textarea. (2) Account section - email display (read-only), password change (current + new + confirm fields, calls Supabase auth.updateUser). (3) Notifications section - toggle switches for: email notifications, message alerts, listing updates, marketing emails (UI-only toggles stored in localStorage). (4) Privacy section - toggles for: show phone number publicly, show location on listings, allow messages from non-buyers. (5) Danger Zone - Delete account button (red) with ConfirmDialog that explains consequences.",
@@ -25,5 +25,5 @@
     "Run 'unset NODE_OPTIONS && npx --yes next build' in /projects/sandbox/Khmer-Store and confirm zero errors"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "Dashboard layout already existed as a basic file - replaced with sidebar nav version. The dashboard layout is a client component that uses usePathname for active link detection and useAuthStore for user greeting. On mobile, it renders horizontal scroll tabs below the header. Dashboard page remains a server component. Settings page has all 5 sections using localStorage for notification/privacy toggles. Messages page has a responsive two-panel layout with mobile back-button navigation. Static pages (about, contact, terms, privacy) are server components using ScrollReveal for animations. Terms and privacy pages include a sticky table of contents sidebar on desktop. Build passes all 26 routes successfully."
 }
