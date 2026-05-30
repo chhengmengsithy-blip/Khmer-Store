@@ -237,6 +237,11 @@
   border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
+/* Khmer font application */
+html[lang="km"] body {
+  font-family: var(--font-khmer);
+}
+
 .gradient-text {
   background: linear-gradient(135deg, #C6A769 0%, #D4B87A 50%, #C6A769 100%);
   -webkit-background-clip: text;

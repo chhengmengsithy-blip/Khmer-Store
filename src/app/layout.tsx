@@ -7,6 +7,7 @@ import { Footer } from "@/components/layout/footer";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/components/providers/auth-provider";
+import { LocaleEffect } from "@/components/providers/locale-effect";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -84,6 +85,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AuthProvider>
+            <LocaleEffect />
             <Header />
             <main className="pb-16 md:pb-0">{children}</main>
             <Footer />

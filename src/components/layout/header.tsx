@@ -449,7 +449,7 @@ export function Header() {
                   className="bg-accent-gold text-background hover:bg-accent-gold/90"
                 >
                   <Link href="/sign-up" onClick={() => setMobileOpen(false)}>
-                    Sign Up
+                    {t.nav.signUp}
                   </Link>
                 </Button>
               </>

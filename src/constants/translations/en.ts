@@ -15,6 +15,7 @@ export const en = {
     sellNow: "Sell Now",
     browseMarketplace: "Browse Marketplace",
     notifications: "Notifications",
+    signUp: "Sign Up",
   },
   hero: {
     title: "Buy & Sell Anything in",
