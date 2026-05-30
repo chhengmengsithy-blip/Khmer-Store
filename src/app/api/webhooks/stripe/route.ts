@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createHmac, timingSafeEqual } from "crypto";
+import { createClient } from "@supabase/supabase-js";
 
 /**
  * Stripe Webhook Handler
@@ -11,6 +12,14 @@ import { createHmac, timingSafeEqual } from "crypto";
 
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || "";
 
+// Use a service-role client for webhook handling (no user session available)
+function getServiceClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
+
 /**
  * Verify the Stripe webhook signature using HMAC-SHA256.
  * Implements the same algorithm as Stripe SDK's constructEvent():
@@ -19,10 +28,7 @@ const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || "";
  * 3. Compute HMAC-SHA256 using the webhook secret
  * 4. Compare computed signature to the one in the header using timing-safe comparison
  */
-function verifyStripeSignature(
-  payload: string,
-  signature: string
-): boolean {
+function verifyStripeSignature(payload: string, signature: string): boolean {
   if (!STRIPE_WEBHOOK_SECRET || !signature) {
     return false;
   }
@@ -65,35 +71,147 @@ function verifyStripeSignature(
 }
 
 async function handlePaymentIntentSucceeded(data: Record<string, unknown>) {
-  // Process successful payment:
-  // 1. Update order status
-  // 2. Move funds to escrow
-  // 3. Notify buyer and seller
-  void data;
+  const supabase = getServiceClient();
+
+  const metadata = (data.metadata as Record<string, string>) || {};
+  const buyerId = metadata.buyer_id;
+  const sellerId = metadata.seller_id;
+  const shippingAddress = metadata.shipping_address || "";
+  const itemsJson = metadata.items || "[]";
+  const amount = typeof data.amount === "number" ? data.amount / 100 : 0;
+  const paymentIntentId = (data.id as string) || "";
+
+  if (!buyerId || !sellerId) {
+    return;
+  }
+
+  // Check if an order already exists for this payment intent
+  const { data: existingOrder } = await supabase
+    .from("orders")
+    .select("id")
+    .like("notes", `%${paymentIntentId}%`)
+    .single();
+
+  if (existingOrder) {
+    // Update existing order status to confirmed
+    await supabase
+      .from("orders")
+      .update({
+        status: "confirmed",
+        escrow_status: "held",
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", existingOrder.id);
+  } else {
+    // Create a new order
+    const commission = amount * 0.03;
+    const notesJson = JSON.stringify({
+      items: JSON.parse(itemsJson),
+      payment_intent_id: paymentIntentId,
+    });
+
+    await supabase.from("orders").insert({
+      buyer_id: buyerId,
+      seller_id: sellerId,
+      status: "confirmed",
+      total: amount,
+      commission,
+      escrow_status: "held",
+      shipping_address: shippingAddress,
+      notes: notesJson,
+    });
+  }
+
+  // Create a transaction record if the table exists
+  await supabase.from("transactions").insert({
+    payment_intent_id: paymentIntentId,
+    buyer_id: buyerId,
+    seller_id: sellerId,
+    amount,
+    status: "succeeded",
+    type: "payment",
+  });
 }
 
 async function handlePaymentIntentFailed(data: Record<string, unknown>) {
-  // Handle failed payment:
-  // 1. Update order status
-  // 2. Notify buyer
-  // 3. Log for fraud monitoring if repeated
-  void data;
+  const supabase = getServiceClient();
+
+  const paymentIntentId = (data.id as string) || "";
+
+  if (!paymentIntentId) {
+    return;
+  }
+
+  // Find and update the order if one exists
+  const { data: existingOrder } = await supabase
+    .from("orders")
+    .select("id")
+    .like("notes", `%${paymentIntentId}%`)
+    .single();
+
+  if (existingOrder) {
+    await supabase
+      .from("orders")
+      .update({
+        status: "cancelled",
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", existingOrder.id);
+  }
 }
 
 async function handleChargeRefunded(data: Record<string, unknown>) {
-  // Process refund:
-  // 1. Update escrow status
-  // 2. Update order status
-  // 3. Notify both parties
-  void data;
+  const supabase = getServiceClient();
+
+  const paymentIntentId =
+    (data.payment_intent as string) || (data.id as string) || "";
+
+  if (!paymentIntentId) {
+    return;
+  }
+
+  const { data: existingOrder } = await supabase
+    .from("orders")
+    .select("id")
+    .like("notes", `%${paymentIntentId}%`)
+    .single();
+
+  if (existingOrder) {
+    await supabase
+      .from("orders")
+      .update({
+        status: "refunded",
+        escrow_status: "released",
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", existingOrder.id);
+  }
 }
 
 async function handleDisputeCreated(data: Record<string, unknown>) {
-  // Handle dispute:
-  // 1. Flag order for admin review
-  // 2. Freeze escrow funds
-  // 3. Notify admin team
-  void data;
+  const supabase = getServiceClient();
+
+  const paymentIntentId = (data.payment_intent as string) || "";
+
+  if (!paymentIntentId) {
+    return;
+  }
+
+  const { data: existingOrder } = await supabase
+    .from("orders")
+    .select("id")
+    .like("notes", `%${paymentIntentId}%`)
+    .single();
+
+  if (existingOrder) {
+    await supabase
+      .from("orders")
+      .update({
+        escrow_status: "frozen",
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", existingOrder.id);
+  }
 }
 
 export async function POST(request: Request) {

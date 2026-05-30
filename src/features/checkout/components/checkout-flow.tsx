@@ -1,14 +1,37 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, ShoppingBag, MapPin, CreditCard, PartyPopper } from "lucide-react";
+import {
+  Check,
+  ShoppingBag,
+  MapPin,
+  CreditCard,
+  PartyPopper,
+  Loader2,
+} from "lucide-react";
+import { loadStripe } from "@stripe/stripe-js";
+import {
+  Elements,
+  PaymentElement,
+  useStripe,
+  useElements,
+} from "@stripe/react-stripe-js";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CartSummary } from "./cart-summary";
 import { PaymentMethodSelector } from "./payment-method-selector";
+import { useCartStore } from "@/stores/cart-store";
+import {
+  createPaymentIntent,
+  createOrder,
+} from "@/features/checkout/actions/checkout-actions";
 import { cn } from "@/lib/utils";
+
+const stripePromise = loadStripe(
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ""
+);
 
 const premiumEasing: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
@@ -19,10 +42,23 @@ const steps = [
   { id: 4, name: "Confirmation", icon: Check },
 ];
 
+interface ShippingInfo {
+  fullName: string;
+  address: string;
+  city: string;
+  country: string;
+  postalCode: string;
+  phone: string;
+}
+
 export function CheckoutFlow() {
   const [currentStep, setCurrentStep] = useState(1);
   const [paymentMethod, setPaymentMethod] = useState("card");
-  const [shippingInfo, setShippingInfo] = useState({
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [orderId, setOrderId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [shippingInfo, setShippingInfo] = useState<ShippingInfo>({
     fullName: "",
     address: "",
     city: "",
@@ -31,7 +67,99 @@ export function CheckoutFlow() {
     phone: "",
   });
 
-  const goNext = () => setCurrentStep((s) => Math.min(s + 1, 4));
+  const { items, total, clearCart } = useCartStore();
+
+  const getShippingAddress = useCallback(() => {
+    return `${shippingInfo.fullName}, ${shippingInfo.address}, ${shippingInfo.city}, ${shippingInfo.country} ${shippingInfo.postalCode}`;
+  }, [shippingInfo]);
+
+  const handleContinueToPayment = async () => {
+    setError(null);
+    setLoading(true);
+
+    // Validate shipping info
+    if (
+      !shippingInfo.fullName ||
+      !shippingInfo.address ||
+      !shippingInfo.city ||
+      !shippingInfo.country
+    ) {
+      setError("Please fill in all required shipping fields.");
+      setLoading(false);
+      return;
+    }
+
+    const cartItems = items.map((item) => ({
+      product_id: item.product_id,
+      product_name: item.product.name,
+      quantity: item.quantity,
+      unit_price: item.product.price,
+      seller_id: item.product.seller_id,
+    }));
+
+    const totalAmount = total();
+
+    const result = await createPaymentIntent(
+      cartItems,
+      totalAmount,
+      getShippingAddress()
+    );
+
+    if (result.error) {
+      setError(result.error);
+      setLoading(false);
+      return;
+    }
+
+    if (result.clientSecret) {
+      setClientSecret(result.clientSecret);
+    }
+
+    setLoading(false);
+    setCurrentStep(3);
+  };
+
+  const handlePaymentSuccess = async (paymentIntentId: string) => {
+    setError(null);
+    setLoading(true);
+
+    const cartItems = items.map((item) => ({
+      product_id: item.product_id,
+      product_name: item.product.name,
+      quantity: item.quantity,
+      unit_price: item.product.price,
+      seller_id: item.product.seller_id,
+    }));
+
+    const totalAmount = total();
+
+    const result = await createOrder(
+      cartItems,
+      totalAmount,
+      getShippingAddress(),
+      paymentIntentId
+    );
+
+    if (result.error) {
+      setError(result.error);
+      setLoading(false);
+      return;
+    }
+
+    setOrderId(result.orderId || null);
+    clearCart();
+    setLoading(false);
+    setCurrentStep(4);
+  };
+
+  const goNext = () => {
+    if (currentStep === 2) {
+      handleContinueToPayment();
+      return;
+    }
+    setCurrentStep((s) => Math.min(s + 1, 4));
+  };
+
   const goBack = () => setCurrentStep((s) => Math.max(s - 1, 1));
 
   return (
@@ -48,8 +176,8 @@ export function CheckoutFlow() {
                     currentStep > step.id
                       ? "border-accent-gold bg-accent-gold text-background"
                       : currentStep === step.id
-                      ? "border-accent-gold text-accent-gold"
-                      : "border-white/20 text-muted-foreground"
+                        ? "border-accent-gold text-accent-gold"
+                        : "border-white/20 text-muted-foreground"
                   )}
                 >
                   {currentStep > step.id ? (
@@ -82,6 +210,13 @@ export function CheckoutFlow() {
         </div>
       </div>
 
+      {/* Error Banner */}
+      {error && (
+        <div className="rounded-lg border border-red-500/30 bg-red-500/5 p-4">
+          <p className="text-sm text-red-400">{error}</p>
+        </div>
+      )}
+
       {/* Step Content */}
       <div className="grid gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2">
@@ -97,24 +232,36 @@ export function CheckoutFlow() {
               {currentStep === 2 && (
                 <StepShipping info={shippingInfo} onChange={setShippingInfo} />
               )}
-              {currentStep === 3 && (
+              {currentStep === 3 && clientSecret && (
+                <Elements
+                  stripe={stripePromise}
+                  options={{ clientSecret, appearance: { theme: "night" } }}
+                >
+                  <StepStripePayment
+                    onSuccess={handlePaymentSuccess}
+                    onError={(msg) => setError(msg)}
+                  />
+                </Elements>
+              )}
+              {currentStep === 3 && !clientSecret && (
                 <StepPayment
                   selected={paymentMethod}
                   onSelect={setPaymentMethod}
                 />
               )}
-              {currentStep === 4 && <StepConfirmation />}
+              {currentStep === 4 && <StepConfirmation orderId={orderId} />}
             </motion.div>
           </AnimatePresence>
 
           {/* Navigation */}
-          {currentStep < 4 && (
+          {currentStep < 3 && (
             <div className="mt-6 flex gap-3">
               {currentStep > 1 && (
                 <Button
                   variant="outline"
                   className="border-white/10 text-muted-foreground"
                   onClick={goBack}
+                  disabled={loading}
                 >
                   Back
                 </Button>
@@ -122,8 +269,10 @@ export function CheckoutFlow() {
               <Button
                 className="bg-accent-gold text-background hover:bg-accent-gold/90"
                 onClick={goNext}
+                disabled={loading}
               >
-                {currentStep === 3 ? "Place Order" : "Continue"}
+                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Continue
               </Button>
             </div>
           )}
@@ -152,15 +301,6 @@ function StepReviewCart() {
       <CartSummary />
     </div>
   );
-}
-
-interface ShippingInfo {
-  fullName: string;
-  address: string;
-  city: string;
-  country: string;
-  postalCode: string;
-  phone: string;
 }
 
 function StepShipping({
@@ -259,7 +399,75 @@ function StepPayment({
   );
 }
 
-function StepConfirmation() {
+function StepStripePayment({
+  onSuccess,
+  onError,
+}: {
+  onSuccess: (paymentIntentId: string) => void;
+  onError: (message: string) => void;
+}) {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [processing, setProcessing] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!stripe || !elements) {
+      return;
+    }
+
+    setProcessing(true);
+
+    const { error, paymentIntent } = await stripe.confirmPayment({
+      elements,
+      confirmParams: {
+        return_url: `${window.location.origin}/dashboard/orders`,
+      },
+      redirect: "if_required",
+    });
+
+    if (error) {
+      onError(error.message || "Payment failed. Please try again.");
+      setProcessing(false);
+      return;
+    }
+
+    if (paymentIntent && paymentIntent.status === "succeeded") {
+      onSuccess(paymentIntent.id);
+    } else {
+      onError("Payment was not completed. Please try again.");
+    }
+
+    setProcessing(false);
+  };
+
+  return (
+    <div className="space-y-4">
+      <h2 className="text-lg font-semibold text-soft-white">
+        Enter Payment Details
+      </h2>
+      <p className="text-sm text-muted-foreground">
+        Complete your payment securely via Stripe.
+      </p>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="rounded-xl border border-white/[0.06] bg-surface p-4">
+          <PaymentElement />
+        </div>
+        <Button
+          type="submit"
+          disabled={!stripe || processing}
+          className="w-full bg-accent-gold text-background hover:bg-accent-gold/90"
+        >
+          {processing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          {processing ? "Processing..." : "Place Order"}
+        </Button>
+      </form>
+    </div>
+  );
+}
+
+function StepConfirmation({ orderId }: { orderId: string | null }) {
   return (
     <div className="flex flex-col items-center justify-center space-y-4 rounded-xl border border-white/[0.06] bg-surface p-8 text-center">
       <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-500/10">
@@ -270,14 +478,19 @@ function StepConfirmation() {
         Your order has been placed successfully. You will receive a confirmation
         email shortly with your order details and tracking information.
       </p>
-      <div className="rounded-lg bg-elevated px-4 py-2">
-        <span className="text-xs text-muted-foreground">Order ID: </span>
-        <span className="text-sm font-mono text-accent-gold">
-          #KS-2024-00847
-        </span>
-      </div>
-      <Button className="mt-4 bg-accent-gold text-background hover:bg-accent-gold/90">
-        View Order Details
+      {orderId && (
+        <div className="rounded-lg bg-elevated px-4 py-2">
+          <span className="text-xs text-muted-foreground">Order ID: </span>
+          <span className="text-sm font-mono text-accent-gold">
+            {orderId.slice(0, 8)}
+          </span>
+        </div>
+      )}
+      <Button
+        className="mt-4 bg-accent-gold text-background hover:bg-accent-gold/90"
+        asChild
+      >
+        <a href="/dashboard/orders">View Order Details</a>
       </Button>
     </div>
   );
