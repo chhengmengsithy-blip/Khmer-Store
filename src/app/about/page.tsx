@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import {
   Users,
   Shield,
@@ -12,6 +13,12 @@ import {
 } from "lucide-react";
 import { ScrollReveal } from "@/components/animations/scroll-reveal";
 import { Card, CardContent } from "@/components/ui/card";
+
+export const metadata: Metadata = {
+  title: "About Us | Khmer Store",
+  description:
+    "Learn about Khmer Store, Cambodia's premier online marketplace connecting buyers and sellers across the country.",
+};
 
 const values = [
   {

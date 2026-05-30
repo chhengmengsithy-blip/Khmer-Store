@@ -1,5 +1,12 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ScrollReveal } from "@/components/animations/scroll-reveal";
+
+export const metadata: Metadata = {
+  title: "Terms of Service | Khmer Store",
+  description:
+    "Read the terms and conditions for using Khmer Store marketplace.",
+};
 
 const sections = [
   { id: "introduction", title: "1. Introduction" },

@@ -3,7 +3,7 @@ export const siteConfig = {
   description:
     "Cambodia's premier online marketplace. Buy and sell vehicles, property, electronics, jobs, and more.",
   url: "https://khmerstore.com",
-  ogImage: "https://khmerstore.com/og.png",
+  ogImage: "/logo.svg",
   links: {
     github: "https://github.com/khmer-store",
   },

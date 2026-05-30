@@ -3,9 +3,6 @@ import { siteConfig } from "@/config/site";
 import { categories } from "@/constants/categories";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  // Note: lastModified uses the build timestamp for all routes since we don't
-  // have per-page modification tracking. This is acceptable for static content
-  // and will be replaced with real timestamps once dynamic content tracking is added.
   const staticRoutes: MetadataRoute.Sitemap = [
     {
       url: siteConfig.url,
@@ -20,10 +17,28 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
     },
     {
-      url: `${siteConfig.url}/post`,
+      url: `${siteConfig.url}/about`,
       lastModified: new Date(),
       changeFrequency: "monthly",
-      priority: 0.7,
+      priority: 0.6,
+    },
+    {
+      url: `${siteConfig.url}/contact`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.5,
+    },
+    {
+      url: `${siteConfig.url}/terms`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.3,
+    },
+    {
+      url: `${siteConfig.url}/privacy`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.3,
     },
     {
       url: `${siteConfig.url}/sign-in`,
@@ -38,19 +53,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.5,
     },
     {
-      url: `${siteConfig.url}/about`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.4,
-    },
-    {
-      url: `${siteConfig.url}/terms`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.3,
-    },
-    {
-      url: `${siteConfig.url}/privacy`,
+      url: `${siteConfig.url}/forgot-password`,
       lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.3,

@@ -1,5 +1,12 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ScrollReveal } from "@/components/animations/scroll-reveal";
+
+export const metadata: Metadata = {
+  title: "Privacy Policy | Khmer Store",
+  description:
+    "Learn how Khmer Store collects, uses, and protects your personal data.",
+};
 
 const sections = [
   { id: "data-collection", title: "1. Data Collection" },
