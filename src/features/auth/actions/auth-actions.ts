@@ -1,11 +1,50 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { headers } from "next/headers";
+import { headers, cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 
 interface AuthResult {
   error?: string;
+}
+
+/** Cookie options for the user-role cookie. */
+const ROLE_COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "lax" as const,
+  path: "/",
+  // 7 days — will be refreshed on every sign-in
+  maxAge: 60 * 60 * 24 * 7,
+};
+
+/**
+ * Query the user's role from users_extended and persist it as a cookie
+ * so middleware can gate admin/seller routes without a DB call.
+ */
+async function setUserRoleCookie(userId: string): Promise<void> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("users_extended")
+    .select("role")
+    .eq("auth_user_id", userId)
+    .single();
+
+  const cookieStore = await cookies();
+  if (data?.role) {
+    cookieStore.set("user-role", data.role, ROLE_COOKIE_OPTIONS);
+  } else {
+    // Default role for users whose users_extended row hasn't been created yet
+    cookieStore.set("user-role", "buyer", ROLE_COOKIE_OPTIONS);
+  }
+}
+
+/**
+ * Clear the user-role cookie (called on sign-out).
+ */
+async function clearUserRoleCookie(): Promise<void> {
+  const cookieStore = await cookies();
+  cookieStore.delete("user-role");
 }
 
 /**
@@ -43,13 +82,18 @@ export async function signIn({
 }): Promise<AuthResult | undefined> {
   const supabase = await createClient();
 
-  const { error } = await supabase.auth.signInWithPassword({
+  const { error, data } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
 
   if (error) {
     return { error: error.message };
+  }
+
+  // Set user-role cookie so middleware can gate admin/seller routes
+  if (data.user) {
+    await setUserRoleCookie(data.user.id);
   }
 
   redirect("/dashboard");
@@ -83,6 +127,7 @@ export async function signUp({
 export async function signOut(): Promise<void> {
   const supabase = await createClient();
   await supabase.auth.signOut();
+  await clearUserRoleCookie();
   redirect("/sign-in");
 }
 
@@ -114,7 +159,7 @@ export async function verifyOtp({
 }): Promise<AuthResult | undefined> {
   const supabase = await createClient();
 
-  const { error } = await supabase.auth.verifyOtp({
+  const { error, data } = await supabase.auth.verifyOtp({
     phone,
     token,
     type: "sms",
@@ -122,6 +167,11 @@ export async function verifyOtp({
 
   if (error) {
     return { error: error.message };
+  }
+
+  // Set user-role cookie so middleware can gate admin/seller routes
+  if (data.user) {
+    await setUserRoleCookie(data.user.id);
   }
 
   redirect("/dashboard");

@@ -1,5 +1,15 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+
+/** Cookie options for the user-role cookie. */
+const ROLE_COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "lax" as const,
+  path: "/",
+  maxAge: 60 * 60 * 24 * 7,
+};
 
 /**
  * Auth callback handler.
@@ -12,7 +22,8 @@ import { createClient } from "@/lib/supabase/server";
  * Flow:
  *   1. Read the `code` from the URL.
  *   2. Exchange it for a session (this sets the auth cookies via the SSR client).
- *   3. Redirect the user onward (defaults to /dashboard, or `next` if provided).
+ *   3. Set the `user-role` cookie from users_extended for middleware gating.
+ *   4. Redirect the user onward (defaults to /dashboard, or `next` if provided).
  */
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -21,13 +32,34 @@ export async function GET(request: Request) {
   const next = searchParams.get("next") ?? "/dashboard";
 
   // Surface Supabase-provided errors (e.g. expired/invalid link).
-  const authError = searchParams.get("error_description") ?? searchParams.get("error");
+  const authError =
+    searchParams.get("error_description") ?? searchParams.get("error");
 
   if (code) {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
+      // Set the user-role cookie so middleware can gate admin/seller routes.
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (user) {
+        const { data } = await supabase
+          .from("users_extended")
+          .select("role")
+          .eq("auth_user_id", user.id)
+          .single();
+
+        const cookieStore = await cookies();
+        cookieStore.set(
+          "user-role",
+          data?.role ?? "buyer",
+          ROLE_COOKIE_OPTIONS
+        );
+      }
+
       return NextResponse.redirect(`${origin}${next}`);
     }
 
