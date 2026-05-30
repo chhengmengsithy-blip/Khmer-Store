@@ -6,8 +6,6 @@ import { SearchBar } from "@/components/shared/search-bar";
 import { CategoryCard } from "@/components/shared/category-card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { categories } from "@/constants/categories";
-import { isSupabaseConfigured } from "@/lib/supabase/client";
-
 const howItWorks = [
   {
     icon: Camera,
@@ -30,8 +28,6 @@ const howItWorks = [
 ];
 
 export default function Home() {
-  const supabaseReady = isSupabaseConfigured();
-
   return (
     <div className="flex min-h-screen flex-col">
       {/* Hero Section */}
@@ -113,23 +109,13 @@ export default function Home() {
             </h2>
           </ScrollReveal>
           <div className="mt-8">
-            {!supabaseReady ? (
-              <EmptyState
-                icon={Package}
-                title="No listings yet"
-                description="Be the first to post a listing on Khmer Store"
-                actionLabel="Post a Listing"
-                actionHref="/post"
-              />
-            ) : (
-              <EmptyState
-                icon={Package}
-                title="No listings yet"
-                description="Be the first to post a listing on Khmer Store"
-                actionLabel="Post a Listing"
-                actionHref="/post"
-              />
-            )}
+            <EmptyState
+              icon={Package}
+              title="No listings yet"
+              description="Be the first to post a listing on Khmer Store"
+              actionLabel="Post a Listing"
+              actionHref="/post"
+            />
           </div>
         </div>
       </section>

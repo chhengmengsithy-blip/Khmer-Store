@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Camera, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,6 +31,14 @@ export default function PostListingPage() {
   const supabaseReady = isSupabaseConfigured();
   const [selectedCategory, setSelectedCategory] = useState("");
   const [photos, setPhotos] = useState<string[]>([]);
+  const photosRef = useRef<string[]>([]);
+
+  // Revoke all object URLs on unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      photosRef.current.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, []);
 
   const category = categories.find((c) => c.slug === selectedCategory);
   const subcategories = category?.subcategories || [];
@@ -42,7 +50,15 @@ export default function PostListingPage() {
     for (let i = 0; i < files.length && photos.length + newPhotos.length < 8; i++) {
       newPhotos.push(URL.createObjectURL(files[i]));
     }
-    setPhotos((prev) => [...prev, ...newPhotos].slice(0, 8));
+    setPhotos((prev) => {
+      const updated = [...prev, ...newPhotos].slice(0, 8);
+      // Revoke URLs that were dropped due to the slice
+      const dropped = [...prev, ...newPhotos].slice(8);
+      dropped.forEach((url) => URL.revokeObjectURL(url));
+      // Track current URLs for cleanup on unmount
+      photosRef.current = updated;
+      return updated;
+    });
   };
 
   const handleSubmit = (e: React.FormEvent) => {

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { isSupabaseConfigured } from "@/lib/supabase/client";
+import { signUp } from "@/features/auth/actions/auth-actions";
 import { useToast } from "@/hooks/use-toast";
 
 export function SignUpForm() {
@@ -25,9 +26,11 @@ export function SignUpForm() {
     setError(null);
 
     if (!supabaseReady) {
-      setError(
-        "Authentication requires database setup. Contact the admin."
-      );
+      toast({
+        title: "Database not connected",
+        description:
+          "Configure Supabase environment variables to enable sign-up.",
+      });
       return;
     }
 
@@ -36,18 +39,23 @@ export function SignUpForm() {
       return;
     }
 
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters.");
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters.");
       return;
     }
 
     setIsLoading(true);
 
     try {
-      toast({
-        title: "Account created",
-        description: "Check your email to verify your account.",
-      });
+      const result = await signUp({ email, password });
+      if (result?.error) {
+        setError(result.error);
+      } else {
+        toast({
+          title: "Account created",
+          description: "Check your email to verify your account.",
+        });
+      }
     } catch {
       setError("An unexpected error occurred. Please try again.");
     } finally {
@@ -121,7 +129,7 @@ export function SignUpForm() {
           <Input
             id="password"
             type="password"
-            placeholder="At least 6 characters"
+            placeholder="At least 8 characters"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
