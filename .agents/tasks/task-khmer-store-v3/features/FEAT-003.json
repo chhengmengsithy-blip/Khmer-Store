@@ -2,7 +2,7 @@
   "id": "FEAT-003",
   "type": "feat",
   "description": "Build the full user-facing frontend pages that fetch real data from Supabase: marketplace with search/filter/sort, listing detail page, post listing page with Supabase Storage upload, user dashboard with real stats/listings/favorites, messages page, and profile settings. All pages show empty states when no data exists and never use mock/fake data.",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "Create src/features/listings/actions/listing-actions.ts with server actions: getListings(filters), getListingById(id), createListing(formData), updateListing(id, formData), deleteListing(id), incrementViews(id). Each checks if supabase is configured and returns appropriate error or data.",
     "Create src/features/listings/actions/favorite-actions.ts: toggleFavorite(listingId), getFavorites(), isFavorited(listingId)",
@@ -34,5 +34,5 @@
     "Run 'unset NODE_OPTIONS && npx next build' in /projects/sandbox/Khmer-Store and confirm it compiles without errors"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "Build passes cleanly with all routes compiling. Marketplace and category pages are now dynamic (server-rendered on demand) due to Supabase queries. Dashboard remains static during build because the server-side supabase client returns null when env vars are not set, so it falls through to showing zeros/empty state. The dashboard layout is a client component so the dashboard page itself is rendered as static at build time. The post and messages pages are client components that check auth store state. All server actions properly handle null supabase client case."
 }
