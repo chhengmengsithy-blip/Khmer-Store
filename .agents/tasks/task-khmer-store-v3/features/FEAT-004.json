@@ -2,7 +2,7 @@
   "id": "FEAT-004",
   "type": "feat",
   "description": "Build the complete admin panel at /admin with dashboard stats, user management, listing management, category management, and reports management. Protected by role check (profiles.role === 'admin'). All data fetched from Supabase.",
-  "status": "pending",
+  "status": "in_progress",
   "steps": [
     "Create src/app/admin/layout.tsx: server component that checks if current user has role='admin' in profiles table. If not admin, redirect to /dashboard. Sidebar navigation with links: Dashboard, Users, Listings, Categories, Reports. Dark theme consistent with rest of app.",
     "Create src/features/admin/actions/admin-actions.ts with server actions: getAdminStats() returns {totalUsers, totalListings, activeListings, pendingReports}, getAllUsers(page, search), updateUserRole(userId, role), deleteUser(userId), getAllListings(page, status filter), updateListingStatus(listingId, status), deleteListing(listingId), getAllCategories(), createCategory(data), updateCategory(id, data), deleteCategory(id), reorderCategories(orderedIds), getAllReports(status filter), updateReportStatus(reportId, status). All actions verify the caller is an admin first.",
