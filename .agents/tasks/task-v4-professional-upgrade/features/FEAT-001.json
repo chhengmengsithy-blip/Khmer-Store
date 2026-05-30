@@ -2,7 +2,7 @@
   "id": "FEAT-001",
   "type": "feat",
   "description": "Design System Foundation + Shared UI Components - Upgrade globals.css with refined V4 color tokens, typography, and animations. Create all premium shared components that other features depend on.",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "Update src/app/globals.css: Refine dark theme colors to V4 spec (Background: #0A0B0F, Surface: #141519, Elevated: #1C1D24, Card: #1A1B21, Border: rgba(255,255,255,0.06), Gold: #C6A769, Gold hover: #D4B87A). Add Inter font import and JetBrains Mono. Add new animation keyframes for slide-up, scale-in, count-up, shimmer. Add utility classes for glassmorphism (.glass), gradient text (.gradient-text), gold glow (.glow-gold).",
     "Create src/components/shared/stats-card.tsx - Professional stat card with icon, value, label, optional trend badge (up/down percentage), and number counting animation on mount using framer-motion.",
@@ -28,5 +28,5 @@
     "Run 'unset NODE_OPTIONS && npx --yes next build' in /projects/sandbox/Khmer-Store and confirm zero errors"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "EmptyState kept as server component (no 'use client') since it receives LucideIcon props from server pages - used CSS animate-float instead of framer-motion for the floating animation. ListingCard upgraded to client component (uses useState for favorite/image loading state) which is fine since Listing data is serializable. CategoryCard kept as server component. SearchBar was already a client component. Build passes all 24 routes successfully."
 }
