@@ -1,10 +1,11 @@
-import Link from "next/link";
 import { Search, Package } from "lucide-react";
 import { ListingCard } from "@/components/shared/listing-card";
 import { EmptyState } from "@/components/shared/empty-state";
-import { SearchBar } from "@/components/shared/search-bar";
-import { getListings, getCategories } from "@/features/listings/actions/listing-actions";
-import type { Category } from "@/types";
+import { Breadcrumbs } from "@/components/shared/breadcrumbs";
+import { getListings } from "@/features/listings/actions/listing-actions";
+import { MarketplaceFilters } from "./marketplace-filters";
+import { MarketplaceToolbar } from "./marketplace-toolbar";
+import { MarketplacePagination } from "./marketplace-pagination";
 
 interface MarketplacePageProps {
   searchParams: Promise<{
@@ -12,8 +13,15 @@ interface MarketplacePageProps {
     category?: string;
     sort?: string;
     location?: string;
+    page?: string;
+    view?: string;
+    condition?: string;
+    price_min?: string;
+    price_max?: string;
   }>;
 }
+
+const ITEMS_PER_PAGE = 12;
 
 export default async function MarketplacePage({
   searchParams,
@@ -22,109 +30,80 @@ export default async function MarketplacePage({
   const search = params.q || "";
   const category = params.category || "";
   const sort = params.sort || "";
+  const view = params.view || "grid";
+  const page = Math.max(1, parseInt(params.page || "1", 10));
 
-  const [{ data: listings }, categories] = await Promise.all([
-    getListings({ search: search || undefined, category: category || undefined, sort: sort || undefined }),
-    getCategories(),
-  ]);
+  const { data: allListings } = await getListings({
+    search: search || undefined,
+    category: category || undefined,
+    sort: sort || undefined,
+  });
+
+  // Client-side pagination
+  const totalPages = Math.max(1, Math.ceil(allListings.length / ITEMS_PER_PAGE));
+  const currentPage = Math.min(page, totalPages);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const listings = allListings.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
   return (
     <div className="min-h-screen pt-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 py-6">
         {/* Breadcrumbs */}
-        <nav className="mb-4 text-sm text-muted-foreground">
-          <Link href="/" className="hover:text-accent-gold">
-            Home
-          </Link>
-          <span className="mx-2">/</span>
-          <span className="text-soft-white">Marketplace</span>
-        </nav>
+        <Breadcrumbs className="mb-4" />
 
-        {/* Search Bar */}
-        <div className="mb-6">
-          <SearchBar
-            defaultQuery={search}
-            defaultCategory={category}
-            defaultLocation={params.location || ""}
-          />
-        </div>
+        {/* Layout: Sidebar + Main */}
+        <div className="flex gap-6">
+          {/* Sidebar Filters (desktop) */}
+          <MarketplaceFilters activeCategory={category} className="w-60 flex-shrink-0" />
 
-        {/* Category Filter Chips */}
-        {categories.length > 0 && (
-          <div className="mb-6 flex flex-wrap gap-2">
-            <Link
-              href="/marketplace"
-              className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-                !category
-                  ? "bg-accent-gold/20 text-accent-gold"
-                  : "bg-elevated text-muted-foreground hover:text-soft-white"
-              }`}
-            >
-              All
-            </Link>
-            {(categories as Category[]).map((cat) => (
-              <Link
-                key={cat.slug}
-                href={`/marketplace?category=${cat.slug}${search ? `&q=${search}` : ""}${sort ? `&sort=${sort}` : ""}`}
-                className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-                  category === cat.slug
-                    ? "bg-accent-gold/20 text-accent-gold"
-                    : "bg-elevated text-muted-foreground hover:text-soft-white"
-                }`}
-              >
-                {cat.name}
-              </Link>
-            ))}
-          </div>
-        )}
+          {/* Main Content */}
+          <div className="flex-1 min-w-0">
+            {/* Toolbar: results count + sort + view toggle */}
+            <div className="mb-4">
+              <MarketplaceToolbar
+                totalResults={allListings.length}
+                activeSort={sort}
+                view={view}
+                activeCategory={category}
+              />
+            </div>
 
-        {/* Sort Options */}
-        <div className="mb-6 flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
-            {listings.length} listing{listings.length !== 1 ? "s" : ""} found
-          </p>
-          <div className="flex gap-2">
-            <Link
-              href={`/marketplace?${new URLSearchParams({ ...(search && { q: search }), ...(category && { category }), sort: "newest" }).toString()}`}
-              className={`text-xs px-2 py-1 rounded ${sort === "newest" || !sort ? "text-accent-gold" : "text-muted-foreground hover:text-soft-white"}`}
-            >
-              Newest
-            </Link>
-            <Link
-              href={`/marketplace?${new URLSearchParams({ ...(search && { q: search }), ...(category && { category }), sort: "price-asc" }).toString()}`}
-              className={`text-xs px-2 py-1 rounded ${sort === "price-asc" ? "text-accent-gold" : "text-muted-foreground hover:text-soft-white"}`}
-            >
-              Price: Low-High
-            </Link>
-            <Link
-              href={`/marketplace?${new URLSearchParams({ ...(search && { q: search }), ...(category && { category }), sort: "price-desc" }).toString()}`}
-              className={`text-xs px-2 py-1 rounded ${sort === "price-desc" ? "text-accent-gold" : "text-muted-foreground hover:text-soft-white"}`}
-            >
-              Price: High-Low
-            </Link>
+            {/* Listings */}
+            {listings.length > 0 ? (
+              <>
+                <div
+                  className={
+                    view === "list"
+                      ? "space-y-3"
+                      : "grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3"
+                  }
+                >
+                  {listings.map((listing) => (
+                    <ListingCard key={listing.id} listing={listing} />
+                  ))}
+                </div>
+
+                {/* Pagination */}
+                <MarketplacePagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                />
+              </>
+            ) : (
+              <EmptyState
+                icon={search ? Search : Package}
+                title={search ? "No listings match your search" : "No listings yet"}
+                description={
+                  search
+                    ? "Try adjusting your search terms or filters"
+                    : "Be the first to post a listing on Khmer Store!"
+                }
+                actionLabel="Post a Listing"
+                actionHref="/post"
+              />
+            )}
           </div>
         </div>
-
-        {/* Listings Grid */}
-        {listings.length > 0 ? (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {listings.map((listing) => (
-              <ListingCard key={listing.id} listing={listing} />
-            ))}
-          </div>
-        ) : (
-          <EmptyState
-            icon={search ? Search : Package}
-            title={search ? "No listings match your search" : "No listings yet"}
-            description={
-              search
-                ? "Try adjusting your search terms or filters"
-                : "Be the first to post a listing on Khmer Store!"
-            }
-            actionLabel="Post a Listing"
-            actionHref="/post"
-          />
-        )}
       </div>
     </div>
   );
