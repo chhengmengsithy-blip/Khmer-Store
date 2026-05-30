@@ -1,0 +1,29 @@
+{
+  "id": "FEAT-001",
+  "type": "feat",
+  "description": "Implement the full product creation flow: server action to insert products, wire the form to collect and submit field values, and add a 'become a seller' registration action so buyers can self-upgrade to seller role (which creates the required sellers record for RLS to pass)",
+  "status": "in_progress",
+  "steps": [
+    "Create src/features/dashboard/actions/product-actions.ts with two server actions: (a) createProduct - authenticates user via supabase.auth.getUser(), looks up users_extended to get the user's extended id, queries sellers table to get seller_id for that user_id, returns error if no seller record found, generates a URL-safe slug from title (lowercase + hyphens + timestamp suffix for uniqueness), inserts into products table with seller_id/title/slug/description/price/stock/status, returns {success: true, productId} or {error: string}. (b) registerAsSeller - authenticates user, checks if seller record already exists, if not creates one in sellers table with user_id and a business_name provided by the user, also upgrades users_extended.role from 'buyer' to 'seller', returns success or error.",
+    "Rewrite src/features/dashboard/components/seller-product-form.tsx to: add useState for title, description, price, stock, category, condition, status (draft/published), plus loading and error/success state. On submit, call the createProduct server action. Show loading spinner on the submit button, display error messages in a red banner, and on success show a toast or redirect to /dashboard/products. Keep the existing visual styling and image slots UI intact (images remain placeholder for now since there is no storage bucket wired up yet). Add a 'Save as Draft' button that submits with status='draft' and a 'Publish' button that submits with status='published'.",
+    "Create src/features/dashboard/components/become-seller-form.tsx - a simple form component that asks for a business name and calls registerAsSeller. On success, shows a success message and suggests the user refresh or navigate to products/new.",
+    "Update src/app/dashboard/products/new/page.tsx to be a server component that checks if the current user has a seller record. If yes, render the SellerProductForm. If no, render the BecomeSellerForm with a message like 'You need to register as a seller before posting products'."
+  ],
+  "acceptance_criteria": [
+    "src/features/dashboard/actions/product-actions.ts exports createProduct and registerAsSeller server actions with proper 'use server' directive",
+    "createProduct validates required fields (title non-empty, price > 0), looks up seller_id from the authenticated user, and inserts into products table",
+    "registerAsSeller creates a sellers row and updates users_extended.role to 'seller'",
+    "seller-product-form.tsx tracks all field values in state and calls createProduct on submit",
+    "The form shows loading state during submission and displays errors/success",
+    "become-seller-form.tsx provides a way for buyers to self-register as sellers",
+    "The new product page conditionally shows the seller registration form if the user has no seller record",
+    "pnpm lint passes with no errors",
+    "npx tsc --noEmit passes with no type errors"
+  ],
+  "verification": [
+    "Run: pnpm lint (in /projects/sandbox/Khmer-Store)",
+    "Run: npx tsc --noEmit (in /projects/sandbox/Khmer-Store)"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}
