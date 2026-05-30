@@ -145,6 +145,26 @@ export async function updateAvatar(avatarUrl: string): Promise<ActionResult> {
     return { error: "Not authenticated" };
   }
 
+  // Validate that the URL points to the project's Supabase storage domain
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!supabaseUrl) {
+    return { error: "Server configuration error." };
+  }
+
+  try {
+    const parsedUrl = new URL(avatarUrl);
+    const expectedHost = new URL(supabaseUrl).host;
+    if (parsedUrl.host !== expectedHost) {
+      return { error: "Invalid avatar URL. Must be uploaded to project storage." };
+    }
+    // Ensure the path contains the avatars bucket
+    if (!parsedUrl.pathname.includes("/storage/v1/object/public/avatars/")) {
+      return { error: "Invalid avatar URL. Must reference the avatars bucket." };
+    }
+  } catch {
+    return { error: "Invalid avatar URL format." };
+  }
+
   // Look up users_extended to get the extended user id
   const { data: extUser, error: extError } = await supabase
     .from("users_extended")
@@ -203,6 +223,10 @@ export async function updatePassword(formData: FormData): Promise<ActionResult> 
   }
 
   // Re-authenticate by verifying current password
+  // TODO: signInWithPassword may rotate session tokens on the server side, potentially
+  // disrupting the user's active session. This is a pre-existing architectural issue.
+  // A proper fix would use a dedicated password verification endpoint or
+  // supabase.auth.reauthenticate() when available.
   const { error: signInError } = await supabase.auth.signInWithPassword({
     email: user.email!,
     password: currentPassword,

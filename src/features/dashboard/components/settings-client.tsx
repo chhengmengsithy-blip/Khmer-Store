@@ -136,6 +136,20 @@ export function SettingsClient({
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Validate MIME type (only allow image formats)
+    const allowedMimeTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/gif",
+      "image/webp",
+    ];
+    if (!allowedMimeTypes.includes(file.type)) {
+      setAvatarError(
+        "Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed."
+      );
+      return;
+    }
+
     // Validate file size (max 2MB)
     if (file.size > 2 * 1024 * 1024) {
       setAvatarError("File size must be less than 2MB.");
@@ -439,7 +453,7 @@ export function SettingsClient({
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept="image/*"
+                  accept="image/jpeg,image/png,image/gif,image/webp"
                   className="hidden"
                   onChange={handleAvatarFileChange}
                 />

@@ -23,10 +23,7 @@ import { Label } from "@/components/ui/label";
 import { CartSummary } from "./cart-summary";
 import { PaymentMethodSelector } from "./payment-method-selector";
 import { useCartStore } from "@/stores/cart-store";
-import {
-  createPaymentIntent,
-  createOrder,
-} from "@/features/checkout/actions/checkout-actions";
+import { createPaymentIntent } from "@/features/checkout/actions/checkout-actions";
 import { cn } from "@/lib/utils";
 
 const stripePromise = loadStripe(
@@ -99,6 +96,8 @@ export function CheckoutFlow() {
 
     const totalAmount = total();
 
+    // createPaymentIntent now creates the order (pending) first, then the PaymentIntent.
+    // The order_id is included in PaymentIntent metadata for webhook lookup.
     const result = await createPaymentIntent(
       cartItems,
       totalAmount,
@@ -114,41 +113,19 @@ export function CheckoutFlow() {
     if (result.clientSecret) {
       setClientSecret(result.clientSecret);
     }
+    if (result.orderId) {
+      setOrderId(result.orderId);
+    }
 
     setLoading(false);
     setCurrentStep(3);
   };
 
-  const handlePaymentSuccess = async (paymentIntentId: string) => {
-    setError(null);
-    setLoading(true);
-
-    const cartItems = items.map((item) => ({
-      product_id: item.product_id,
-      product_name: item.product.name,
-      quantity: item.quantity,
-      unit_price: item.product.price,
-      seller_id: item.product.seller_id,
-    }));
-
-    const totalAmount = total();
-
-    const result = await createOrder(
-      cartItems,
-      totalAmount,
-      getShippingAddress(),
-      paymentIntentId
-    );
-
-    if (result.error) {
-      setError(result.error);
-      setLoading(false);
-      return;
-    }
-
-    setOrderId(result.orderId || null);
+  // Payment succeeded - the order was already created in "pending" status before payment.
+  // The webhook will update it to "confirmed". We just navigate to the confirmation step.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handlePaymentSuccess = async (_paymentIntentId: string) => {
     clearCart();
-    setLoading(false);
     setCurrentStep(4);
   };
 

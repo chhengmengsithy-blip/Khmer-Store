@@ -37,6 +37,12 @@ export function MessagesClient({
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const selectedPartnerRef = useRef<ConversationPartner | null>(null);
+
+  // Keep the ref in sync with state
+  useEffect(() => {
+    selectedPartnerRef.current = selectedPartner;
+  }, [selectedPartner]);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -47,7 +53,8 @@ export function MessagesClient({
     scrollToBottom();
   }, [messages, scrollToBottom]);
 
-  // Subscribe to Realtime messages
+  // Subscribe to Realtime messages - subscribe once based on userId only.
+  // Uses selectedPartnerRef to avoid tearing down the channel on partner switch.
   useEffect(() => {
     const supabase = createClient();
 
@@ -80,8 +87,10 @@ export function MessagesClient({
             createdAt: newMsg.created_at,
           };
 
+          const currentPartner = selectedPartnerRef.current;
+
           // If this message is from the currently selected partner, add to messages
-          if (selectedPartner && newMsg.sender_id === selectedPartner.partnerId) {
+          if (currentPartner && newMsg.sender_id === currentPartner.partnerId) {
             setMessages((prev) => [...prev, formatted]);
             // Mark as read since conversation is open
             markAsRead(newMsg.sender_id);
@@ -99,7 +108,7 @@ export function MessagesClient({
                 lastMessage: newMsg.content,
                 lastMessageAt: newMsg.created_at,
                 unreadCount:
-                  selectedPartner?.partnerId === newMsg.sender_id
+                  currentPartner?.partnerId === newMsg.sender_id
                     ? updated[idx].unreadCount
                     : updated[idx].unreadCount + 1,
               };
@@ -129,7 +138,7 @@ export function MessagesClient({
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [userId, selectedPartner]);
+  }, [userId]);
 
   const handleSelectPartner = async (partner: ConversationPartner) => {
     setSelectedPartner(partner);
