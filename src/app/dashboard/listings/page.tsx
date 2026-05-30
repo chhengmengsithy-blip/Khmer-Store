@@ -2,13 +2,14 @@
 
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import { Package, Plus, Trash2, Eye, Search } from "lucide-react";
+import { Package, Plus, Trash2, Eye, Search, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { useToast } from "@/hooks/use-toast";
 import {
   getUserListings,
   deleteListing,
@@ -33,21 +34,28 @@ function getStatusBadgeClass(status: string) {
 export default function DashboardListingsPage() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const { toast } = useToast();
 
-  useEffect(() => {
-    let mounted = true;
-    getUserListings().then((data) => {
-      if (mounted) {
+  function fetchListings() {
+    setLoading(true);
+    setError(null);
+    getUserListings()
+      .then((data) => {
         setListings(data);
         setLoading(false);
-      }
-    });
-    return () => {
-      mounted = false;
-    };
+      })
+      .catch(() => {
+        setError("Failed to load your listings. Please try again.");
+        setLoading(false);
+      });
+  }
+
+  useEffect(() => {
+    fetchListings();
   }, []);
 
   const filteredListings = useMemo(() => {
@@ -59,9 +67,21 @@ export default function DashboardListingsPage() {
   async function handleDelete() {
     if (!deleteId) return;
     setDeleting(true);
-    const result = await deleteListing(deleteId);
-    if (!result.error) {
-      setListings((prev) => prev.filter((l) => l.id !== deleteId));
+    try {
+      const result = await deleteListing(deleteId);
+      if (!result.error) {
+        setListings((prev) => prev.filter((l) => l.id !== deleteId));
+      } else {
+        toast({
+          title: "Delete failed",
+          description: result.error,
+        });
+      }
+    } catch {
+      toast({
+        title: "Delete failed",
+        description: "Something went wrong. Please try again.",
+      });
     }
     setDeleting(false);
     setDeleteId(null);
@@ -74,6 +94,26 @@ export default function DashboardListingsPage() {
           My Listings
         </h1>
         <p className="text-sm text-muted-foreground">Loading your listings...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-2xl font-bold text-soft-white font-playfair">
+          My Listings
+        </h1>
+        <div className="flex flex-col items-center justify-center py-12 text-center">
+          <AlertCircle className="h-10 w-10 text-red-400 mb-4" />
+          <p className="text-sm text-red-400 mb-4">{error}</p>
+          <Button
+            onClick={fetchListings}
+            className="bg-accent-gold text-background hover:bg-accent-gold/90"
+          >
+            Retry
+          </Button>
+        </div>
       </div>
     );
   }
