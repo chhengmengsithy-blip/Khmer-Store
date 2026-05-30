@@ -19,6 +19,8 @@ import {
   insertProductMedia,
 } from "@/features/dashboard/actions/product-actions";
 import { createClient } from "@/lib/supabase/client";
+import { cn } from "@/lib/utils";
+import { validateMinLength, validateRequired, validatePrice } from "@/lib/validation";
 
 const categories = [
   { id: "fashion", name: "Fashion & Apparel" },
@@ -49,6 +51,12 @@ export function SellerProductForm() {
   const [previews, setPreviews] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+
+  const titleError = touched.title
+    ? validateRequired(title, "Title") || validateMinLength(title, 3, "Title")
+    : null;
+  const priceError = touched.price ? validatePrice(price) : null;
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -230,12 +238,16 @@ export function SellerProductForm() {
           <div className="space-y-2 sm:col-span-2">
             <Label className="text-soft-white">Title</Label>
             <Input
-              className="bg-elevated border-white/10"
+              className={cn("bg-elevated", titleError ? "border-red-500/50" : "border-white/10")}
               placeholder="Product title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
+              onBlur={() => setTouched((prev) => ({ ...prev, title: true }))}
               disabled={loading}
             />
+            {titleError && (
+              <p className="text-xs text-red-400 mt-1">{titleError}</p>
+            )}
           </div>
           <div className="space-y-2 sm:col-span-2">
             <Label className="text-soft-white">Description</Label>
@@ -251,12 +263,16 @@ export function SellerProductForm() {
             <Label className="text-soft-white">Price (USD)</Label>
             <Input
               type="number"
-              className="bg-elevated border-white/10"
+              className={cn("bg-elevated", priceError ? "border-red-500/50" : "border-white/10")}
               placeholder="0.00"
               value={price}
               onChange={(e) => setPrice(e.target.value)}
+              onBlur={() => setTouched((prev) => ({ ...prev, price: true }))}
               disabled={loading}
             />
+            {priceError && (
+              <p className="text-xs text-red-400 mt-1">{priceError}</p>
+            )}
           </div>
           <div className="space-y-2">
             <Label className="text-soft-white">Stock Quantity</Label>

@@ -16,6 +16,13 @@ import {
   updateAvatar,
 } from "@/features/dashboard/actions/settings-actions";
 import { createClient } from "@/lib/supabase/client";
+import { cn } from "@/lib/utils";
+import {
+  validateRequired,
+  validateMaxLength,
+  validateMinLength,
+  validatePasswordMatch,
+} from "@/lib/validation";
 
 const NOTIFICATION_STORAGE_KEY = "khmer-store-notification-prefs";
 
@@ -84,6 +91,26 @@ export function SettingsClient({
   const [verifyCode, setVerifyCode] = useState("");
   const [twoFAError, setTwoFAError] = useState<string | null>(null);
   const [twoFALoading, setTwoFALoading] = useState(false);
+
+  // Validation touched state
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+
+  // Profile validation
+  const fullNameError = touched.fullName
+    ? validateRequired(fullName, "Full name") ||
+      validateMaxLength(fullName, 50, "Full name")
+    : null;
+  const displayNameError = touched.displayName
+    ? validateMaxLength(displayName, 50, "Display name")
+    : null;
+
+  // Password validation
+  const newPasswordError = touched.newPassword
+    ? validateMinLength(newPassword, 6, "Password")
+    : null;
+  const confirmPasswordError = touched.confirmPassword
+    ? validatePasswordMatch(newPassword, confirmPassword)
+    : null;
 
   // Notification preferences state (lazy init from localStorage)
   const [notifPrefs, setNotifPrefs] = useState<NotificationPrefs>(() => {
@@ -460,20 +487,34 @@ export function SettingsClient({
               <div className="space-y-2">
                 <Label className="text-soft-white">Full Name</Label>
                 <Input
-                  className="bg-elevated border-white/10"
+                  className={cn("bg-elevated", fullNameError ? "border-red-500/50" : "border-white/10")}
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
+                  onBlur={() =>
+                    setTouched((prev) => ({ ...prev, fullName: true }))
+                  }
                   disabled={profileLoading}
                 />
+                {fullNameError && (
+                  <p className="text-xs text-red-400 mt-1">{fullNameError}</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label className="text-soft-white">Display Name</Label>
                 <Input
-                  className="bg-elevated border-white/10"
+                  className={cn("bg-elevated", displayNameError ? "border-red-500/50" : "border-white/10")}
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
+                  onBlur={() =>
+                    setTouched((prev) => ({ ...prev, displayName: true }))
+                  }
                   disabled={profileLoading}
                 />
+                {displayNameError && (
+                  <p className="text-xs text-red-400 mt-1">
+                    {displayNameError}
+                  </p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label className="text-soft-white">Email</Label>
@@ -634,12 +675,20 @@ export function SettingsClient({
                   <Label className="text-muted-foreground">New Password</Label>
                   <Input
                     type="password"
-                    className="bg-elevated border-white/10"
+                    className={cn("bg-elevated", newPasswordError ? "border-red-500/50" : "border-white/10")}
                     placeholder="Enter new password"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
+                    onBlur={() =>
+                      setTouched((prev) => ({ ...prev, newPassword: true }))
+                    }
                     disabled={passwordLoading}
                   />
+                  {newPasswordError && (
+                    <p className="text-xs text-red-400 mt-1">
+                      {newPasswordError}
+                    </p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label className="text-muted-foreground">
@@ -647,12 +696,23 @@ export function SettingsClient({
                   </Label>
                   <Input
                     type="password"
-                    className="bg-elevated border-white/10"
+                    className={cn("bg-elevated", confirmPasswordError ? "border-red-500/50" : "border-white/10")}
                     placeholder="Confirm new password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
+                    onBlur={() =>
+                      setTouched((prev) => ({
+                        ...prev,
+                        confirmPassword: true,
+                      }))
+                    }
                     disabled={passwordLoading}
                   />
+                  {confirmPasswordError && (
+                    <p className="text-xs text-red-400 mt-1">
+                      {confirmPasswordError}
+                    </p>
+                  )}
                 </div>
               </div>
               <Button
