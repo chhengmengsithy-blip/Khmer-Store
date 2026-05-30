@@ -2,7 +2,7 @@
   "id": "FEAT-005",
   "type": "feat",
   "description": "Professional Admin Panel - Complete redesign of all admin pages with DataTable, modals, collapsible sidebar, and enhanced functionality.",
-  "status": "pending",
+  "status": "in_progress",
   "steps": [
     "Rewrite src/features/admin/components/admin-sidebar.tsx - Professional sidebar: Collapsible (toggle button at bottom to collapse to icons-only mode, stores preference in localStorage). Logo + 'Admin' text at top. Nav sections grouped: Main (Dashboard), Content (Listings, Categories), Users (Users, Reports), System (Settings). Each nav item has icon + label + optional badge count. Active state with gold left border accent. At bottom: admin user avatar + name + 'Back to Site' link. Smooth width transition animation on collapse.",
     "Rewrite src/app/admin/layout.tsx - Keep existing auth check logic. Update layout to support collapsible sidebar (dynamic left padding). Add top bar with: breadcrumbs, admin name display, notification bell icon, 'View Site' link.",

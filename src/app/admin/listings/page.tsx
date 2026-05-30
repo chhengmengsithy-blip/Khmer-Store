@@ -1,8 +1,22 @@
+"use client";
+
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getAllListings } from "@/features/admin/actions/admin-actions";
+import { DataTable, type Column } from "@/components/shared/data-table";
 import { ListingActions } from "@/features/admin/components/listing-actions";
+import { getAllListings } from "@/features/admin/actions/admin-actions";
+
+interface ListingItem {
+  id: string;
+  title: string;
+  status: string;
+  price: number;
+  created_at: string;
+  seller_name: string;
+  category_name: string;
+  images?: string[];
+}
 
 const statusFilters = ["all", "active", "pending", "sold", "removed"];
 
@@ -21,118 +35,170 @@ function getStatusBadgeClass(status: string) {
   }
 }
 
-export default async function AdminListingsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ status?: string; page?: string }>;
-}) {
-  const params = await searchParams;
-  const currentStatus = params.status || "all";
-  const page = parseInt(params.page || "1", 10);
-  const { data: listings, count } = await getAllListings(page, currentStatus);
+export default function AdminListingsPage() {
+  const [listings, setListings] = useState<ListingItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeStatus, setActiveStatus] = useState("all");
+
+  useEffect(() => {
+    let mounted = true;
+    getAllListings(1, "all").then(({ data }) => {
+      if (mounted) {
+        setListings(data as ListingItem[]);
+        setLoading(false);
+      }
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const filteredListings = useMemo(() => {
+    let result = listings;
+    if (activeStatus !== "all") {
+      result = result.filter((l) => l.status === activeStatus);
+    }
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter((l) => l.title.toLowerCase().includes(q));
+    }
+    return result;
+  }, [listings, activeStatus, searchQuery]);
+
+  const columns: Column<ListingItem>[] = [
+    {
+      key: "thumbnail",
+      header: "",
+      className: "w-12",
+      render: (listing) => (
+        <div className="h-9 w-9 rounded-lg bg-elevated overflow-hidden flex items-center justify-center">
+          {listing.images && listing.images.length > 0 ? (
+            <img
+              src={listing.images[0]}
+              alt=""
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <span className="text-xs text-muted-foreground">
+              {listing.title.charAt(0)}
+            </span>
+          )}
+        </div>
+      ),
+    },
+    {
+      key: "title",
+      header: "Title",
+      sortable: true,
+      render: (listing) => (
+        <Link
+          href={`/listing/${listing.id}`}
+          className="text-soft-white hover:text-accent-gold transition-colors font-medium"
+        >
+          {listing.title}
+        </Link>
+      ),
+    },
+    {
+      key: "category_name",
+      header: "Category",
+      className: "hidden md:table-cell",
+      render: (listing) => (
+        <span className="text-muted-foreground">{listing.category_name}</span>
+      ),
+    },
+    {
+      key: "seller_name",
+      header: "Seller",
+      className: "hidden sm:table-cell",
+      render: (listing) => (
+        <span className="text-muted-foreground">{listing.seller_name}</span>
+      ),
+    },
+    {
+      key: "price",
+      header: "Price",
+      sortable: true,
+      render: (listing) => (
+        <span className="text-soft-white font-mono text-xs">
+          ${listing.price?.toLocaleString() || "0"}
+        </span>
+      ),
+    },
+    {
+      key: "status",
+      header: "Status",
+      render: (listing) => (
+        <Badge className={getStatusBadgeClass(listing.status)}>
+          {listing.status}
+        </Badge>
+      ),
+    },
+    {
+      key: "created_at",
+      header: "Date",
+      sortable: true,
+      className: "hidden lg:table-cell",
+      render: (listing) => (
+        <span className="text-muted-foreground text-xs">
+          {new Date(listing.created_at).toLocaleDateString()}
+        </span>
+      ),
+    },
+    {
+      key: "actions",
+      header: "",
+      className: "w-12 text-right",
+      render: (listing) => (
+        <ListingActions listingId={listing.id} currentStatus={listing.status} />
+      ),
+    },
+  ];
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-2xl font-playfair text-soft-white">Listings</h1>
+        <p className="text-muted-foreground text-sm">Loading listings...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-playfair text-soft-white">Listings</h1>
         <p className="text-muted-foreground text-sm mt-1">
-          {count} total listings
+          {listings.length} total listings
         </p>
       </div>
 
       {/* Status filter tabs */}
       <div className="flex flex-wrap gap-2">
         {statusFilters.map((status) => (
-          <Link
+          <button
             key={status}
-            href={`/admin/listings${status === "all" ? "" : `?status=${status}`}`}
+            onClick={() => setActiveStatus(status)}
             className={`px-3 py-1.5 rounded-lg text-sm capitalize transition-colors ${
-              currentStatus === status
+              activeStatus === status
                 ? "bg-accent-gold/10 text-accent-gold"
                 : "text-muted-foreground hover:text-soft-white hover:bg-elevated"
             }`}
           >
             {status}
-          </Link>
+          </button>
         ))}
       </div>
 
-      <Card className="border-white/[0.08] bg-surface">
-        <CardHeader>
-          <CardTitle className="text-soft-white text-base">
-            All Listings
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {listings.length === 0 ? (
-            <p className="text-muted-foreground text-sm">No listings found.</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-white/[0.08]">
-                    <th className="text-left py-3 px-2 text-muted-foreground font-medium">
-                      Title
-                    </th>
-                    <th className="text-left py-3 px-2 text-muted-foreground font-medium hidden sm:table-cell">
-                      Seller
-                    </th>
-                    <th className="text-left py-3 px-2 text-muted-foreground font-medium hidden md:table-cell">
-                      Category
-                    </th>
-                    <th className="text-left py-3 px-2 text-muted-foreground font-medium">
-                      Status
-                    </th>
-                    <th className="text-left py-3 px-2 text-muted-foreground font-medium hidden lg:table-cell">
-                      Date
-                    </th>
-                    <th className="text-right py-3 px-2 text-muted-foreground font-medium">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {listings.map((listing) => (
-                    <tr
-                      key={listing.id}
-                      className="border-b border-white/[0.05] last:border-0"
-                    >
-                      <td className="py-3 px-2">
-                        <Link
-                          href={`/listing/${listing.id}`}
-                          className="text-soft-white hover:text-accent-gold transition-colors"
-                        >
-                          {listing.title}
-                        </Link>
-                      </td>
-                      <td className="py-3 px-2 text-muted-foreground hidden sm:table-cell">
-                        {listing.seller_name}
-                      </td>
-                      <td className="py-3 px-2 text-muted-foreground hidden md:table-cell">
-                        {listing.category_name}
-                      </td>
-                      <td className="py-3 px-2">
-                        <Badge className={getStatusBadgeClass(listing.status)}>
-                          {listing.status}
-                        </Badge>
-                      </td>
-                      <td className="py-3 px-2 text-muted-foreground hidden lg:table-cell">
-                        {new Date(listing.created_at).toLocaleDateString()}
-                      </td>
-                      <td className="py-3 px-2 text-right">
-                        <ListingActions
-                          listingId={listing.id}
-                          currentStatus={listing.status}
-                        />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      <DataTable
+        columns={columns}
+        data={filteredListings}
+        searchPlaceholder="Search listings by title..."
+        onSearch={setSearchQuery}
+        selectable
+        keyExtractor={(listing) => listing.id}
+      />
     </div>
   );
 }

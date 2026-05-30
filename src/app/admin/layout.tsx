@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { AdminSidebar } from "@/features/admin/components/admin-sidebar";
+import { AdminTopBar } from "@/features/admin/components/admin-top-bar";
 
 export default async function AdminLayout({
   children,
@@ -34,7 +35,7 @@ export default async function AdminLayout({
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role")
+    .select("role, full_name")
     .eq("id", user.id)
     .single();
 
@@ -42,11 +43,14 @@ export default async function AdminLayout({
     redirect("/dashboard");
   }
 
+  const adminName = profile.full_name || user.email || "Admin";
+
   return (
     <div className="min-h-screen bg-background">
       <div className="flex">
         <AdminSidebar />
-        <main className="flex-1 min-h-screen lg:pl-60">
+        <main className="flex-1 min-h-screen lg:pl-60 transition-all duration-300">
+          <AdminTopBar adminName={adminName} />
           <div className="p-6 lg:p-8">{children}</div>
         </main>
       </div>
