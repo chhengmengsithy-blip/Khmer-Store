@@ -1,32 +1,11 @@
 import Link from "next/link";
-import {
-  Car,
-  Home,
-  Smartphone,
-  Briefcase,
-  Wrench,
-  Shirt,
-  Flower2,
-  Dumbbell,
-  Gamepad2,
-  Package,
-} from "lucide-react";
-import type { LucideIcon } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Package } from "lucide-react";
 import { EmptyState } from "@/components/shared/empty-state";
-import { categories } from "@/constants/categories";
-
-const iconMap: Record<string, LucideIcon> = {
-  Car,
-  Home,
-  Smartphone,
-  Briefcase,
-  Wrench,
-  Shirt,
-  Flower2,
-  Dumbbell,
-  Gamepad2,
-};
+import { ListingCard } from "@/components/shared/listing-card";
+import { getListings } from "@/features/listings/actions/listing-actions";
+import { createClient } from "@/lib/supabase/server";
+import { categories as clientCategories } from "@/constants/categories";
+import type { Category } from "@/types";
 
 interface CategoryPageProps {
   params: Promise<{ slug: string }>;
@@ -34,9 +13,35 @@ interface CategoryPageProps {
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const { slug } = await params;
-  const category = categories.find((c) => c.slug === slug);
 
-  if (!category) {
+  // Try to get category from Supabase first, fall back to client-side categories
+  let categoryName = "";
+  let categoryDescription = "";
+
+  const supabase = await createClient();
+  if (supabase) {
+    const { data: dbCategory } = await supabase
+      .from("categories")
+      .select("*")
+      .eq("slug", slug)
+      .single();
+    if (dbCategory) {
+      const cat = dbCategory as Category;
+      categoryName = cat.name;
+      categoryDescription = cat.description || "";
+    }
+  }
+
+  // Fall back to client-side categories
+  if (!categoryName) {
+    const localCat = clientCategories.find((c) => c.slug === slug);
+    if (localCat) {
+      categoryName = localCat.name;
+      categoryDescription = localCat.description;
+    }
+  }
+
+  if (!categoryName) {
     return (
       <div className="min-h-screen pt-20">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 py-12">
@@ -52,7 +57,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
     );
   }
 
-  const Icon = iconMap[category.icon] || Briefcase;
+  const { data: listings } = await getListings({ category: slug });
 
   return (
     <div className="min-h-screen pt-20">
@@ -67,53 +72,37 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
             Marketplace
           </Link>
           <span className="mx-2">/</span>
-          <span className="text-soft-white">{category.name}</span>
+          <span className="text-soft-white">{categoryName}</span>
         </nav>
 
         {/* Category Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-accent-gold/10">
-            <Icon className="h-7 w-7 text-accent-gold" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-soft-white font-playfair">
-              {category.name}
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              {category.description}
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-soft-white font-playfair">
+            {categoryName}
+          </h1>
+          {categoryDescription && (
+            <p className="mt-1 text-sm text-muted-foreground">
+              {categoryDescription}
             </p>
-          </div>
+          )}
         </div>
 
-        {/* Subcategory Chips */}
-        {category.subcategories.length > 0 && (
-          <div className="mb-8 flex flex-wrap gap-2">
-            <Badge
-              variant="secondary"
-              className="cursor-pointer bg-accent-gold/10 text-accent-gold hover:bg-accent-gold/20"
-            >
-              All
-            </Badge>
-            {category.subcategories.map((sub) => (
-              <Badge
-                key={sub.slug}
-                variant="secondary"
-                className="cursor-pointer hover:bg-elevated"
-              >
-                {sub.name}
-              </Badge>
+        {/* Listings Grid */}
+        {listings.length > 0 ? (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {listings.map((listing) => (
+              <ListingCard key={listing.id} listing={listing} />
             ))}
           </div>
+        ) : (
+          <EmptyState
+            icon={Package}
+            title={`No listings in ${categoryName} yet`}
+            description="Be the first to post a listing in this category"
+            actionLabel="Post a Listing"
+            actionHref="/post"
+          />
         )}
-
-        {/* Listings - Empty State */}
-        <EmptyState
-          icon={Package}
-          title={`No listings in ${category.name} yet`}
-          description="Be the first to post a listing in this category"
-          actionLabel="Post in this category"
-          actionHref="/post"
-        />
       </div>
     </div>
   );

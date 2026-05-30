@@ -1,16 +1,52 @@
 import Link from "next/link";
-import { Package, MessageSquare, Heart } from "lucide-react";
+import { Package, Eye, Heart, Trash2, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/shared/empty-state";
+import { ListingCard } from "@/components/shared/listing-card";
+import { getUserListings } from "@/features/listings/actions/listing-actions";
+import { getUserFavorites } from "@/features/listings/actions/favorite-actions";
+import { createClient } from "@/lib/supabase/server";
+import type { Listing } from "@/types";
+import { DashboardTabs } from "./dashboard-tabs";
 
-const stats = [
-  { label: "My Listings", value: "0", icon: Package },
-  { label: "Messages", value: "0", icon: MessageSquare },
-  { label: "Favorites", value: "0", icon: Heart },
-];
+export default async function DashboardPage() {
+  const supabase = await createClient();
 
-export default function DashboardPage() {
+  let listings: Listing[] = [];
+  let favorites: (Record<string, unknown> & { listings: Listing | null })[] = [];
+  let totalViews = 0;
+  let favoritesReceived = 0;
+
+  if (supabase) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (user) {
+      listings = await getUserListings();
+      favorites = await getUserFavorites();
+      totalViews = listings.reduce((sum, l) => sum + (l.views_count || 0), 0);
+
+      // Count favorites received on user's listings
+      const { count } = await supabase
+        .from("favorites")
+        .select("id, listings!inner(user_id)", { count: "exact", head: true })
+        .eq("listings.user_id", user.id);
+      favoritesReceived = count || 0;
+    }
+  }
+
+  const stats = [
+    { label: "My Listings", value: listings.length.toString(), icon: Package },
+    { label: "Total Views", value: totalViews.toString(), icon: Eye },
+    { label: "Favorites Received", value: favoritesReceived.toString(), icon: Heart },
+  ];
+
+  const favoriteListings = favorites
+    .map((f) => f.listings)
+    .filter((l): l is Listing => l !== null);
+
   return (
     <div className="space-y-8">
       <h1 className="text-2xl font-bold text-soft-white font-playfair">
@@ -49,19 +85,8 @@ export default function DashboardPage() {
         </Button>
       </div>
 
-      {/* My Listings */}
-      <div>
-        <h2 className="text-lg font-semibold text-soft-white mb-4">
-          My Listings
-        </h2>
-        <EmptyState
-          icon={Package}
-          title="You haven't posted any listings yet"
-          description="Create your first listing and start selling on Khmer Store"
-          actionLabel="Post Your First Listing"
-          actionHref="/post"
-        />
-      </div>
+      {/* Tabs: My Listings / My Favorites */}
+      <DashboardTabs listings={listings} favorites={favoriteListings} />
     </div>
   );
 }

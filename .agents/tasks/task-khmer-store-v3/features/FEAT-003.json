@@ -2,7 +2,7 @@
   "id": "FEAT-003",
   "type": "feat",
   "description": "Build the full user-facing frontend pages that fetch real data from Supabase: marketplace with search/filter/sort, listing detail page, post listing page with Supabase Storage upload, user dashboard with real stats/listings/favorites, messages page, and profile settings. All pages show empty states when no data exists and never use mock/fake data.",
-  "status": "pending",
+  "status": "in_progress",
   "steps": [
     "Create src/features/listings/actions/listing-actions.ts with server actions: getListings(filters), getListingById(id), createListing(formData), updateListing(id, formData), deleteListing(id), incrementViews(id). Each checks if supabase is configured and returns appropriate error or data.",
     "Create src/features/listings/actions/favorite-actions.ts: toggleFavorite(listingId), getFavorites(), isFavorited(listingId)",
