@@ -3,9 +3,10 @@
 import React, { useState, useTransition } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Eye, Loader2 } from "lucide-react";
+import { Eye, Loader2, ShoppingBag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { EmptyState } from "@/components/ui/empty-state";
 import { updateOrderStatus } from "@/features/dashboard/actions/order-actions";
 import type { Order, OrderStatus } from "@/types";
 
@@ -208,8 +209,14 @@ export function OrdersTable({ orders = [], isSeller = false }: OrdersTableProps)
 
   if (orders.length === 0) {
     return (
-      <div className="rounded-xl border border-white/[0.06] bg-surface p-8 text-center">
-        <p className="text-muted-foreground">No orders found.</p>
+      <div className="rounded-xl border border-white/[0.06] bg-surface">
+        <EmptyState
+          icon={ShoppingBag}
+          title="No orders yet"
+          description="Your orders will appear here once you make a purchase or receive one."
+          actionLabel="Browse Marketplace"
+          actionHref="/marketplace"
+        />
       </div>
     );
   }

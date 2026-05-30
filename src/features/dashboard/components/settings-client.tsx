@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { toast } from "@/hooks/use-toast";
 import {
   updateProfile,
   updatePassword,
@@ -61,7 +62,6 @@ export function SettingsClient({
   const [bio, setBio] = useState(initialBio);
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
-  const [profileSuccess, setProfileSuccess] = useState<string | null>(null);
 
   // Avatar state
   const [currentAvatarUrl, setCurrentAvatarUrl] = useState(avatarUrl);
@@ -75,7 +75,6 @@ export function SettingsClient({
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
-  const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
 
   // 2FA state
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
@@ -84,7 +83,6 @@ export function SettingsClient({
   const [factorId, setFactorId] = useState<string | null>(null);
   const [verifyCode, setVerifyCode] = useState("");
   const [twoFAError, setTwoFAError] = useState<string | null>(null);
-  const [twoFASuccess, setTwoFASuccess] = useState<string | null>(null);
   const [twoFALoading, setTwoFALoading] = useState(false);
 
   // Notification preferences state (lazy init from localStorage)
@@ -100,7 +98,6 @@ export function SettingsClient({
     }
     return DEFAULT_PREFS;
   });
-  const [notifSuccess, setNotifSuccess] = useState<string | null>(null);
 
   // Check 2FA status on mount
   useEffect(() => {
@@ -212,7 +209,6 @@ export function SettingsClient({
   const handleSaveProfile = async () => {
     setProfileLoading(true);
     setProfileError(null);
-    setProfileSuccess(null);
 
     const formData = new FormData();
     formData.set("full_name", fullName);
@@ -228,14 +224,13 @@ export function SettingsClient({
     if (result.error) {
       setProfileError(result.error);
     } else {
-      setProfileSuccess("Profile updated successfully!");
+      toast({ title: "Profile updated", description: "Your changes have been saved successfully." });
     }
   };
 
   const handleUpdatePassword = async () => {
     setPasswordLoading(true);
     setPasswordError(null);
-    setPasswordSuccess(null);
 
     if (!currentPassword || !newPassword || !confirmPassword) {
       setPasswordError("All password fields are required.");
@@ -267,7 +262,7 @@ export function SettingsClient({
     if (result.error) {
       setPasswordError(result.error);
     } else {
-      setPasswordSuccess("Password updated successfully!");
+      toast({ title: "Password updated", description: "Your password has been changed successfully." });
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
@@ -278,7 +273,6 @@ export function SettingsClient({
   const handleEnable2FA = async () => {
     setTwoFALoading(true);
     setTwoFAError(null);
-    setTwoFASuccess(null);
 
     try {
       const supabase = createClient();
@@ -338,7 +332,7 @@ export function SettingsClient({
       setEnrolling(false);
       setQrCode(null);
       setVerifyCode("");
-      setTwoFASuccess("Two-factor authentication enabled successfully!");
+      toast({ title: "2FA enabled", description: "Two-factor authentication has been enabled successfully." });
     } catch {
       setTwoFAError("Failed to verify 2FA code.");
     } finally {
@@ -351,7 +345,6 @@ export function SettingsClient({
 
     setTwoFALoading(true);
     setTwoFAError(null);
-    setTwoFASuccess(null);
 
     try {
       const supabase = createClient();
@@ -365,7 +358,7 @@ export function SettingsClient({
 
       setTwoFactorEnabled(false);
       setFactorId(null);
-      setTwoFASuccess("Two-factor authentication has been disabled.");
+      toast({ title: "2FA disabled", description: "Two-factor authentication has been disabled." });
     } catch {
       setTwoFAError("Failed to disable 2FA.");
     } finally {
@@ -383,8 +376,7 @@ export function SettingsClient({
 
   const handleSaveNotifications = () => {
     localStorage.setItem(NOTIFICATION_STORAGE_KEY, JSON.stringify(notifPrefs));
-    setNotifSuccess("Notification preferences saved!");
-    setTimeout(() => setNotifSuccess(null), 3000);
+    toast({ title: "Preferences saved", description: "Your notification preferences have been updated." });
   };
 
   return (
@@ -410,13 +402,6 @@ export function SettingsClient({
             {profileError && (
               <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
                 {profileError}
-              </div>
-            )}
-
-            {/* Success Banner */}
-            {profileSuccess && (
-              <div className="rounded-lg border border-green-500/30 bg-green-500/10 px-4 py-3 text-sm text-green-400">
-                {profileSuccess}
               </div>
             )}
 
@@ -552,13 +537,6 @@ export function SettingsClient({
               </h3>
             </div>
 
-            {/* Success Banner */}
-            {notifSuccess && (
-              <div className="rounded-lg border border-green-500/30 bg-green-500/10 px-4 py-3 text-sm text-green-400">
-                {notifSuccess}
-              </div>
-            )}
-
             <div className="space-y-3">
               {(
                 [
@@ -635,13 +613,6 @@ export function SettingsClient({
               </div>
             )}
 
-            {/* Success Banner */}
-            {passwordSuccess && (
-              <div className="rounded-lg border border-green-500/30 bg-green-500/10 px-4 py-3 text-sm text-green-400">
-                {passwordSuccess}
-              </div>
-            )}
-
             {/* Change Password */}
             <div className="space-y-4">
               <h4 className="text-sm text-soft-white">Change Password</h4>
@@ -711,13 +682,6 @@ export function SettingsClient({
               {twoFAError && (
                 <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
                   {twoFAError}
-                </div>
-              )}
-
-              {/* 2FA Success */}
-              {twoFASuccess && (
-                <div className="rounded-lg border border-green-500/30 bg-green-500/10 px-4 py-3 text-sm text-green-400">
-                  {twoFASuccess}
                 </div>
               )}
 

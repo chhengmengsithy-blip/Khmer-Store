@@ -2,10 +2,11 @@
 
 import React from "react";
 import Link from "next/link";
-import { Plus, Eye, Pencil } from "lucide-react";
+import { Plus, Eye, Pencil, Package } from "lucide-react";
 import { FadeIn } from "@/components/animations/motion-wrapper";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
 import { cn } from "@/lib/utils";
 
 const mockProducts = [
@@ -41,6 +42,17 @@ export default function ProductsPage() {
       </div>
 
       {/* Products Grid */}
+      {mockProducts.length === 0 ? (
+        <div className="rounded-xl border border-white/[0.06] bg-surface">
+          <EmptyState
+            icon={Package}
+            title="No products yet"
+            description="Start selling by creating your first product listing."
+            actionLabel="Add Product"
+            actionHref="/dashboard/products/new"
+          />
+        </div>
+      ) : (
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {mockProducts.map((product) => (
           <div
@@ -89,6 +101,7 @@ export default function ProductsPage() {
           </div>
         ))}
       </div>
+      )}
     </FadeIn>
   );
 }

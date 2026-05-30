@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { toast } from "@/hooks/use-toast";
 import {
   createProduct,
   insertProductMedia,
@@ -48,7 +49,6 @@ export function SellerProductForm() {
   const [previews, setPreviews] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -106,7 +106,6 @@ export function SellerProductForm() {
   const handleSubmit = async (status: "draft" | "published") => {
     setLoading(true);
     setError(null);
-    setSuccess(null);
 
     const formData = new FormData();
     formData.set("title", title);
@@ -169,11 +168,10 @@ export function SellerProductForm() {
       if (failedUploads.length > 0 && uploadedUrls.length === 0) {
         // All uploads failed but product was created
         setLoading(false);
-        setSuccess(
-          status === "published"
-            ? "Product published, but image upload failed. You can add images later."
-            : "Product saved as draft, but image upload failed. You can add images later."
-        );
+        toast({
+          title: status === "published" ? "Product published" : "Draft saved",
+          description: "Image upload failed. You can add images later.",
+        });
         // Reset form
         resetForm();
         return;
@@ -182,20 +180,22 @@ export function SellerProductForm() {
       if (failedUploads.length > 0) {
         // Some uploads failed
         setLoading(false);
-        setSuccess(
-          `Product ${status === "published" ? "published" : "saved as draft"} with ${uploadedUrls.length} image(s). ${failedUploads.length} image(s) failed to upload.`
-        );
+        toast({
+          title: status === "published" ? "Product published" : "Draft saved",
+          description: `${uploadedUrls.length} image(s) uploaded. ${failedUploads.length} image(s) failed.`,
+        });
         resetForm();
         return;
       }
     }
 
     setLoading(false);
-    setSuccess(
-      status === "published"
-        ? "Product published successfully!"
-        : "Product saved as draft."
-    );
+    toast({
+      title: status === "published" ? "Product published!" : "Draft saved",
+      description: status === "published"
+        ? "Your product is now live on the marketplace."
+        : "Your product has been saved as a draft.",
+    });
     resetForm();
   };
 
@@ -218,13 +218,6 @@ export function SellerProductForm() {
       {error && (
         <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
           {error}
-        </div>
-      )}
-
-      {/* Success Banner */}
-      {success && (
-        <div className="rounded-lg border border-green-500/30 bg-green-500/10 px-4 py-3 text-sm text-green-400">
-          {success}
         </div>
       )}
 

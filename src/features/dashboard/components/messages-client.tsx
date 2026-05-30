@@ -5,6 +5,8 @@ import { Loader2, Send, ArrowLeft, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
+import { MessageBubblesSkeleton } from "@/components/ui/skeleton-loaders";
 import { createClient } from "@/lib/supabase/client";
 import {
   getMessages,
@@ -276,13 +278,13 @@ export function MessagesClient({
         <div className="flex-1 overflow-y-auto">
           {conversations.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full p-6 text-center">
-              <MessageSquare className="h-10 w-10 text-muted-foreground mb-3" />
-              <p className="text-sm text-muted-foreground">
-                No conversations yet
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Messages from buyers and sellers will appear here.
-              </p>
+              <EmptyState
+                icon={MessageSquare}
+                title="No conversations yet"
+                description="Messages from buyers and sellers will appear here."
+                actionLabel="Browse Marketplace"
+                actionHref="/marketplace"
+              />
             </div>
           ) : (
             conversations.map((conv) => (
@@ -355,9 +357,7 @@ export function MessagesClient({
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
               {loadingMessages ? (
-                <div className="flex items-center justify-center h-full">
-                  <Loader2 className="h-6 w-6 animate-spin text-accent-gold" />
-                </div>
+                <MessageBubblesSkeleton />
               ) : messages.length === 0 ? (
                 <div className="flex items-center justify-center h-full">
                   <p className="text-sm text-muted-foreground">
