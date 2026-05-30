@@ -101,6 +101,8 @@ export function Header() {
             : "bg-background/60 backdrop-blur-md"
         )}
       >
+        {/* Gradient glow line */}
+        <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-purple-500/50 to-transparent" />
         <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6">
           {/* Logo */}
           <Link href="/" className="flex shrink-0 items-center gap-2">
@@ -183,7 +185,7 @@ export function Header() {
             {/* Sell Now Button */}
             <Button
               asChild
-              className="bg-accent-gold text-background hover:bg-accent-gold/90 text-sm font-semibold rounded-full px-5"
+              className="bg-accent-gold text-background hover:bg-accent-gold/90 text-sm font-semibold rounded-full px-5 transition-all hover:shadow-[0_0_20px_rgba(198,167,105,0.3)]"
             >
               <Link href="/post">Sell Now</Link>
             </Button>

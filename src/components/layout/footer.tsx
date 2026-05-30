@@ -28,7 +28,9 @@ const footerLinks = {
 
 export function Footer() {
   return (
-    <footer className="border-t border-white/[0.08] bg-surface">
+    <footer className="relative border-t border-white/[0.08] bg-surface">
+      {/* Gradient separator at top */}
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent" />
       {/* Newsletter Section - UI scaffold only, no backend submission handler yet */}
       <div className="mx-auto max-w-7xl px-6 pt-12 pb-8">
         <div className="flex flex-col items-center gap-4 rounded-xl border border-white/[0.06] bg-elevated/50 p-8 text-center sm:flex-row sm:text-left">
@@ -69,21 +71,21 @@ export function Footer() {
               <a
                 href="#"
                 aria-label="Facebook"
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/[0.08] text-muted-foreground transition-colors hover:border-accent-gold/30 hover:text-accent-gold"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/[0.08] text-muted-foreground transition-colors hover:border-blue-500/30 hover:text-blue-400"
               >
                 <Globe className="h-4 w-4" />
               </a>
               <a
                 href="#"
                 aria-label="Telegram"
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/[0.08] text-muted-foreground transition-colors hover:border-accent-gold/30 hover:text-accent-gold"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/[0.08] text-muted-foreground transition-colors hover:border-teal-500/30 hover:text-teal-400"
               >
                 <Send className="h-4 w-4" />
               </a>
               <a
                 href="#"
                 aria-label="Instagram"
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/[0.08] text-muted-foreground transition-colors hover:border-accent-gold/30 hover:text-accent-gold"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/[0.08] text-muted-foreground transition-colors hover:border-pink-500/30 hover:text-pink-400"
               >
                 <Camera className="h-4 w-4" />
               </a>

@@ -49,8 +49,10 @@ export function ListingCard({
   return (
     <Link
       href={`/listing/${listing.id}`}
-      className="group block overflow-hidden rounded-lg border border-white/[0.06] bg-surface transition-all duration-300 hover:border-accent-gold/30 hover:-translate-y-1 hover:shadow-lg hover:shadow-accent-gold/5"
+      className="group relative block overflow-hidden rounded-lg border border-white/[0.06] bg-surface transition-all duration-300 hover:border-accent-gold/30 hover:-translate-y-1 hover:shadow-lg hover:shadow-accent-gold/5"
     >
+      {/* Subtle gradient overlay on hover */}
+      <div className="absolute inset-0 bg-gradient-to-br from-accent-gold/0 to-accent-gold/0 transition-all duration-300 group-hover:from-accent-gold/[0.02] group-hover:to-transparent pointer-events-none z-10 rounded-lg" />
       <div className="relative aspect-[4/3] bg-elevated overflow-hidden">
         {listing.images && listing.images.length > 0 ? (
           <>

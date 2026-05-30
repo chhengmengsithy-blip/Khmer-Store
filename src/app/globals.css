@@ -246,3 +246,41 @@
 .glow-gold {
   box-shadow: 0 0 20px rgba(198, 167, 105, 0.15), 0 0 40px rgba(198, 167, 105, 0.05);
 }
+
+/* Gradient utilities */
+.gradient-purple-blue {
+  background: linear-gradient(135deg, #8B5CF6 0%, #3B82F6 100%);
+}
+
+.gradient-blue-teal {
+  background: linear-gradient(135deg, #3B82F6 0%, #14B8A6 100%);
+}
+
+.gradient-vibrant {
+  background: linear-gradient(135deg, #8B5CF6 0%, #3B82F6 40%, #14B8A6 70%, #C6A769 100%);
+}
+
+/* Glow utilities */
+.glow-blue {
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.15), 0 0 40px rgba(59, 130, 246, 0.05);
+}
+
+.glow-purple {
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.15), 0 0 40px rgba(139, 92, 246, 0.05);
+}
+
+.glow-teal {
+  box-shadow: 0 0 20px rgba(20, 184, 166, 0.15), 0 0 40px rgba(20, 184, 166, 0.05);
+}
+
+/* Animated gradient background */
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animated-gradient {
+  background-size: 200% 200%;
+  animation: gradient-shift 8s ease infinite;
+}

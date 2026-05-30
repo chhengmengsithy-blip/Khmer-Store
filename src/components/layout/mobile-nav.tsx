@@ -47,18 +47,25 @@ export function MobileNav() {
                   : "text-muted-foreground"
               )}
             >
+              {/* Active gradient background */}
+              {isActive && !isPost && (
+                <span className="absolute inset-0 bg-gradient-to-t from-accent-gold/10 to-transparent rounded-lg" />
+              )}
               {/* Active indicator dot */}
               {isActive && !isPost && (
                 <span className="absolute -top-1 left-1/2 h-1 w-5 -translate-x-1/2 rounded-full bg-accent-gold" />
               )}
               <item.icon
                 className={cn(
-                  "h-5 w-5 transition-transform duration-200",
+                  "relative h-5 w-5 transition-transform duration-200",
                   isPost && "h-6 w-6",
                   isActive && "scale-110"
                 )}
               />
-              <span className="font-medium">{item.label}</span>
+              <span className={cn(
+                "relative font-medium",
+                isPost && "bg-gradient-to-r from-accent-gold to-amber-400 bg-clip-text text-transparent"
+              )}>{item.label}</span>
             </Link>
           );
         })}

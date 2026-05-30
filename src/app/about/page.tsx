@@ -26,26 +26,53 @@ const values = [
     title: "Trust",
     description:
       "We build a safe environment where buyers and sellers can transact with confidence through verified accounts and active moderation.",
+    color: "blue",
   },
   {
     icon: Heart,
     title: "Safety",
     description:
       "User safety is paramount. We provide tools, guidelines, and a dedicated team to ensure every transaction is secure.",
+    color: "emerald",
   },
   {
     icon: Users,
     title: "Community",
     description:
       "We connect people across Cambodia, fostering local economies and building meaningful relationships through commerce.",
+    color: "purple",
   },
   {
     icon: Lightbulb,
     title: "Innovation",
     description:
       "We continuously improve our platform with modern technology to deliver the best marketplace experience possible.",
+    color: "amber",
   },
 ];
+
+const valueColors = {
+  blue: {
+    bg: "bg-blue-500/10",
+    text: "text-blue-400",
+    border: "hover:border-blue-500/30",
+  },
+  emerald: {
+    bg: "bg-emerald-500/10",
+    text: "text-emerald-400",
+    border: "hover:border-emerald-500/30",
+  },
+  purple: {
+    bg: "bg-purple-500/10",
+    text: "text-purple-400",
+    border: "hover:border-purple-500/30",
+  },
+  amber: {
+    bg: "bg-amber-500/10",
+    text: "text-amber-400",
+    border: "hover:border-amber-500/30",
+  },
+};
 
 const steps = [
   {
@@ -65,31 +92,6 @@ const steps = [
     title: "Close the Deal",
     description:
       "Agree on terms, meet up safely, and complete your transaction.",
-  },
-];
-
-const stats = [
-  { value: "10K+", label: "Active Users" },
-  { value: "5K+", label: "Listings Posted" },
-  { value: "9", label: "Categories" },
-  { value: "24/7", label: "Platform Availability" },
-];
-
-const team = [
-  {
-    name: "Sothea Chan",
-    role: "Founder & CEO",
-    bio: "Passionate about connecting Cambodian communities through technology.",
-  },
-  {
-    name: "Vicheka Phan",
-    role: "Head of Engineering",
-    bio: "Building scalable systems to power the next generation of commerce.",
-  },
-  {
-    name: "Sreyleak Mao",
-    role: "Head of Operations",
-    bio: "Ensuring a safe and seamless experience for every user on the platform.",
   },
 ];
 
@@ -114,35 +116,15 @@ export default function AboutPage() {
           </div>
         </ScrollReveal>
 
-        {/* Stats */}
-        <ScrollReveal delay={0.1}>
-          <div className="mt-16 grid grid-cols-2 gap-4 sm:grid-cols-4">
-            {stats.map((stat) => (
-              <Card
-                key={stat.label}
-                className="border-white/[0.06] bg-surface text-center"
-              >
-                <CardContent className="p-6">
-                  <p className="text-2xl font-bold text-accent-gold font-mono">
-                    {stat.value}
-                  </p>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {stat.label}
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </ScrollReveal>
-
         {/* Mission & Vision */}
         <ScrollReveal delay={0.15}>
           <div className="mt-16 grid gap-6 md:grid-cols-2">
-            <Card className="border-white/[0.06] bg-surface">
+            <Card className="border-white/[0.06] bg-surface relative overflow-hidden">
+              <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-blue-500 to-blue-400" />
               <CardContent className="p-8">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent-gold/10">
-                    <Target className="h-5 w-5 text-accent-gold" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10">
+                    <Target className="h-5 w-5 text-blue-400" />
                   </div>
                   <h2 className="text-xl font-semibold text-soft-white">
                     Our Mission
@@ -156,11 +138,12 @@ export default function AboutPage() {
                 </p>
               </CardContent>
             </Card>
-            <Card className="border-white/[0.06] bg-surface">
+            <Card className="border-white/[0.06] bg-surface relative overflow-hidden">
+              <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-purple-500 to-purple-400" />
               <CardContent className="p-8">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent-gold/10">
-                    <Eye className="h-5 w-5 text-accent-gold" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/10">
+                    <Eye className="h-5 w-5 text-purple-400" />
                   </div>
                   <h2 className="text-xl font-semibold text-soft-white">
                     Our Vision
@@ -215,43 +198,6 @@ export default function AboutPage() {
           </section>
         </ScrollReveal>
 
-        {/* Team */}
-        <ScrollReveal delay={0.25}>
-          <section className="mt-16">
-            <div className="text-center mb-10">
-              <h2 className="text-2xl font-bold text-soft-white font-playfair">
-                Our Team
-              </h2>
-              <p className="mt-2 text-muted-foreground">
-                The people behind Khmer Store
-              </p>
-            </div>
-            <div className="grid gap-6 sm:grid-cols-3">
-              {team.map((member) => (
-                <Card
-                  key={member.name}
-                  className="border-white/[0.06] bg-surface"
-                >
-                  <CardContent className="p-6 text-center">
-                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-elevated border border-white/[0.08]">
-                      <Users className="h-7 w-7 text-muted-foreground" />
-                    </div>
-                    <h3 className="mt-4 font-semibold text-soft-white">
-                      {member.name}
-                    </h3>
-                    <p className="text-xs text-accent-gold mt-1">
-                      {member.role}
-                    </p>
-                    <p className="mt-3 text-sm text-muted-foreground">
-                      {member.bio}
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </section>
-        </ScrollReveal>
-
         {/* Values */}
         <ScrollReveal delay={0.3}>
           <section className="mt-16">
@@ -264,24 +210,27 @@ export default function AboutPage() {
               </p>
             </div>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {values.map((value) => (
-                <Card
-                  key={value.title}
-                  className="border-white/[0.06] bg-surface hover:border-accent-gold/20 transition-colors"
-                >
-                  <CardContent className="p-6">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent-gold/10">
-                      <value.icon className="h-5 w-5 text-accent-gold" />
-                    </div>
-                    <h3 className="mt-4 font-semibold text-soft-white">
-                      {value.title}
-                    </h3>
-                    <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                      {value.description}
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
+              {values.map((value) => {
+                const colors = valueColors[value.color as keyof typeof valueColors];
+                return (
+                  <Card
+                    key={value.title}
+                    className={`border-white/[0.06] bg-surface ${colors.border} transition-colors`}
+                  >
+                    <CardContent className="p-6">
+                      <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${colors.bg}`}>
+                        <value.icon className={`h-5 w-5 ${colors.text}`} />
+                      </div>
+                      <h3 className="mt-4 font-semibold text-soft-white">
+                        {value.title}
+                      </h3>
+                      <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                        {value.description}
+                      </p>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           </section>
         </ScrollReveal>

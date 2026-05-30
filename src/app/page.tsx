@@ -3,10 +3,8 @@ import {
   MessageSquare,
   Handshake,
   Package,
-  Users,
   ShoppingBag,
   Shield,
-  Star,
   Download,
   ArrowRight,
 } from "lucide-react";
@@ -27,44 +25,47 @@ const howItWorks = [
     title: "Post Your Listing",
     description:
       "Take a few photos, add a description and price, and your listing is live in minutes.",
+    color: "blue",
   },
   {
     icon: MessageSquare,
     title: "Get Contacted",
     description:
       "Interested buyers will message you directly. Respond quickly for the best results.",
+    color: "purple",
   },
   {
     icon: Handshake,
     title: "Make the Deal",
     description:
       "Agree on a price, meet up safely, and complete your transaction.",
+    color: "emerald",
   },
 ];
 
-const testimonials = [
-  {
-    name: "Sokha Chan",
-    role: "Seller",
-    quote:
-      "I sold my motorbike within 2 days of posting. The process was incredibly smooth and I got a great price.",
-    avatar: "SC",
+const stepColors = {
+  blue: {
+    bg: "bg-blue-500/10",
+    ring: "ring-blue-500/20",
+    text: "text-blue-400",
+    badge: "bg-blue-500/10 text-blue-400",
+    line: "from-blue-500/20",
   },
-  {
-    name: "Pheakdey Lim",
-    role: "Buyer",
-    quote:
-      "Found an amazing apartment at a fraction of what I expected. Khmer Store made it easy to connect with the landlord.",
-    avatar: "PL",
+  purple: {
+    bg: "bg-purple-500/10",
+    ring: "ring-purple-500/20",
+    text: "text-purple-400",
+    badge: "bg-purple-500/10 text-purple-400",
+    line: "from-purple-500/20",
   },
-  {
-    name: "Channary Vong",
-    role: "Business Owner",
-    quote:
-      "My electronics shop gets consistent leads from the platform. It has become an essential part of my business.",
-    avatar: "CV",
+  emerald: {
+    bg: "bg-emerald-500/10",
+    ring: "ring-emerald-500/20",
+    text: "text-emerald-400",
+    badge: "bg-emerald-500/10 text-emerald-400",
+    line: "from-emerald-500/20",
   },
-];
+};
 
 export default async function Home() {
   const { data: listings } = await getListings({ limit: 8 });
@@ -73,9 +74,11 @@ export default async function Home() {
     <div className="flex min-h-screen flex-col">
       {/* Section 1: Hero */}
       <section className="relative pt-24 pb-16 sm:pt-32 sm:pb-24 overflow-hidden">
-        {/* Animated gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-950/20 via-background to-blue-950/20" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(198,167,105,0.05)_0%,transparent_70%)]" />
+        {/* Vibrant multi-color gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-950/30 via-blue-950/20 to-teal-950/20" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(139,92,246,0.08)_0%,transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(20,184,166,0.06)_0%,transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(198,167,105,0.04)_0%,transparent_60%)]" />
         <div className="relative mx-auto max-w-4xl px-4 text-center sm:px-6">
           <ScrollReveal>
             <h1 className="text-3xl font-bold tracking-tight text-soft-white sm:text-4xl lg:text-5xl xl:text-6xl font-playfair">
@@ -108,8 +111,9 @@ export default async function Home() {
       </section>
 
       {/* Section 2: Popular Categories */}
-      <section className="py-12 sm:py-16">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+      <section className="relative py-12 sm:py-16">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(59,130,246,0.03)_0%,transparent_50%)]" />
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
           <ScrollReveal>
             <h2 className="text-center text-2xl font-bold text-soft-white font-playfair sm:text-3xl">
               Popular Categories
@@ -188,8 +192,9 @@ export default async function Home() {
       </section>
 
       {/* Section 4: How It Works */}
-      <section id="how-it-works" className="py-12 sm:py-16">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6">
+      <section id="how-it-works" className="relative py-12 sm:py-16">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(139,92,246,0.03)_0%,transparent_50%)]" />
+        <div className="relative mx-auto max-w-5xl px-4 sm:px-6">
           <ScrollReveal>
             <h2 className="text-center text-2xl font-bold text-soft-white font-playfair sm:text-3xl">
               How It Works
@@ -199,70 +204,62 @@ export default async function Home() {
             </p>
           </ScrollReveal>
           <div className="mt-10 grid gap-8 sm:grid-cols-3">
-            {howItWorks.map((step, i) => (
-              <ScrollReveal key={step.title} delay={i * 0.1}>
-                <div className="relative flex flex-col items-center text-center">
-                  {/* Step number */}
-                  <span className="absolute -top-2 right-1/2 translate-x-8 text-5xl font-bold text-white/[0.03] font-mono">
-                    {i + 1}
-                  </span>
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-accent-gold/10 ring-1 ring-accent-gold/20">
-                    <step.icon className="h-7 w-7 text-accent-gold" />
+            {howItWorks.map((step, i) => {
+              const colors = stepColors[step.color as keyof typeof stepColors];
+              return (
+                <ScrollReveal key={step.title} delay={i * 0.1}>
+                  <div className="relative flex flex-col items-center text-center">
+                    {/* Step number */}
+                    <span className="absolute -top-2 right-1/2 translate-x-8 text-5xl font-bold text-white/[0.03] font-mono">
+                      {i + 1}
+                    </span>
+                    <div className={`flex h-16 w-16 items-center justify-center rounded-full ${colors.bg} ring-1 ${colors.ring}`}>
+                      <step.icon className={`h-7 w-7 ${colors.text}`} />
+                    </div>
+                    {/* Connecting line (only between items on desktop) */}
+                    {i < howItWorks.length - 1 && (
+                      <div className={`absolute left-[calc(50%+3rem)] top-8 hidden h-px w-[calc(100%-2rem)] bg-gradient-to-r ${colors.line} to-transparent sm:block`} />
+                    )}
+                    <span className={`mt-5 inline-flex items-center rounded-full px-3 py-0.5 text-xs font-medium ${colors.badge}`}>
+                      Step {i + 1}
+                    </span>
+                    <h3 className="mt-3 text-base font-semibold text-soft-white">
+                      {step.title}
+                    </h3>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      {step.description}
+                    </p>
                   </div>
-                  {/* Connecting line (only between items on desktop) */}
-                  {i < howItWorks.length - 1 && (
-                    <div className="absolute left-[calc(50%+3rem)] top-8 hidden h-px w-[calc(100%-2rem)] bg-gradient-to-r from-accent-gold/20 to-transparent sm:block" />
-                  )}
-                  <h3 className="mt-5 text-base font-semibold text-soft-white">
-                    {step.title}
-                  </h3>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    {step.description}
-                  </p>
-                </div>
-              </ScrollReveal>
-            ))}
+                </ScrollReveal>
+              );
+            })}
           </div>
         </div>
       </section>
 
-      {/* Section 5: Trust / Stats */}
+      {/* Section 5: Platform Facts */}
       <section className="py-12 sm:py-16 bg-surface/50">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6">
           <ScrollReveal>
             <h2 className="text-center text-2xl font-bold text-soft-white font-playfair sm:text-3xl">
-              Trusted by Thousands
+              Our Platform
             </h2>
             <p className="mt-2 text-center text-sm text-muted-foreground">
-              Growing every day across Cambodia
+              Built for the Cambodian community
             </p>
           </ScrollReveal>
           <ScrollReveal delay={0.15}>
-            <div className="mt-10 grid grid-cols-2 gap-6 sm:grid-cols-4">
-              <div className="rounded-lg border border-white/[0.06] bg-surface p-6 text-center">
-                <ShoppingBag className="mx-auto h-6 w-6 text-accent-gold" />
-                <p className="mt-3 text-2xl font-bold text-accent-gold sm:text-3xl font-mono">
-                  1,000+
-                </p>
-                <p className="mt-1 text-sm text-muted-foreground">Listings</p>
-              </div>
-              <div className="rounded-lg border border-white/[0.06] bg-surface p-6 text-center">
-                <Users className="mx-auto h-6 w-6 text-accent-gold" />
-                <p className="mt-3 text-2xl font-bold text-accent-gold sm:text-3xl font-mono">
-                  500+
-                </p>
-                <p className="mt-1 text-sm text-muted-foreground">Users</p>
-              </div>
-              <div className="rounded-lg border border-white/[0.06] bg-surface p-6 text-center">
-                <Shield className="mx-auto h-6 w-6 text-accent-gold" />
-                <p className="mt-3 text-2xl font-bold text-accent-gold sm:text-3xl font-mono">
+            <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 max-w-lg mx-auto">
+              <div className="rounded-lg border border-purple-500/20 bg-surface p-6 text-center transition-all hover:border-purple-500/40">
+                <Shield className="mx-auto h-6 w-6 text-purple-400" />
+                <p className="mt-3 text-2xl font-bold text-purple-400 sm:text-3xl font-mono">
                   9
                 </p>
                 <p className="mt-1 text-sm text-muted-foreground">Categories</p>
               </div>
-              <div className="rounded-lg border border-white/[0.06] bg-surface p-6 text-center">
-                <Star className="mx-auto h-6 w-6 text-accent-gold" />
-                <p className="mt-3 text-2xl font-bold text-accent-gold sm:text-3xl font-mono">
+              <div className="rounded-lg border border-teal-500/20 bg-surface p-6 text-center transition-all hover:border-teal-500/40">
+                <ShoppingBag className="mx-auto h-6 w-6 text-teal-400" />
+                <p className="mt-3 text-2xl font-bold text-teal-400 sm:text-3xl font-mono">
                   24/7
                 </p>
                 <p className="mt-1 text-sm text-muted-foreground">Available</p>
@@ -272,53 +269,7 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Section 6: Testimonials */}
-      <section className="py-12 sm:py-16">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <ScrollReveal>
-            <h2 className="text-center text-2xl font-bold text-soft-white font-playfair sm:text-3xl">
-              What Our Users Say
-            </h2>
-            <p className="mt-2 text-center text-sm text-muted-foreground">
-              Real stories from our community
-            </p>
-          </ScrollReveal>
-          <div className="mt-10 grid gap-6 sm:grid-cols-3">
-            {testimonials.map((testimonial, i) => (
-              <ScrollReveal key={testimonial.name} delay={i * 0.1}>
-                <div className="rounded-lg border border-white/[0.06] bg-surface p-6">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent-gold/20 text-sm font-semibold text-accent-gold">
-                      {testimonial.avatar}
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-soft-white">
-                        {testimonial.name}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {testimonial.role}
-                      </p>
-                    </div>
-                  </div>
-                  <p className="mt-4 text-sm text-muted-foreground leading-relaxed">
-                    &ldquo;{testimonial.quote}&rdquo;
-                  </p>
-                  <div className="mt-4 flex gap-0.5">
-                    {Array.from({ length: 5 }).map((_, idx) => (
-                      <Star
-                        key={idx}
-                        className="h-3.5 w-3.5 fill-accent-gold text-accent-gold"
-                      />
-                    ))}
-                  </div>
-                </div>
-              </ScrollReveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Section 7: Download App CTA */}
+      {/* Section 6: Download App CTA */}
       <section className="py-12 sm:py-16 bg-surface/30">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <ScrollReveal>
@@ -350,7 +301,7 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Section 8: Newsletter */}
+      {/* Section 7: Newsletter */}
       <section className="py-12 sm:py-16">
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
           <ScrollReveal>
