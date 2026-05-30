@@ -2,7 +2,7 @@
   "id": "FEAT-001",
   "type": "feat",
   "description": "Implement the full product creation flow: server action to insert products, wire the form to collect and submit field values, and add a 'become a seller' registration action so buyers can self-upgrade to seller role (which creates the required sellers record for RLS to pass)",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "Create src/features/dashboard/actions/product-actions.ts with two server actions: (a) createProduct - authenticates user via supabase.auth.getUser(), looks up users_extended to get the user's extended id, queries sellers table to get seller_id for that user_id, returns error if no seller record found, generates a URL-safe slug from title (lowercase + hyphens + timestamp suffix for uniqueness), inserts into products table with seller_id/title/slug/description/price/stock/status, returns {success: true, productId} or {error: string}. (b) registerAsSeller - authenticates user, checks if seller record already exists, if not creates one in sellers table with user_id and a business_name provided by the user, also upgrades users_extended.role from 'buyer' to 'seller', returns success or error.",
     "Rewrite src/features/dashboard/components/seller-product-form.tsx to: add useState for title, description, price, stock, category, condition, status (draft/published), plus loading and error/success state. On submit, call the createProduct server action. Show loading spinner on the submit button, display error messages in a red banner, and on success show a toast or redirect to /dashboard/products. Keep the existing visual styling and image slots UI intact (images remain placeholder for now since there is no storage bucket wired up yet). Add a 'Save as Draft' button that submits with status='draft' and a 'Publish' button that submits with status='published'.",
@@ -25,5 +25,5 @@
     "Run: npx tsc --noEmit (in /projects/sandbox/Khmer-Store)"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "pnpm lint required running pnpm approve-builds first to resolve ERR_PNPM_IGNORED_BUILDS for sharp and unrs-resolver. NODE_OPTIONS must be cleared to avoid proxy-bootstrap.js preload error. Both pnpm lint and tsc --noEmit pass cleanly."
 }
