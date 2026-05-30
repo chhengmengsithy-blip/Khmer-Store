@@ -1,0 +1,7 @@
+{
+  "task_id": "task-khmer-store-v3",
+  "task_description": "Upgrade Khmer Store from V2 to V3: replace complex e-commerce schema with simplified marketplace-listings model, fix auth to work with Supabase (signup, login, OAuth, password reset), build beautiful modern frontend with real data from Supabase, add full admin panel for managing users/listings/categories/reports, and ensure all pages use real database data with proper empty states.",
+  "status": "in_progress",
+  "feature_order": ["FEAT-001", "FEAT-002", "FEAT-003", "FEAT-004", "FEAT-005"],
+  "blocked_reason": null
+}

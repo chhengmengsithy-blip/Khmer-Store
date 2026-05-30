@@ -1,0 +1,38 @@
+{
+  "id": "FEAT-003",
+  "type": "feat",
+  "description": "Build the full user-facing frontend pages that fetch real data from Supabase: marketplace with search/filter/sort, listing detail page, post listing page with Supabase Storage upload, user dashboard with real stats/listings/favorites, messages page, and profile settings. All pages show empty states when no data exists and never use mock/fake data.",
+  "status": "pending",
+  "steps": [
+    "Create src/features/listings/actions/listing-actions.ts with server actions: getListings(filters), getListingById(id), createListing(formData), updateListing(id, formData), deleteListing(id), incrementViews(id). Each checks if supabase is configured and returns appropriate error or data.",
+    "Create src/features/listings/actions/favorite-actions.ts: toggleFavorite(listingId), getFavorites(), isFavorited(listingId)",
+    "Create src/features/messages/actions/message-actions.ts: getConversations(), getMessages(otherUserId), sendMessage(receiverId, content, listingId?), markAsRead(messageId)",
+    "Create src/features/listings/actions/report-actions.ts: createReport(listingId, reason, description)",
+    "Rewrite src/app/marketplace/page.tsx: server component that fetches listings from Supabase with search query (q param), category filter, sort (newest/price-asc/price-desc), show listing cards in responsive grid (1/2/3/4 cols), each card shows gradient placeholder if no image or first image from images array, title, price, location, relative time. Category filter chips at top. Empty state when no listings.",
+    "Rewrite src/app/listing/[id]/page.tsx: server component that fetches listing by ID from Supabase. Shows title, images carousel/gallery, price, description, condition badge, location, seller info (from profiles). Contact button, Favorite button (client component), Share button, Report button (opens dialog). Related listings section (same category). 404 if not found.",
+    "Rewrite src/app/post/page.tsx: protected client component with form fields (title, category dropdown fetched from DB, price, currency, condition, description, location, contact phone, images upload to Supabase Storage bucket 'listings'). On submit calls createListing action. Redirect to /listing/[id] on success.",
+    "Rewrite src/app/dashboard/page.tsx: server component that fetches user's listings count, total views, favorites received count from Supabase. Shows stats cards with real data. Lists user's own listings in a grid with edit/delete buttons. Tab for favorites showing favorited listings.",
+    "Rewrite src/app/dashboard/settings/page.tsx: client component that loads user profile from Supabase, pre-fills form (display_name, phone, location, avatar upload). On save calls supabase update on profiles table.",
+    "Rewrite src/app/messages/page.tsx: client component showing conversation list on left, messages on right. Fetch conversations (grouped by other user + listing). Send message form at bottom. Empty state when no messages.",
+    "Update src/components/shared/listing-card.tsx: accept Listing type prop, show image (or gradient placeholder based on category), title, price formatted with currency, location, relative time (using a simple timeAgo helper in src/lib/utils.ts)",
+    "Add timeAgo utility function to src/lib/utils.ts that converts ISO date to relative time string",
+    "Create src/app/category/[slug]/page.tsx: server component that fetches category by slug, then fetches listings in that category. Reuse listing grid pattern from marketplace."
+  ],
+  "acceptance_criteria": [
+    "Marketplace page fetches real listings from Supabase (shows empty state if none)",
+    "Listing detail page fetches by ID and renders full listing info",
+    "Post page submits to Supabase (creates real listing record)",
+    "Dashboard shows real user stats and their listings",
+    "Messages page shows real conversations",
+    "Settings page loads and saves real profile data",
+    "Category page fetches and displays listings filtered by category",
+    "No mock/fake/placeholder data in any component",
+    "All pages handle the case where Supabase is not configured gracefully",
+    "Build passes successfully"
+  ],
+  "verification": [
+    "Run 'unset NODE_OPTIONS && npx next build' in /projects/sandbox/Khmer-Store and confirm it compiles without errors"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}

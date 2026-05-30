@@ -1,0 +1,35 @@
+{
+  "id": "FEAT-002",
+  "type": "feat",
+  "description": "Implement complete V3 auth system with Google OAuth, password reset, email verification, auth callback route, and proper auth state management. Update the auth store to sync with Supabase session, add AuthProvider component, update header to show authenticated user menu, and ensure protected routes work correctly.",
+  "status": "pending",
+  "steps": [
+    "Update src/features/auth/actions/auth-actions.ts: fix signUp to pass full_name in user metadata (options.data.full_name), add signInWithGoogle action that calls supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo } }), update resetPassword to use proper redirect URL, remove verifyOtp (not needed for V3). Error message when Supabase is not configured should be: 'Please configure Supabase environment variables to use authentication'",
+    "Create src/app/auth/callback/route.ts - Next.js route handler that exchanges the auth code for a session (using supabase.auth.exchangeCodeForSession) and redirects to /dashboard. This handles both OAuth and email verification callbacks.",
+    "Create src/app/(auth)/verify/page.tsx - simple page showing 'Check your email to verify your account' message with a link back to sign-in",
+    "Create src/app/(auth)/reset-password/page.tsx - page with a form to enter new password, calls supabase.auth.updateUser({ password })",
+    "Create src/app/(auth)/forgot-password/page.tsx - page with email input that calls the resetPassword server action",
+    "Update src/features/auth/components/sign-in-form.tsx: add 'Forgot password?' link, add Google OAuth button (calls signInWithGoogle), update error message text",
+    "Update src/features/auth/components/sign-up-form.tsx: pass displayName to signUp action, update error handling",
+    "Create src/components/providers/auth-provider.tsx - client component that initializes Supabase auth listener (onAuthStateChange), syncs user to Zustand auth store, and provides auth context. Wrap the app layout with this provider.",
+    "Update src/stores/auth-store.ts: add profile field (Profile type from types), add setProfile action, update User type to use Supabase User type",
+    "Update src/components/layout/header.tsx: conditionally render user avatar dropdown (Dashboard, Settings, Sign Out) when authenticated, or Sign In button when not. Use the auth store to check authentication state.",
+    "Update src/middleware.ts (root level): add /admin prefix to PROTECTED_ROUTE_PREFIXES, add /auth/callback to PUBLIC_ROUTES, keep existing cookie-based auth check",
+    "Update .env.example to the simplified V3 version: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, NEXT_PUBLIC_SITE_URL=http://localhost:3000",
+    "Update src/app/layout.tsx to wrap children with AuthProvider"
+  ],
+  "acceptance_criteria": [
+    "src/app/auth/callback/route.ts exists and handles OAuth/email verification callbacks",
+    "src/app/(auth)/verify/page.tsx, reset-password/page.tsx, forgot-password/page.tsx all exist",
+    "Sign-in form has Google OAuth button and forgot password link",
+    "AuthProvider component exists and is used in the root layout",
+    "Header shows user menu when authenticated (using auth store state)",
+    ".env.example contains only the 3 required V3 env vars",
+    "Build passes successfully"
+  ],
+  "verification": [
+    "Run 'unset NODE_OPTIONS && npx next build' in /projects/sandbox/Khmer-Store and confirm it compiles without errors"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}

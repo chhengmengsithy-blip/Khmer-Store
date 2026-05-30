@@ -1,0 +1,32 @@
+{
+  "id": "FEAT-004",
+  "type": "feat",
+  "description": "Build the complete admin panel at /admin with dashboard stats, user management, listing management, category management, and reports management. Protected by role check (profiles.role === 'admin'). All data fetched from Supabase.",
+  "status": "pending",
+  "steps": [
+    "Create src/app/admin/layout.tsx: server component that checks if current user has role='admin' in profiles table. If not admin, redirect to /dashboard. Sidebar navigation with links: Dashboard, Users, Listings, Categories, Reports. Dark theme consistent with rest of app.",
+    "Create src/features/admin/actions/admin-actions.ts with server actions: getAdminStats() returns {totalUsers, totalListings, activeListings, pendingReports}, getAllUsers(page, search), updateUserRole(userId, role), deleteUser(userId), getAllListings(page, status filter), updateListingStatus(listingId, status), deleteListing(listingId), getAllCategories(), createCategory(data), updateCategory(id, data), deleteCategory(id), reorderCategories(orderedIds), getAllReports(status filter), updateReportStatus(reportId, status). All actions verify the caller is an admin first.",
+    "Create src/app/admin/page.tsx (Admin Dashboard): server component showing stats cards (Total Users, Total Listings, Active Listings, Pending Reports) fetched via getAdminStats(). Recent activity section showing latest listings and reports.",
+    "Create src/app/admin/users/page.tsx: server component with table of all users (name from profiles, email from auth metadata if available, role, joined date, listings count). Client component for actions: change role dropdown, delete button with confirmation dialog.",
+    "Create src/app/admin/listings/page.tsx: server component with table of all listings (title, seller name, category, status badge, date). Filter by status. Actions: approve (set active), reject (set removed), edit button, delete with confirmation.",
+    "Create src/app/admin/categories/page.tsx: client component showing list of categories with drag-to-reorder (or up/down buttons). Add category form (name, slug auto-generated, icon dropdown, description). Edit/delete each category.",
+    "Create src/app/admin/reports/page.tsx: server component with table of reports (reporter name, listing title, reason, status badge, date). Actions: mark resolved, mark dismissed, view listing link, remove offending listing.",
+    "Create reusable admin UI components in src/features/admin/components/: AdminStatsCard, AdminTable (generic table with pagination), StatusBadge, ConfirmDialog",
+    "Update src/middleware.ts to add /admin to PROTECTED_ROUTE_PREFIXES if not already there"
+  ],
+  "acceptance_criteria": [
+    "Admin layout protects all /admin/* routes (redirects non-admins)",
+    "Admin dashboard shows real stats from Supabase",
+    "Users page shows all users with role management",
+    "Listings page shows all listings with status management",
+    "Categories page allows CRUD and reordering",
+    "Reports page shows all reports with status updates",
+    "All admin actions verify admin role server-side",
+    "Build passes successfully"
+  ],
+  "verification": [
+    "Run 'unset NODE_OPTIONS && npx next build' in /projects/sandbox/Khmer-Store and confirm it compiles without errors"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}
