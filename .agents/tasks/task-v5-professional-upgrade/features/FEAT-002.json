@@ -1,0 +1,37 @@
+{
+  "id": "FEAT-002",
+  "type": "fix",
+  "description": "Fix all frontend pages, add missing routes (dashboard/listings, dashboard/favorites), ensure proper error handling, loading states, and responsive design across all pages. Fix admin panel to be fully functional.",
+  "status": "completed",
+  "steps": [
+    "Create src/app/dashboard/listings/page.tsx - a dedicated page for managing user's listings. Show a table/list of all listings with status badges, edit/delete actions using ConfirmDialog for deletion. Include search filtering. Use getUserListings() and deleteListing() server actions. Follow the dashboard page pattern.",
+    "Create src/app/dashboard/favorites/page.tsx - a dedicated page showing user's favorited listings. Use getUserFavorites() to get favorites. Display as a grid of ListingCard components with unfavorite action. Show EmptyState when no favorites.",
+    "Update src/app/dashboard/layout.tsx to add navigation tabs/links for Overview (/dashboard), My Listings (/dashboard/listings), Favorites (/dashboard/favorites), and Settings (/dashboard/settings). Add auth check - redirect to /sign-in if not authenticated (check supabase user). Show the user's name in the layout header.",
+    "Update src/app/listing/[id]/page.tsx to properly handle the case where listing is not found (show not-found state), add proper loading state, increment views via server action, show seller info with contact options, and add 'Message Seller' button that links to /messages. Ensure images gallery works with the existing ImageGallery component. Add breadcrumbs.",
+    "Update src/app/category/[slug]/page.tsx to properly fetch listings for the category using getListings({category: slug}), display them in a grid with ListingCard, show category name and description as page header, and handle empty state. Add breadcrumbs.",
+    "Update src/app/(auth)/reset-password/page.tsx to have a form with new password + confirm password fields, use Supabase's updateUser method via a server action. Show success toast and redirect to /sign-in after password update.",
+    "Ensure src/app/admin/users/page.tsx works properly - displays paginated user list with search, role change buttons, and delete confirmation. Uses getAllUsers, updateUserRole, deleteUser server actions. Show role badges (admin=gold, user=default).",
+    "Ensure src/app/admin/listings/page.tsx works properly - displays all listings (any status) with status filter tabs, approve/reject/remove/delete actions. Uses getAllListings and updateListingStatus/adminDeleteListing server actions.",
+    "Ensure src/app/admin/categories/page.tsx works properly - displays category list with add/edit/delete functionality. Has a form dialog for creating/editing categories. Uses getAllCategories, createCategory, updateCategory, deleteCategory server actions.",
+    "Ensure src/app/admin/reports/page.tsx works properly - displays reports with status filter, shows reporter name and listing title, has resolve/dismiss actions. Uses getAllReports and updateReportStatus server actions.",
+    "Ensure src/app/admin/settings/page.tsx has a proper settings page for admin (site name display, version info, placeholder for future settings). Static content is fine.",
+    "Update src/features/listings/actions/report-actions.ts to export a createReport server action that validates input (reason required), checks auth, and inserts into reports table. Include proper error handling.",
+    "Ensure the listing detail page's report-dialog.tsx uses the createReport action properly with a form (reason select + description textarea) and shows success/error toast."
+  ],
+  "acceptance_criteria": [
+    "/dashboard/listings route exists and renders a listing management page",
+    "/dashboard/favorites route exists and renders favorited listings",
+    "Dashboard layout has navigation tabs between sub-pages",
+    "Listing detail page handles not-found gracefully",
+    "Category page fetches and displays filtered listings",
+    "Reset password page has a working form UI",
+    "Admin users page shows user list with role management",
+    "Admin listings page shows all listings with moderation actions",
+    "Admin categories page has CRUD functionality",
+    "Admin reports page shows reports with resolve/dismiss",
+    "All pages build without TypeScript errors"
+  ],
+  "verification": ["Run `unset NODE_OPTIONS && pnpm build` and confirm successful compilation with all routes generated"],
+  "blocked_reason": null,
+  "findings": "All pages in the feature scope already existed and were well-implemented from prior work. Created the two missing pages (dashboard/listings and dashboard/favorites) as client components. Fixed dashboard layout nav links from hash fragments to proper routes. Updated admin settings version to V5.0.0. Build passes cleanly with all routes generated."
+}

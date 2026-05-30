@@ -1,0 +1,25 @@
+{
+  "id": "FEAT-001",
+  "type": "feat",
+  "description": "Create professional SVG logo component and update database schema with performance indexes. This covers the branding and backend infrastructure improvements.",
+  "status": "completed",
+  "steps": [
+    "Create src/components/shared/logo.tsx with two exported components: Logo (icon + 'Khmer Store' text) and LogoIcon (icon only). Design: a stylized 'KS' monogram inside a hexagonal/shield shape with gold gradient (#C6A769 to #D4B87A). The text 'Khmer Store' uses font-semibold with 'Store' in gold. Use SVG with proper viewBox. Both components accept className prop.",
+    "Create public/logo.svg as a standalone version of the LogoIcon SVG (just the icon, no text) for favicon/meta usage.",
+    "Update src/components/layout/header.tsx to import and use the Logo component instead of the plain text 'KhmerStore' span. Keep it compact - use LogoIcon on mobile and Logo on desktop (hidden/shown with responsive classes).",
+    "Update src/components/layout/footer.tsx to import and use the Logo component in the brand column instead of the plain text span.",
+    "Update supabase/migrations/001_schema.sql to add performance indexes after the table definitions: CREATE INDEX idx_listings_category_id ON listings(category_id); CREATE INDEX idx_listings_user_id ON listings(user_id); CREATE INDEX idx_listings_status ON listings(status); CREATE INDEX idx_listings_created_at ON listings(created_at DESC); CREATE INDEX idx_messages_sender_id ON messages(sender_id); CREATE INDEX idx_messages_receiver_id ON messages(receiver_id); CREATE INDEX idx_favorites_user_id ON favorites(user_id); CREATE INDEX idx_reports_status ON reports(status); Also add an admin policy for profiles: CREATE POLICY 'profiles_admin_all' ON profiles FOR ALL TO authenticated USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')); Add admin select policy for reports and messages for admins to query all: CREATE POLICY 'messages_admin_select' ON messages FOR SELECT TO authenticated USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin'));",
+    "Update the admin page (src/app/admin/page.tsx) to show version V5.0.0 instead of V4.0.0."
+  ],
+  "acceptance_criteria": [
+    "Logo and LogoIcon components render valid SVG with gold gradient",
+    "public/logo.svg file exists with the icon SVG",
+    "Header shows the Logo component with responsive behavior",
+    "Footer shows the Logo component",
+    "SQL migration includes all specified indexes and admin policies",
+    "Build succeeds without TypeScript errors"
+  ],
+  "verification": ["Run `unset NODE_OPTIONS && pnpm build` and confirm successful compilation"],
+  "blocked_reason": null,
+  "findings": "Build passes cleanly. Logo uses inline SVG with linearGradient for the gold effect. SheetTitle in header now wraps the Logo component directly."
+}

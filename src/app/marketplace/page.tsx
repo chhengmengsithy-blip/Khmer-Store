@@ -1,80 +1,110 @@
-"use client";
+import { Search, Package } from "lucide-react";
+import { ListingCard } from "@/components/shared/listing-card";
+import { EmptyState } from "@/components/shared/empty-state";
+import { Breadcrumbs } from "@/components/shared/breadcrumbs";
+import { getListings } from "@/features/listings/actions/listing-actions";
+import { MarketplaceFilters } from "./marketplace-filters";
+import { MarketplaceToolbar } from "./marketplace-toolbar";
+import { MarketplacePagination } from "./marketplace-pagination";
 
-import React, { useState } from "react";
-import { Search, SlidersHorizontal } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { FilterSidebar } from "@/features/marketplace/components/filter-sidebar";
-import { ProductGrid } from "@/features/marketplace/components/product-grid";
-import { SearchOverlay } from "@/features/marketplace/components/search-overlay";
-import { FadeIn } from "@/components/animations/motion-wrapper";
+interface MarketplacePageProps {
+  searchParams: Promise<{
+    q?: string;
+    category?: string;
+    sort?: string;
+    location?: string;
+    page?: string;
+    view?: string;
+    condition?: string;
+    price_min?: string;
+    price_max?: string;
+  }>;
+}
 
-export default function MarketplacePage() {
-  const [searchOpen, setSearchOpen] = useState(false);
+const ITEMS_PER_PAGE = 12;
+
+export default async function MarketplacePage({
+  searchParams,
+}: MarketplacePageProps) {
+  const params = await searchParams;
+  const search = params.q || "";
+  const category = params.category || "";
+  const sort = params.sort || "";
+  const view = params.view || "grid";
+  const page = Math.max(1, parseInt(params.page || "1", 10));
+
+  const { data: allListings } = await getListings({
+    search: search || undefined,
+    category: category || undefined,
+    sort: sort || undefined,
+  });
+
+  // Client-side pagination
+  const totalPages = Math.max(1, Math.ceil(allListings.length / ITEMS_PER_PAGE));
+  const currentPage = Math.min(page, totalPages);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const listings = allListings.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
   return (
-    <main className="min-h-screen bg-background">
-      <FadeIn>
-        {/* Search Header */}
-        <div className="border-b border-white/[0.06] bg-surface/50">
-          <div className="container mx-auto px-4 py-4">
-            {/* Breadcrumbs */}
-            <div className="mb-3 flex items-center gap-2 text-xs text-muted-foreground">
-              <span className="hover:text-soft-white cursor-pointer">Home</span>
-              <span>/</span>
-              <span className="text-soft-white">Marketplace</span>
+    <div className="min-h-screen pt-20">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-6">
+        {/* Breadcrumbs */}
+        <Breadcrumbs className="mb-4" />
+
+        {/* Layout: Sidebar + Main */}
+        <div className="flex gap-6">
+          {/* Sidebar Filters (desktop) */}
+          <MarketplaceFilters activeCategory={category} className="w-60 flex-shrink-0" />
+
+          {/* Main Content */}
+          <div className="flex-1 min-w-0">
+            {/* Toolbar: results count + sort + view toggle */}
+            <div className="mb-4">
+              <MarketplaceToolbar
+                totalResults={allListings.length}
+                activeSort={sort}
+                view={view}
+                activeCategory={category}
+              />
             </div>
 
-            {/* Search Bar */}
-            <div className="flex items-center gap-3">
-              <div
-                className="relative flex-1 cursor-pointer"
-                onClick={() => setSearchOpen(true)}
-              >
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <div className="flex h-10 w-full items-center rounded-lg border border-white/10 bg-elevated pl-10 pr-4 text-sm text-muted-foreground">
-                  Search products, sellers, categories...
-                  <span className="ml-auto hidden text-xs text-muted-foreground sm:block">
-                    Cmd+K
-                  </span>
+            {/* Listings */}
+            {listings.length > 0 ? (
+              <>
+                <div
+                  className={
+                    view === "list"
+                      ? "space-y-3"
+                      : "grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3"
+                  }
+                >
+                  {listings.map((listing) => (
+                    <ListingCard key={listing.id} listing={listing} />
+                  ))}
                 </div>
-              </div>
 
-              {/* Mobile Filter Toggle */}
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="border-white/10 lg:hidden"
-                  >
-                    <SlidersHorizontal className="h-4 w-4" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="left" className="w-80 bg-background border-white/[0.06] p-6">
-                  <FilterSidebar />
-                </SheetContent>
-              </Sheet>
-            </div>
+                {/* Pagination */}
+                <MarketplacePagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                />
+              </>
+            ) : (
+              <EmptyState
+                icon={search ? Search : Package}
+                title={search ? "No listings match your search" : "No listings yet"}
+                description={
+                  search
+                    ? "Try adjusting your search terms or filters"
+                    : "Be the first to post a listing on Khmer Store!"
+                }
+                actionLabel="Post a Listing"
+                actionHref="/post"
+              />
+            )}
           </div>
         </div>
-
-        {/* Main Content */}
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex gap-8">
-            {/* Desktop Filter Sidebar */}
-            <div className="hidden lg:block">
-              <FilterSidebar />
-            </div>
-
-            {/* Product Grid */}
-            <ProductGrid />
-          </div>
-        </div>
-      </FadeIn>
-
-      {/* Search Overlay */}
-      <SearchOverlay open={searchOpen} onOpenChange={setSearchOpen} />
-    </main>
+      </div>
+    </div>
   );
 }

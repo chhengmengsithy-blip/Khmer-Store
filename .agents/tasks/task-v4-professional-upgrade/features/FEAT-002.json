@@ -1,0 +1,29 @@
+{
+  "id": "FEAT-002",
+  "type": "feat",
+  "description": "Professional Layout + Homepage + SEO - Redesign the header with glassmorphism and enhanced navigation, redesign footer with multi-column layout, upgrade homepage with all V4 sections, add SEO infrastructure.",
+  "status": "completed",
+  "steps": [
+    "Rewrite src/components/layout/header.tsx - Professional redesign: Sticky glassmorphism (bg-background/70 backdrop-blur-xl on scroll). Logo left. Center: expandable search (hidden on mobile, icon triggers full-screen search overlay on mobile). Right actions: language switcher button (EN/KH toggle, UI only), notification bell icon, 'Sell Now' prominent gold button, user avatar dropdown (Dashboard, My Listings, Favorites, Messages, Settings, Sign Out). On mobile: clean hamburger + bottom tab bar handles main nav. Make search slide down from header on mobile tap.",
+    "Rewrite src/components/layout/footer.tsx - Professional multi-column footer: Brand column (logo, description, social icons - Facebook, Telegram, Instagram). Marketplace column (Browse, Categories, Post Listing, Featured). Company column (About, Contact, Careers placeholder, Press placeholder). Support column (Help Center placeholder, Safety Tips, Terms, Privacy). Newsletter section above columns (email input + subscribe button). Bottom bar: copyright, payment method icons placeholder, language.",
+    "Upgrade src/components/layout/mobile-nav.tsx - Add subtle top border glow effect. Active indicator as a small dot or pill above icon. Slightly larger touch targets. Smooth icon transitions. Keep same 5 items (Home, Search, Sell, Messages, Profile).",
+    "Rewrite src/app/page.tsx - Complete homepage redesign with these sections in order: (1) Hero: Large centered search bar, animated gradient background (subtle dark purple/blue gradient that moves slowly), headline 'Buy & Sell Anything in Cambodia', subtext, search component. (2) Popular Categories: Beautiful cards in 3-column grid with icon + name + listing count badge, scroll-reveal stagger animation. (3) Featured/Recent Listings: Grid of ListingCards fetched from DB (empty state if none). (4) How It Works: 3-step visual with icons and connecting lines/arrows. (5) Trust/Stats: Real counts from Supabase or zeros - animated counting numbers. (6) Testimonials: 3 placeholder testimonial cards with avatar, name, quote (static data). (7) Download App CTA: Design-only section with phone mockup placeholder and App Store/Play Store badge placeholders. (8) Newsletter: Email input + subscribe button + privacy note. All sections use ScrollReveal for entrance animations.",
+    "Create src/app/not-found.tsx - Custom 404 page: Centered layout with large '404' text (gradient gold), 'Page Not Found' heading, description text, animated floating search icon, 'Go Home' button and 'Browse Marketplace' link.",
+    "Create src/app/error.tsx - Custom error boundary page (client component): Shows error message, 'Try Again' button that calls reset(), 'Go Home' link. Professional design matching the theme.",
+    "Add SEO infrastructure: Create src/app/robots.ts (Next.js metadata robots file exporting default rules). Create src/app/sitemap.ts (generates sitemap with all static routes). Update src/app/layout.tsx to add JSON-LD structured data script for Organization. Add viewport meta. Ensure all page components can set dynamic metadata via generateMetadata where applicable.",
+    "Update src/app/layout.tsx - Add Google Fonts link for Inter (400,500,600,700) and JetBrains Mono (400,500). Keep existing structure. Add metadata.manifest for PWA-ready. Keep ThemeProvider with dark default."
+  ],
+  "acceptance_criteria": [
+    "Running 'unset NODE_OPTIONS && npx --yes next build' succeeds with no errors",
+    "Homepage renders all 8 sections as listed",
+    "Header shows glassmorphism effect with all navigation elements",
+    "Footer has 4 link columns + newsletter section",
+    "Custom 404 and error pages exist and compile",
+    "robots.ts and sitemap.ts files exist in src/app/"
+  ],
+  "verification": [
+    "Run 'unset NODE_OPTIONS && npx --yes next build' in /projects/sandbox/Khmer-Store and confirm zero errors and all routes listed"
+  ],
+  "blocked_reason": null,
+  "findings": "Google Fonts cannot be fetched from the sandbox environment (COMMON_DEPENDENCIES network mode blocks fonts.googleapis.com). Removed next/font/google imports and relied on the CSS-based font declarations already present in globals.css (--font-sans: Inter, --font-mono: JetBrains Mono) which fall back to system fonts. The lucide-react version (1.17.0) does not export 'Instagram' icon - used 'Camera' icon as a substitute. Build passes all 26 routes successfully including new robots.txt and sitemap.xml."
+}

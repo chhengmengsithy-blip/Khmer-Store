@@ -1,17 +1,8 @@
-import { HeroSection } from "@/components/sections/hero-section";
-import { FeaturedCategories } from "@/components/sections/featured-categories";
-import { FeaturedProducts } from "@/components/sections/featured-products";
-import { TrustSection } from "@/components/sections/trust-section";
-import { CTASection } from "@/components/sections/cta-section";
+import { getListings } from "@/features/listings/actions/listing-actions";
+import { HomeContent } from "@/components/home/home-content";
 
-export default function Home() {
-  return (
-    <main className="flex min-h-screen flex-col">
-      <HeroSection />
-      <FeaturedCategories />
-      <FeaturedProducts />
-      <TrustSection />
-      <CTASection />
-    </main>
-  );
+export default async function Home() {
+  const { data: listings } = await getListings({ limit: 8 });
+
+  return <HomeContent listings={listings} />;
 }

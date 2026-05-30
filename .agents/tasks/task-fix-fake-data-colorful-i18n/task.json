@@ -1,0 +1,28 @@
+{
+  "task_id": "task-fix-fake-data-colorful-i18n",
+  "task_description": "Fix three issues: 1) Remove all fake/hardcoded data (testimonials, fake stats, fake team members), 2) Make the frontend more vibrant and colorful instead of just dark/black, 3) Make the language switcher actually work with English and Khmer translations",
+  "status": "completed",
+  "feature_order": ["FEAT-001", "FEAT-002"],
+  "blocked_reason": null,
+  "verification": {
+    "build": "pass",
+    "tests": "skipped",
+    "test_quality": "skipped",
+    "docker_build": "skipped",
+    "summary": "pnpm build passes cleanly - TypeScript compiles, all 29 pages generate successfully. No tests exist in this project. No Dockerfile present."
+  },
+  "review_fixes": {
+    "status": "completed",
+    "fixes_applied": [
+      "Fixed corrupted Khmer translations (removed 'org' fragments from visionText, innovationDesc, valuesDesc, trustDesc, safetyDesc, stayUpdatedDesc)",
+      "Added hydration-safe pattern to useTranslation hook using mounted state",
+      "Created LocaleEffect component that updates document.documentElement.lang",
+      "Added CSS rule to apply Noto Sans Khmer font when html lang is km",
+      "Replaced hardcoded 'Sign Up' in mobile sheet with t.nav.signUp translation key",
+      "Added signUp key to en.ts and kh.ts"
+    ],
+    "skipped": [
+      "SSR loss on homepage (issue #4) - acceptable pattern per review instructions"
+    ]
+  }
+}

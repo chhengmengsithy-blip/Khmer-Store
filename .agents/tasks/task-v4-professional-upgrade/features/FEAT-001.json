@@ -1,0 +1,32 @@
+{
+  "id": "FEAT-001",
+  "type": "feat",
+  "description": "Design System Foundation + Shared UI Components - Upgrade globals.css with refined V4 color tokens, typography, and animations. Create all premium shared components that other features depend on.",
+  "status": "completed",
+  "steps": [
+    "Update src/app/globals.css: Refine dark theme colors to V4 spec (Background: #0A0B0F, Surface: #141519, Elevated: #1C1D24, Card: #1A1B21, Border: rgba(255,255,255,0.06), Gold: #C6A769, Gold hover: #D4B87A). Add Inter font import and JetBrains Mono. Add new animation keyframes for slide-up, scale-in, count-up, shimmer. Add utility classes for glassmorphism (.glass), gradient text (.gradient-text), gold glow (.glow-gold).",
+    "Create src/components/shared/stats-card.tsx - Professional stat card with icon, value, label, optional trend badge (up/down percentage), and number counting animation on mount using framer-motion.",
+    "Create src/components/shared/breadcrumbs.tsx - Auto-generated breadcrumbs from pathname. Uses usePathname hook. Renders Home > path segments as links. Last segment is plain text. Styled with muted-foreground colors.",
+    "Create src/components/shared/loading-skeleton.tsx - Multiple skeleton variants: ListingCardSkeleton, StatsCardSkeleton, TableRowSkeleton, ProfileSkeleton, ChatSkeleton. Use the existing skeleton.tsx primitive with pulse animation.",
+    "Create src/components/shared/confirm-dialog.tsx - Reusable confirmation modal using Radix Dialog. Props: title, description, confirmLabel, cancelLabel, variant (danger/default), onConfirm, open/onOpenChange. Uses existing dialog.tsx component.",
+    "Create src/components/shared/data-table.tsx - Reusable table component with: search input, column headers with sort indicators, rows, pagination (numbered pages + prev/next), optional bulk selection checkboxes. Props: columns config array, data array, searchPlaceholder, onSearch, pagination state.",
+    "Create src/components/shared/image-upload.tsx - Drag & drop image upload component. Shows grid of preview thumbnails. Supports remove, reorder (move left/right buttons). Max images prop. Accepts file input. Preview with object-cover in rounded boxes.",
+    "Create src/components/shared/price-input.tsx - Input with currency selector (USD/KHR) inline. Uses JetBrains Mono font for the number. Shows currency symbol/code prefix.",
+    "Create src/components/shared/pagination.tsx - Numbered page buttons with prev/next arrows. Props: currentPage, totalPages, onPageChange. Shows ellipsis for large page counts. Gold accent on active page.",
+    "Upgrade src/components/shared/listing-card.tsx - Add: gradient overlay on image for price badge (bottom-left), seller avatar mini thumbnail (bottom-right of image), favorite heart button (top-right, animated), subtle lift + shadow on hover, image loading skeleton state. Keep existing props interface compatible.",
+    "Upgrade src/components/shared/category-card.tsx - Add: listing count badge, smoother hover animation with scale, subtle gradient background on hover, larger icon size.",
+    "Upgrade src/components/shared/empty-state.tsx - Add: subtle animated illustration (floating icon with gentle bob animation via framer-motion), better spacing, optional secondary action button.",
+    "Upgrade src/components/shared/search-bar.tsx - Professional redesign: rounded-full container with subtle border, integrated category dropdown, location dropdown, prominent search button. On mobile: simplified single search input that expands. Animated focus state with gold glow."
+  ],
+  "acceptance_criteria": [
+    "Running 'unset NODE_OPTIONS && npx --yes next build' in /projects/sandbox/Khmer-Store succeeds with no TypeScript errors",
+    "All new component files exist in src/components/shared/ with proper TypeScript types and exports",
+    "globals.css contains updated V4 color tokens and new animation keyframes",
+    "No existing component imports break - listing-card, category-card, empty-state, search-bar maintain backward-compatible interfaces"
+  ],
+  "verification": [
+    "Run 'unset NODE_OPTIONS && npx --yes next build' in /projects/sandbox/Khmer-Store and confirm zero errors"
+  ],
+  "blocked_reason": null,
+  "findings": "EmptyState kept as server component (no 'use client') since it receives LucideIcon props from server pages - used CSS animate-float instead of framer-motion for the floating animation. ListingCard upgraded to client component (uses useState for favorite/image loading state) which is fine since Listing data is serializable. CategoryCard kept as server component. SearchBar was already a client component. Build passes all 24 routes successfully."
+}

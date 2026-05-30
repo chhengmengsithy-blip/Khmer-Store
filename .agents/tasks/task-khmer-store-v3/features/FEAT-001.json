@@ -1,0 +1,31 @@
+{
+  "id": "FEAT-001",
+  "type": "feat",
+  "description": "Replace the V2 database schema with the simplified V3 schema. Create a single consolidated migration file at supabase/migrations/001_schema.sql that drops all V2 complexity (escrow, wallets, orders, products, sellers) and implements the V3 marketplace-listings model. Update TypeScript types and database.types.ts to match the new schema.",
+  "status": "completed",
+  "steps": [
+    "Delete all existing migration files in supabase/migrations/ (001_initial_schema.sql, 002_indexes.sql, 003_rls_policies.sql, 004_functions.sql)",
+    "Create supabase/migrations/001_schema.sql with the V3 schema containing: profiles table (id uuid PK references auth.users, full_name, avatar_url, phone, location, role 'user'|'admin' default 'user', created_at, updated_at), categories table (id uuid PK, name, slug unique, icon, description, parent_id self-reference, order_index int default 0, created_at), listings table (id uuid PK, user_id references profiles, category_id references categories, title, description, price numeric, currency default 'USD', condition 'new'|'used'|'like_new', location, contact_phone, contact_name, images text[], status 'active'|'pending'|'sold'|'removed' default 'active', views_count default 0, created_at, updated_at), favorites table (id, user_id, listing_id, created_at, unique(user_id, listing_id)), messages table (id, sender_id, receiver_id, listing_id nullable, content, is_read default false, created_at), reports table (id, reporter_id, listing_id, reason, description, status 'pending'|'resolved'|'dismissed' default 'pending', created_at)",
+    "Add RLS policies in the same file: profiles - anyone can SELECT, authenticated users can UPDATE where id = auth.uid(), authenticated users can INSERT where id = auth.uid(). listings - anyone can SELECT where status='active', authenticated users can INSERT/UPDATE/DELETE their own. categories - anyone can SELECT, only role='admin' in profiles can INSERT/UPDATE/DELETE. favorites - authenticated users can SELECT/INSERT/DELETE their own. messages - users can SELECT/INSERT where they are sender or receiver. reports - authenticated users can INSERT, admins can SELECT all.",
+    "Add auto-create profile trigger: on auth.users INSERT, create a profiles row with id = NEW.id, role = 'user'",
+    "Add seed data for 9 categories: Vehicles (Car), Property (Home), Electronics (Smartphone), Jobs (Briefcase), Services (Wrench), Fashion (Shirt), Home & Garden (Flower2), Sports & Leisure (Dumbbell), Digital Products (Gamepad2) - with slugs and order_index 1-9",
+    "Add updated_at trigger function and apply to profiles, listings, categories",
+    "Rewrite src/lib/supabase/database.types.ts to match the new V3 schema with proper types for all 6 tables (profiles, categories, listings, favorites, messages, reports). Remove all V2 types (sellers, products, orders, wallets, etc.)",
+    "Rewrite src/types/index.ts to export V3-compatible types: Profile (with role: 'user' | 'admin'), Listing (with status, condition, images array), Category, Message (with is_read), Report, Favorite",
+    "Delete unused V2 service files: src/services/escrow-service.ts, src/services/payment-service.ts, src/services/fraud-service.ts, src/services/notification-service.ts",
+    "Delete src/constants/roles.ts (V2 role system no longer needed)"
+  ],
+  "acceptance_criteria": [
+    "supabase/migrations/001_schema.sql exists and is valid SQL creating all 6 tables with RLS, triggers, and seed data",
+    "No other migration files exist in supabase/migrations/",
+    "src/lib/supabase/database.types.ts reflects the new 6-table schema",
+    "src/types/index.ts exports clean V3 types",
+    "No references to V2 tables (sellers, products, orders, wallets, etc.) remain in type files",
+    "Build passes with unset NODE_OPTIONS && npx next build"
+  ],
+  "verification": [
+    "Run 'unset NODE_OPTIONS && npx next build' in /projects/sandbox/Khmer-Store and confirm it compiles without errors"
+  ],
+  "blocked_reason": null,
+  "findings": "Build passes cleanly. Kept backward-compatible User interface in types/index.ts so auth-store.ts continues to work without changes. The src/constants/index.ts was cleaned up to remove V2 constants (ROLES, ORDER_STATUSES, etc.) but it is not imported anywhere so no breakage. The listing-card.tsx uses the Listing type which now has nullable location field - this is fine since the component already handles display correctly."
+}

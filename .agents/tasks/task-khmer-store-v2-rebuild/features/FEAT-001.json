@@ -1,0 +1,39 @@
+{
+  "id": "FEAT-001",
+  "type": "chore",
+  "description": "Clean up V1: Remove 3D libraries and fake data, update package.json, update types and config for V2 marketplace model (classified ads like khmer24.com). Set up the foundation for a clean rebuild.",
+  "status": "completed",
+  "steps": [
+    "1. Update package.json: Remove @react-three/fiber, @react-three/drei, @splinetool/react-spline, @splinetool/runtime, and @types/three from dependencies/devDependencies. Run pnpm install after.",
+    "2. Delete the 3D component directory entirely: src/components/3d/ (hero-scene-canvas.tsx, hero-scene.tsx, scene-loader.tsx, .gitkeep)",
+    "3. Update src/types/index.ts to match a classified ads marketplace model. Replace the luxury e-commerce types with: Listing (id, user_id, category_id, title, slug, description, price, currency, location, contact_phone, images, condition, is_active, created_at, updated_at), Category (id, name, slug, icon, parent_id, description), UserProfile (id, user_id, display_name, avatar_url, phone, location, created_at), Message (id, listing_id, sender_id, receiver_id, content, is_read, created_at). Remove Product, Seller, Order, OrderItem, Review, CartItem, Notification types. Keep User type but simplify role to 'user' | 'admin'.",
+    "4. Update src/config/site.ts: Change description to 'Cambodia's premier online marketplace - Buy and sell vehicles, property, electronics, jobs, and more.' Update keywords to include cambodia, marketplace, classified, buy, sell, khmer.",
+    "5. Delete src/stores/cart-store.ts (no shopping cart in classified ads). Keep auth-store.ts.",
+    "6. Delete the following V1 feature directories that are no longer needed: src/features/checkout/ (entire directory), src/features/seller/ (entire directory), src/features/admin/ (entire directory - will rebuild simplified version later).",
+    "7. Delete V1 app routes that are being removed: src/app/checkout/, src/app/sellers/, src/app/admin/, src/app/api/webhooks/ (stripe and paypal routes). Also delete src/app/dashboard/wallet/ and src/app/dashboard/orders/.",
+    "8. Delete V1 security library files that are overly complex: src/lib/security/ (captcha.ts, device-fingerprint.ts, ip-monitor.ts, rate-limiter.ts). Also delete src/lib/auth/ (permissions.ts, require-role.ts).",
+    "9. Add a categories constant file at src/constants/categories.ts with the khmer24-style categories: Vehicles (subcategories: Cars, Motorcycles, Bicycles), Property (Houses, Apartments, Land), Electronics (Phones, Computers, TVs), Jobs (Full-time, Part-time, Freelance), Services (Repair, Tutoring, Delivery), Fashion (Clothing, Shoes, Accessories), Home & Garden, Sports & Leisure, Digital Products (Game Accounts, Software, Digital Art). Each category should have: id, name, slug, icon (lucide icon name string), subcategories array.",
+    "10. Update next.config.ts: Remove the unsplash remote pattern (no fake images). Keep supabase pattern.",
+    "11. Simplify src/middleware.ts: Remove all references to rate-limiter imports, remove rate limiting logic, remove admin/seller/verification route checks. Keep only: public route check, basic auth cookie check for protected routes (/dashboard, /messages, /post), and the isSupabaseConfigured graceful fallback. Update PUBLIC_ROUTES to include /about, /contact, /marketplace, /category, all category subpaths. Update PROTECTED_ROUTE_PREFIXES to just /dashboard, /messages, /post.",
+    "12. Update src/lib/supabase/client.ts to add a graceful check: export a function isSupabaseConfigured() that returns boolean. Modify createClient to return null if not configured.",
+    "13. Update src/lib/supabase/server.ts similarly - add graceful fallback that returns null if env vars not set.",
+    "14. Run pnpm install to ensure node_modules is clean after removing 3D packages."
+  ],
+  "acceptance_criteria": [
+    "package.json has no react-three, splinetool, or three-related dependencies",
+    "src/components/3d/ directory does not exist",
+    "src/types/index.ts contains Listing, Category, UserProfile, Message types instead of Product/Order/Seller types",
+    "src/constants/categories.ts exists with 9 main categories matching khmer24 style",
+    "src/features/checkout/, src/features/seller/, src/features/admin/ directories do not exist",
+    "src/app/checkout/, src/app/sellers/, src/app/admin/, src/app/api/webhooks/ do not exist",
+    "src/lib/security/ directory does not exist",
+    "src/stores/cart-store.ts does not exist",
+    "middleware.ts compiles without import errors",
+    "Supabase client/server files have graceful null fallback when env vars missing"
+  ],
+  "verification": [
+    "Run: cd /projects/sandbox/Khmer-Store && pnpm install && pnpm build 2>&1 | tail -30 (may have page-level errors from deleted features, but package resolution should work)"
+  ],
+  "blocked_reason": null,
+  "findings": "Build passes cleanly with no errors. Lint passes with no warnings. Had to also update src/components/sections/hero-section.tsx because it imported from the deleted 3D directory. Had to add null checks to src/features/auth/actions/auth-actions.ts and verification-actions.ts because createClient() now returns null when Supabase env vars are missing. The lucide-react icon imports in categories.ts were removed since icons are stored as string names, not component references. The isSupabaseConfigured function in src/lib/supabase/middleware.ts was already present before this change - no modification needed there beyond adding the named export to the middleware import statement."
+}

@@ -1,40 +1,15 @@
-export type UserRole = "buyer" | "seller" | "admin" | "moderator";
-
-export type VerificationStatus =
-  | "pending"
-  | "verified"
-  | "rejected"
-  | "suspended";
-
-export type OrderStatus =
-  | "pending"
-  | "confirmed"
-  | "processing"
-  | "shipped"
-  | "delivered"
-  | "cancelled"
-  | "refunded";
-
-export type PaymentMethod = "card" | "bank_transfer" | "crypto" | "cod";
-
-export interface User {
-  id: string;
-  email: string;
-  role: UserRole;
-  created_at: string;
-  updated_at: string;
-}
+export type UserRole = "user" | "admin";
+export type ListingStatus = "active" | "pending" | "sold" | "removed";
+export type ListingCondition = "new" | "used" | "like_new";
+export type ReportStatus = "pending" | "resolved" | "dismissed";
 
 export interface Profile {
   id: string;
-  user_id: string;
-  full_name: string;
+  full_name: string | null;
   avatar_url: string | null;
   phone: string | null;
-  address: string | null;
-  city: string | null;
-  country: string | null;
-  bio: string | null;
+  location: string | null;
+  role: UserRole;
   created_at: string;
   updated_at: string;
 }
@@ -43,95 +18,64 @@ export interface Category {
   id: string;
   name: string;
   slug: string;
+  icon: string | null;
   description: string | null;
-  image_url: string | null;
   parent_id: string | null;
+  order_index: number;
   created_at: string;
 }
 
-export interface Product {
-  id: string;
-  seller_id: string;
-  category_id: string;
-  name: string;
-  slug: string;
-  description: string;
-  price: number;
-  compare_at_price: number | null;
-  currency: string;
-  images: string[];
-  stock: number;
-  is_active: boolean;
-  is_featured: boolean;
-  metadata: Record<string, unknown> | null;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Seller {
+export interface Listing {
   id: string;
   user_id: string;
-  store_name: string;
-  store_slug: string;
-  store_description: string | null;
-  store_logo: string | null;
-  store_banner: string | null;
-  verification_status: VerificationStatus;
-  rating: number;
-  total_sales: number;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Order {
-  id: string;
-  buyer_id: string;
-  seller_id: string;
-  status: OrderStatus;
-  total: number;
-  currency: string;
-  payment_method: PaymentMethod;
-  shipping_address: string;
-  tracking_number: string | null;
-  notes: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface OrderItem {
-  id: string;
-  order_id: string;
-  product_id: string;
-  quantity: number;
-  unit_price: number;
-  total_price: number;
-}
-
-export interface Review {
-  id: string;
-  product_id: string;
-  buyer_id: string;
-  rating: number;
-  comment: string | null;
-  images: string[];
-  is_verified_purchase: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Notification {
-  id: string;
-  user_id: string;
-  type: string;
+  category_id: string | null;
   title: string;
-  message: string;
-  is_read: boolean;
-  metadata: Record<string, unknown> | null;
+  description: string | null;
+  price: number;
+  currency: string;
+  condition: ListingCondition;
+  location: string | null;
+  contact_phone: string | null;
+  contact_name: string | null;
+  images: string[];
+  status: ListingStatus;
+  views_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Favorite {
+  id: string;
+  user_id: string;
+  listing_id: string;
   created_at: string;
 }
 
-export interface CartItem {
-  product_id: string;
-  product: Product;
-  quantity: number;
+export interface Message {
+  id: string;
+  sender_id: string;
+  receiver_id: string;
+  listing_id: string | null;
+  content: string;
+  is_read: boolean;
+  created_at: string;
+}
+
+export interface Report {
+  id: string;
+  reporter_id: string;
+  listing_id: string;
+  reason: string;
+  description: string | null;
+  status: ReportStatus;
+  created_at: string;
+}
+
+// Keep User type for backward compatibility with auth-store
+export interface User {
+  id: string;
+  email: string;
+  role: UserRole;
+  created_at: string;
+  updated_at: string;
 }

@@ -1,37 +1,6 @@
-export const ROLES = {
-  BUYER: "buyer",
-  SELLER: "seller",
-  ADMIN: "admin",
-  MODERATOR: "moderator",
-} as const;
-
-export const VERIFICATION_STATUSES = {
-  PENDING: "pending",
-  VERIFIED: "verified",
-  REJECTED: "rejected",
-  SUSPENDED: "suspended",
-} as const;
-
-export const ORDER_STATUSES = {
-  PENDING: "pending",
-  CONFIRMED: "confirmed",
-  PROCESSING: "processing",
-  SHIPPED: "shipped",
-  DELIVERED: "delivered",
-  CANCELLED: "cancelled",
-  REFUNDED: "refunded",
-} as const;
-
-export const PAYMENT_METHODS = {
-  CARD: "card",
-  BANK_TRANSFER: "bank_transfer",
-  CRYPTO: "crypto",
-  COD: "cod",
-} as const;
-
 export const APP_NAME = "Khmer Store";
 export const APP_DESCRIPTION =
-  "A luxury marketplace platform showcasing premium Cambodian products and artisanal craftsmanship.";
+  "Cambodia's marketplace for buying and selling.";
 
 export const DEFAULT_CURRENCY = "USD";
 export const DEFAULT_LOCALE = "en";

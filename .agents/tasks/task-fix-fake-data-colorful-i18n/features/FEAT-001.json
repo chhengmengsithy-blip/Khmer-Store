@@ -1,0 +1,32 @@
+{
+  "id": "FEAT-001",
+  "type": "fix",
+  "description": "Remove all fake/hardcoded data and make the frontend more vibrant and colorful (not just dark/black). Remove testimonials from homepage, remove fake stats and fake team from about page. Revamp the color system to be more visually interesting with gradients, category-specific colors, and modern vibrant dark theme (like Linear.app or Vercel).",
+  "status": "completed",
+  "steps": [
+    "1. Update src/app/globals.css: Add new color variables for category-specific colors (vehicles=blue #3B82F6, property=emerald #10B981, electronics=purple #8B5CF6, jobs=amber #F59E0B, services=teal #14B8A6, fashion=pink #EC4899, home-garden=lime #84CC16, sports=red #EF4444, digital-products=indigo #6366F1). Add gradient utility classes (gradient-purple-blue, gradient-blue-teal, gradient-vibrant-hero). Add glow effects. Add animated gradient background keyframes. Keep the dark theme but add colorful accents.",
+    "2. Update src/app/page.tsx: REMOVE the entire testimonials section (Section 6 with fake names Sokha Chan, Pheakdey Lim, Channary Vong) completely. Update the Hero section to have a more vibrant animated gradient background with purple/blue/teal/gold colors. Update the 'Trust/Stats' section (Section 5) to remove fake numbers like '1,000+' and '500+' - instead just show the 9 categories and 24/7 availability as those are real facts, or remove the misleading stats. Make the How It Works section more colorful with different colored icons per step. Make the overall page feel more vibrant.",
+    "3. Update src/app/about/page.tsx: REMOVE the fake stats array entirely (the ones showing '10K+ Active Users', '5K+ Listings Posted') - remove that whole stats section rendering. REMOVE the entire 'Our Team' section with fake team members (Sothea Chan, Vicheka Phan, Sreyleak Mao). Keep the Mission, Vision, Values, and How It Works sections as those are real content. Make the remaining sections more colorful.",
+    "4. Update src/components/shared/category-card.tsx: Give each category a unique color accent instead of just gold everywhere. Use the category slug to determine color. Add a colored top border or gradient accent unique to each category. Make the icon container use the category-specific color.",
+    "5. Update src/components/shared/listing-card.tsx: Add a subtle category color indicator (small colored dot or thin top border). Make the hover state more vibrant with a category-colored glow instead of just gold.",
+    "6. Update src/components/layout/header.tsx: Add a subtle gradient glow line at the top of the header. Make the 'Sell Now' button more vibrant with a gold glow effect on hover.",
+    "7. Update src/components/layout/footer.tsx: Add subtle gradient accents to make it less flat/boring. Social icons should have colorful hover states (not just gold).",
+    "8. Update src/components/layout/mobile-nav.tsx: Add more color to the active state - use a subtle gradient background for the active item instead of just text color change.",
+    "9. Update src/components/shared/empty-state.tsx: Add a soft gradient background behind the icon to make empty states look less stark."
+  ],
+  "acceptance_criteria": [
+    "No fake testimonials exist anywhere in the codebase (Sokha Chan, Pheakdey Lim, Channary Vong removed)",
+    "No fake stats exist (10K+ Active Users, 5K+ Listings removed from about page)",
+    "No fake team members exist (Sothea Chan, Vicheka Phan, Sreyleak Mao removed)",
+    "Homepage stats section only shows verifiable facts (9 categories, 24/7 availability) or is removed",
+    "Category cards each have a unique color accent (not all gold)",
+    "Hero section has a vibrant multi-color gradient background",
+    "The overall theme feels dark-but-colorful (like Linear/Vercel) not dark-and-boring",
+    "pnpm build completes without errors"
+  ],
+  "verification": [
+    "Run: cd /projects/sandbox/Khmer-Store && pnpm build"
+  ],
+  "blocked_reason": null,
+  "findings": "Build passes with NODE_OPTIONS='' npx next build (the default pnpm build has a proxy-bootstrap preload issue but the actual Next.js compilation and page generation succeeds cleanly). All fake data removed, vibrant colors added across 9 files. No tests exist to run."
+}
