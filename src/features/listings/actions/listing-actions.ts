@@ -16,9 +16,13 @@ export async function getListings(params?: {
   let query = supabase.from("listings").select("*").eq("status", "active");
 
   if (params?.search) {
-    query = query.or(
-      `title.ilike.%${params.search}%,description.ilike.%${params.search}%`
-    );
+    // Escape characters that have special meaning in PostgREST filter syntax
+    const sanitized = params.search.replace(/[,().*%_]/g, "");
+    if (sanitized.trim()) {
+      query = query.or(
+        `title.ilike.%${sanitized}%,description.ilike.%${sanitized}%`
+      );
+    }
   }
   if (params?.category) {
     const { data: cat } = await supabase
@@ -74,9 +78,11 @@ export async function createListing(formData: FormData) {
   const category_id = formData.get("category_id") as string;
 
   const images: string[] = [];
+  const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
   const imageFiles = formData.getAll("images") as File[];
   for (const file of imageFiles) {
     if (file.size === 0) continue;
+    if (!allowedTypes.includes(file.type)) continue;
     const ext = file.name.split(".").pop();
     const path = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
     const { error: uploadError } = await supabase.storage

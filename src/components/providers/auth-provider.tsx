@@ -16,12 +16,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session) {
+        // Fetch profile to get the actual role
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", session.user.id)
+          .single();
+
         setUser({
           id: session.user.id,
           email: session.user.email || "",
-          role: "user",
+          role: (profile?.role as "user" | "admin") || "user",
           created_at: session.user.created_at,
           updated_at: session.user.updated_at || session.user.created_at,
         });
@@ -37,12 +44,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session) {
+        // Fetch profile to get the actual role
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", session.user.id)
+          .single();
+
         setUser({
           id: session.user.id,
           email: session.user.email || "",
-          role: "user",
+          role: (profile?.role as "user" | "admin") || "user",
           created_at: session.user.created_at,
           updated_at: session.user.updated_at || session.user.created_at,
         });

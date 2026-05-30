@@ -163,6 +163,10 @@ CREATE POLICY "reports_insert_own" ON reports
   FOR INSERT TO authenticated
   WITH CHECK (reporter_id = auth.uid());
 
+CREATE POLICY "reports_select_own" ON reports
+  FOR SELECT TO authenticated
+  USING (reporter_id = auth.uid());
+
 CREATE POLICY "reports_select_admin" ON reports
   FOR SELECT TO authenticated
   USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin'));
@@ -216,3 +220,15 @@ INSERT INTO categories (name, slug, icon, description, order_index) VALUES
 ('Home & Garden', 'home-garden', 'Flower2', 'Furniture, decor, and garden supplies', 7),
 ('Sports & Leisure', 'sports-leisure', 'Dumbbell', 'Sports equipment and outdoor activities', 8),
 ('Digital Products', 'digital-products', 'Gamepad2', 'Game accounts, software, and digital art', 9);
+
+-- ============================================================
+-- RPC FUNCTIONS
+-- ============================================================
+
+-- Increment listing views
+CREATE OR REPLACE FUNCTION increment_views(listing_id UUID)
+RETURNS VOID AS $$
+BEGIN
+  UPDATE listings SET views_count = views_count + 1 WHERE id = listing_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;

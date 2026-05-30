@@ -74,6 +74,14 @@ export async function updateUserRole(userId: string, role: "user" | "admin") {
   const { supabase } = await verifyAdmin();
   if (!supabase) return { error: "Not authorized" };
 
+  // Prevent admin from demoting themselves
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (user && user.id === userId) {
+    return { error: "You cannot change your own role" };
+  }
+
   const { error } = await supabase
     .from("profiles")
     .update({ role })
