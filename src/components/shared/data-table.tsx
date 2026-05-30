@@ -84,6 +84,23 @@ export function DataTable<T>({
     onSearch?.(value);
   };
 
+  // Sort data by the active sort key/direction before rendering
+  const sortedData = (() => {
+    if (!sortKey) return data;
+    const sorted = [...data].sort((a, b) => {
+      const aVal = (a as Record<string, unknown>)[sortKey];
+      const bVal = (b as Record<string, unknown>)[sortKey];
+      if (aVal == null && bVal == null) return 0;
+      if (aVal == null) return 1;
+      if (bVal == null) return -1;
+      if (typeof aVal === "number" && typeof bVal === "number") {
+        return aVal - bVal;
+      }
+      return String(aVal).localeCompare(String(bVal));
+    });
+    return sortDirection === "desc" ? sorted.reverse() : sorted;
+  })();
+
   const SortIcon = ({ columnKey }: { columnKey: string }) => {
     if (sortKey !== columnKey) {
       return <ChevronsUpDown className="h-3.5 w-3.5 text-muted-foreground/50" />;
@@ -149,7 +166,7 @@ export function DataTable<T>({
             </tr>
           </thead>
           <tbody>
-            {data.length === 0 ? (
+            {sortedData.length === 0 ? (
               <tr>
                 <td
                   colSpan={columns.length + (selectable ? 1 : 0)}
@@ -159,7 +176,7 @@ export function DataTable<T>({
                 </td>
               </tr>
             ) : (
-              data.map((item) => {
+              sortedData.map((item) => {
                 const key = keyExtractor(item);
                 return (
                   <tr

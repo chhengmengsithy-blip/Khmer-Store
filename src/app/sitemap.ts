@@ -3,6 +3,9 @@ import { siteConfig } from "@/config/site";
 import { categories } from "@/constants/categories";
 
 export default function sitemap(): MetadataRoute.Sitemap {
+  // Note: lastModified uses the build timestamp for all routes since we don't
+  // have per-page modification tracking. This is acceptable for static content
+  // and will be replaced with real timestamps once dynamic content tracking is added.
   const staticRoutes: MetadataRoute.Sitemap = [
     {
       url: siteConfig.url,

@@ -101,6 +101,9 @@ export default function ContactPage() {
     return Object.keys(errors).length === 0;
   };
 
+  // Contact form - UI scaffold with client-side validation only.
+  // Shows a success toast but does not transmit data to a backend.
+  // Wire to an API route or email service for production use.
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);

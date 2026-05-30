@@ -42,13 +42,16 @@ export default function SettingsPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [changingPassword, setChangingPassword] = useState(false);
 
-  // Notification preferences (localStorage)
+  // Notification preferences (device-local only, stored in localStorage)
+  // These are UI preferences that do not have server-side enforcement yet.
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [messageAlerts, setMessageAlerts] = useState(true);
   const [listingUpdates, setListingUpdates] = useState(true);
   const [marketingEmails, setMarketingEmails] = useState(false);
 
-  // Privacy preferences (localStorage)
+  // Privacy preferences (device-local only, stored in localStorage)
+  // These toggles do not influence API responses; they are UI scaffolds
+  // for future backend integration.
   const [showPhone, setShowPhone] = useState(true);
   const [showLocation, setShowLocation] = useState(true);
   const [allowMessages, setAllowMessages] = useState(true);
@@ -186,6 +189,10 @@ export default function SettingsPage() {
     }
 
     setChangingPassword(true);
+    // Note: Supabase's updateUser() operates on the active session token and does
+    // not require re-authentication with the current password. The "current password"
+    // field above is a UX confirmation step only - it is not sent to Supabase.
+    // To enforce re-authentication, you would call signInWithPassword() first.
     const { error } = await supabase.auth.updateUser({
       password: newPassword,
     });
@@ -419,6 +426,7 @@ export default function SettingsPage() {
               Change Password
             </h4>
             <form onSubmit={handleChangePassword} className="space-y-4">
+              {/* UX confirmation only - not sent to Supabase (see handleChangePassword) */}
               <div className="space-y-2">
                 <Label htmlFor="currentPassword" className="text-soft-white">
                   Current Password

@@ -28,7 +28,7 @@ const footerLinks = {
 export function Footer() {
   return (
     <footer className="border-t border-white/[0.08] bg-surface">
-      {/* Newsletter Section */}
+      {/* Newsletter Section - UI scaffold only, no backend submission handler yet */}
       <div className="mx-auto max-w-7xl px-6 pt-12 pb-8">
         <div className="flex flex-col items-center gap-4 rounded-xl border border-white/[0.06] bg-elevated/50 p-8 text-center sm:flex-row sm:text-left">
           <div className="flex-1">

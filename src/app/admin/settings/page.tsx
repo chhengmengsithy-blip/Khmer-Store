@@ -31,6 +31,9 @@ export default function AdminSettingsPage() {
   const [settings, setSettings] = useState<SiteSettings>(defaultSettings);
   const [saved, setSaved] = useState(false);
 
+  // Admin settings are stored in localStorage only (device-local).
+  // These do not have server-side enforcement; they are UI scaffolds
+  // for future backend integration with a settings table.
   useEffect(() => {
     const stored = localStorage.getItem("admin-site-settings");
     if (stored) {

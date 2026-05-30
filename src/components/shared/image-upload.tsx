@@ -62,6 +62,11 @@ export function ImageUpload({
   }, []);
 
   const handleRemove = (index: number) => {
+    const removedUrl = images[index];
+    // Revoke the blob URL to free browser memory
+    if (removedUrl.startsWith("blob:")) {
+      URL.revokeObjectURL(removedUrl);
+    }
     const newImages = images.filter((_, i) => i !== index);
     onChange(newImages);
   };
