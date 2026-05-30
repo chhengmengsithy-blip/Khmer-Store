@@ -2,7 +2,7 @@
   "id": "FEAT-002",
   "type": "feat",
   "description": "Professional Layout + Homepage + SEO - Redesign the header with glassmorphism and enhanced navigation, redesign footer with multi-column layout, upgrade homepage with all V4 sections, add SEO infrastructure.",
-  "status": "pending",
+  "status": "in_progress",
   "steps": [
     "Rewrite src/components/layout/header.tsx - Professional redesign: Sticky glassmorphism (bg-background/70 backdrop-blur-xl on scroll). Logo left. Center: expandable search (hidden on mobile, icon triggers full-screen search overlay on mobile). Right actions: language switcher button (EN/KH toggle, UI only), notification bell icon, 'Sell Now' prominent gold button, user avatar dropdown (Dashboard, My Listings, Favorites, Messages, Settings, Sign Out). On mobile: clean hamburger + bottom tab bar handles main nav. Make search slide down from header on mobile tap.",
     "Rewrite src/components/layout/footer.tsx - Professional multi-column footer: Brand column (logo, description, social icons - Facebook, Telegram, Instagram). Marketplace column (Browse, Categories, Post Listing, Featured). Company column (About, Contact, Careers placeholder, Press placeholder). Support column (Help Center placeholder, Safety Tips, Terms, Privacy). Newsletter section above columns (email input + subscribe button). Bottom bar: copyright, payment method icons placeholder, language.",

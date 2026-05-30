@@ -1,17 +1,25 @@
 import React from "react";
 import Link from "next/link";
-import { Globe, Send } from "lucide-react";
+import { Globe, Send, Camera } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 const footerLinks = {
-  Platform: [
+  Marketplace: [
+    { label: "Browse", href: "/marketplace" },
+    { label: "Categories", href: "/marketplace" },
+    { label: "Post Listing", href: "/post" },
+    { label: "Featured", href: "/marketplace?sort=featured" },
+  ],
+  Company: [
     { label: "About", href: "/about" },
-    { label: "How it Works", href: "/#how-it-works" },
+    { label: "Contact", href: "/contact" },
+    { label: "Careers", href: "#" },
+    { label: "Press", href: "#" },
   ],
   Support: [
-    { label: "Contact", href: "/contact" },
+    { label: "Help Center", href: "#" },
     { label: "Safety Tips", href: "/about" },
-  ],
-  Legal: [
     { label: "Terms", href: "/terms" },
     { label: "Privacy", href: "/privacy" },
   ],
@@ -20,18 +28,67 @@ const footerLinks = {
 export function Footer() {
   return (
     <footer className="border-t border-white/[0.08] bg-surface">
+      {/* Newsletter Section */}
+      <div className="mx-auto max-w-7xl px-6 pt-12 pb-8">
+        <div className="flex flex-col items-center gap-4 rounded-xl border border-white/[0.06] bg-elevated/50 p-8 text-center sm:flex-row sm:text-left">
+          <div className="flex-1">
+            <h3 className="text-lg font-semibold text-soft-white">
+              Stay updated
+            </h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Get the latest listings and marketplace news delivered to your inbox.
+            </p>
+          </div>
+          <div className="flex w-full max-w-sm gap-2">
+            <Input
+              type="email"
+              placeholder="Enter your email"
+              className="border-white/10 bg-white/5 text-soft-white placeholder:text-muted-foreground/60"
+            />
+            <Button className="shrink-0 bg-accent-gold text-background hover:bg-accent-gold/90">
+              Subscribe
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Footer Content */}
       <div className="mx-auto max-w-7xl px-6 py-12">
-        <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
-          {/* Brand */}
-          <div className="col-span-2 md:col-span-1">
+        <div className="grid grid-cols-2 gap-8 md:grid-cols-5">
+          {/* Brand Column */}
+          <div className="col-span-2 md:col-span-2">
             <Link href="/" className="inline-block">
               <span className="font-playfair text-xl font-bold text-soft-white">
                 Khmer<span className="text-accent-gold">Store</span>
               </span>
             </Link>
-            <p className="mt-3 text-sm text-muted-foreground">
-              Cambodia&apos;s marketplace for buying and selling.
+            <p className="mt-3 max-w-xs text-sm text-muted-foreground">
+              Cambodia&apos;s premier marketplace for buying and selling. Connect
+              with buyers and sellers across the country.
             </p>
+            <div className="mt-5 flex items-center gap-3">
+              <a
+                href="#"
+                aria-label="Facebook"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/[0.08] text-muted-foreground transition-colors hover:border-accent-gold/30 hover:text-accent-gold"
+              >
+                <Globe className="h-4 w-4" />
+              </a>
+              <a
+                href="#"
+                aria-label="Telegram"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/[0.08] text-muted-foreground transition-colors hover:border-accent-gold/30 hover:text-accent-gold"
+              >
+                <Send className="h-4 w-4" />
+              </a>
+              <a
+                href="#"
+                aria-label="Instagram"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/[0.08] text-muted-foreground transition-colors hover:border-accent-gold/30 hover:text-accent-gold"
+              >
+                <Camera className="h-4 w-4" />
+              </a>
+            </div>
           </div>
 
           {/* Link Columns */}
@@ -53,26 +110,20 @@ export function Footer() {
             </div>
           ))}
         </div>
+      </div>
 
-        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/[0.08] pt-8 sm:flex-row">
+      {/* Bottom Bar */}
+      <div className="border-t border-white/[0.08]">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 py-6 sm:flex-row">
           <p className="text-xs text-muted-foreground">
             &copy; {new Date().getFullYear()} Khmer Store. All rights reserved.
           </p>
           <div className="flex items-center gap-4">
-            <a
-              href="#"
-              aria-label="Facebook"
-              className="text-muted-foreground transition-colors hover:text-accent-gold"
-            >
-              <Globe className="h-5 w-5" />
-            </a>
-            <a
-              href="#"
-              aria-label="Telegram"
-              className="text-muted-foreground transition-colors hover:text-accent-gold"
-            >
-              <Send className="h-5 w-5" />
-            </a>
+            <span className="text-xs text-muted-foreground">
+              Payment methods accepted
+            </span>
+            <span className="text-xs text-muted-foreground">|</span>
+            <span className="text-xs text-muted-foreground">EN / KH</span>
           </div>
         </div>
       </div>

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
 import { siteConfig } from "@/config/site";
@@ -7,6 +7,12 @@ import { Footer } from "@/components/layout/footer";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/components/providers/auth-provider";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#0A0B0F",
+};
 
 export const metadata: Metadata = {
   title: {
@@ -18,6 +24,7 @@ export const metadata: Metadata = {
   authors: [{ name: siteConfig.creator }],
   creator: siteConfig.creator,
   metadataBase: new URL(siteConfig.url),
+  manifest: "/manifest.json",
   openGraph: {
     type: "website",
     locale: "en_US",
@@ -42,6 +49,16 @@ export const metadata: Metadata = {
   },
 };
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: siteConfig.name,
+  url: siteConfig.url,
+  logo: `${siteConfig.url}/logo.png`,
+  description: siteConfig.description,
+  sameAs: [siteConfig.links.github],
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -49,6 +66,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body className="min-h-screen bg-background font-sans antialiased">
         <ThemeProvider
           attribute="class"
