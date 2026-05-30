@@ -1,0 +1,157 @@
+export const en = {
+  nav: {
+    home: "Home",
+    browse: "Browse",
+    sell: "Sell",
+    messages: "Messages",
+    profile: "Profile",
+    signIn: "Sign In",
+    signOut: "Sign Out",
+    dashboard: "Dashboard",
+    settings: "Settings",
+    favorites: "Favorites",
+    myListings: "My Listings",
+    categories: "Categories",
+    sellNow: "Sell Now",
+    browseMarketplace: "Browse Marketplace",
+    notifications: "Notifications",
+  },
+  hero: {
+    title: "Buy & Sell Anything in",
+    titleHighlight: "Cambodia",
+    description:
+      "The trusted marketplace for vehicles, property, electronics, jobs, and more. Join thousands of buyers and sellers across the country.",
+    verifiedSellers: "Verified Sellers",
+    freeToPost: "Free to Post",
+  },
+  sections: {
+    popularCategories: "Popular Categories",
+    popularCategoriesDesc: "Find what you need across all categories",
+    featuredListings: "Featured Listings",
+    featuredListingsDesc: "Recently posted items from our community",
+    howItWorks: "How It Works",
+    howItWorksDesc: "Start buying or selling in three simple steps",
+    trustedByThousands: "Trusted by Thousands",
+    trustedDesc: "Growing every day across Cambodia",
+    getTheApp: "Get the App",
+    getTheAppDesc:
+      "Download Khmer Store on your mobile device for the best experience. Browse listings, chat with sellers, and get notifications on the go.",
+    stayInLoop: "Stay in the Loop",
+    stayInLoopDesc:
+      "Get notified about new listings and marketplace updates.",
+    appStoreComing: "App Store - Coming Soon",
+    playStoreComing: "Play Store - Coming Soon",
+    ourPlatform: "Our Platform",
+    ourPlatformDesc: "Built for the Cambodian community",
+  },
+  howItWorks: {
+    step1Title: "Post Your Listing",
+    step1Desc:
+      "Take a few photos, add a description and price, and your listing is live in minutes.",
+    step2Title: "Get Contacted",
+    step2Desc:
+      "Interested buyers will message you directly. Respond quickly for the best results.",
+    step3Title: "Make the Deal",
+    step3Desc:
+      "Agree on a price, meet up safely, and complete your transaction.",
+  },
+  categories: {
+    vehicles: "Vehicles",
+    property: "Property",
+    electronics: "Electronics",
+    jobs: "Jobs",
+    services: "Services",
+    fashion: "Fashion",
+    homeGarden: "Home & Garden",
+    sportsLeisure: "Sports & Leisure",
+    digitalProducts: "Digital Products",
+    vehiclesDesc: "Cars, motorcycles, and bicycles",
+    propertyDesc: "Houses, apartments, and land",
+    electronicsDesc: "Phones, computers, and TVs",
+    jobsDesc: "Full-time, part-time, and freelance",
+    servicesDesc: "Repair, tutoring, and delivery",
+    fashionDesc: "Clothing, shoes, and accessories",
+    homeGardenDesc: "Furniture, decor, and garden supplies",
+    sportsLeisureDesc: "Sports equipment and outdoor activities",
+    digitalProductsDesc: "Game accounts, software, and digital art",
+  },
+  common: {
+    search: "Search",
+    searchListings: "Search listings...",
+    viewAll: "View All",
+    viewAllListings: "View All Listings",
+    postListing: "Post a Listing",
+    subscribe: "Subscribe",
+    enterEmail: "Enter your email address",
+    emailRespect: "We respect your privacy. Unsubscribe at any time.",
+    noListingsYet: "No listings yet",
+    beFirstToPost: "Be the first to post a listing on Khmer Store",
+    loading: "Loading...",
+  },
+  stats: {
+    categories: "Categories",
+    available: "Available",
+  },
+  footer: {
+    stayUpdated: "Stay updated",
+    stayUpdatedDesc:
+      "Get the latest listings and marketplace news delivered to your inbox.",
+    enterEmail: "Enter your email",
+    marketplace: "Marketplace",
+    company: "Company",
+    support: "Support",
+    browse: "Browse",
+    categoriesLink: "Categories",
+    postListing: "Post Listing",
+    featured: "Featured",
+    about: "About",
+    contact: "Contact",
+    careers: "Careers",
+    press: "Press",
+    helpCenter: "Help Center",
+    safetyTips: "Safety Tips",
+    terms: "Terms",
+    privacy: "Privacy",
+    allRightsReserved: "Khmer Store. All rights reserved.",
+    paymentMethods: "Payment methods accepted",
+    brandDescription:
+      "Cambodia's premier marketplace for buying and selling. Connect with buyers and sellers across the country.",
+  },
+  about: {
+    title: "About Khmer Store",
+    description:
+      "Cambodia's trusted online marketplace connecting buyers and sellers across the country. We make buying and selling accessible, safe, and simple for everyone.",
+    ourMission: "Our Mission",
+    ourVision: "Our Vision",
+    missionText:
+      "To make buying and selling accessible to everyone in Cambodia. Whether you are looking for a vehicle, renting property, hiring talent, or selling electronics, our platform provides a simple, safe, and free way to connect with your local community.",
+    visionText:
+      "To become the leading digital marketplace in Southeast Asia, empowering millions of people to build livelihoods, find great deals, and create thriving local economies through trusted peer-to-peer commerce.",
+    ourValues: "Our Values",
+    valuesDesc: "The principles that guide everything we do",
+    trust: "Trust",
+    trustDesc:
+      "We build a safe environment where buyers and sellers can transact with confidence through verified accounts and active moderation.",
+    safety: "Safety",
+    safetyDesc:
+      "User safety is paramount. We provide tools, guidelines, and a dedicated team to ensure every transaction is secure.",
+    community: "Community",
+    communityDesc:
+      "We connect people across Cambodia, fostering local economies and building meaningful relationships through commerce.",
+    innovation: "Innovation",
+    innovationDesc:
+      "We continuously improve our platform with modern technology to deliver the best marketplace experience possible.",
+    howItWorksTitle: "How It Works",
+    howItWorksDesc:
+      "Getting started is easy. Follow these three simple steps.",
+    step1: "Post a Listing",
+    step1Desc:
+      "Snap photos, write a description, set your price, and publish in minutes.",
+    step2: "Connect with Buyers",
+    step2Desc:
+      "Interested buyers message you directly through our built-in messaging system.",
+    step3: "Close the Deal",
+    step3Desc:
+      "Agree on terms, meet up safely, and complete your transaction.",
+  },
+};

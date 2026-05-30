@@ -45,6 +45,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useScrollPosition } from "@/hooks/use-scroll-position";
+import { useTranslation } from "@/hooks/use-translation";
 import { cn } from "@/lib/utils";
 import { categories } from "@/constants/categories";
 import { useAuthStore } from "@/stores/auth-store";
@@ -69,9 +70,9 @@ export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [lang, setLang] = useState<"EN" | "KH">("EN");
   const router = useRouter();
   const { user } = useAuthStore();
+  const { t, locale, toggleLocale } = useTranslation();
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,10 +86,6 @@ export function Header() {
 
   const handleSignOut = async () => {
     await signOut();
-  };
-
-  const toggleLang = () => {
-    setLang(lang === "EN" ? "KH" : "EN");
   };
 
   return (
@@ -119,7 +116,7 @@ export function Header() {
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 type="text"
-                placeholder="Search listings..."
+                placeholder={t.common.searchListings}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-9 border-white/10 bg-white/5 text-soft-white placeholder:text-muted-foreground/60 focus:border-accent-gold focus:ring-accent-gold/20 rounded-full"
@@ -134,10 +131,10 @@ export function Header() {
               variant="ghost"
               size="sm"
               className="text-xs text-muted-foreground hover:text-soft-white gap-1"
-              onClick={toggleLang}
+              onClick={toggleLocale}
             >
               <Globe className="h-3.5 w-3.5" />
-              {lang}
+              {locale.toUpperCase()}
             </Button>
 
             {/* Notification Bell */}
@@ -157,7 +154,7 @@ export function Header() {
                   variant="ghost"
                   className="text-sm text-muted-foreground hover:text-soft-white"
                 >
-                  Categories
+                  {t.nav.categories}
                   <ChevronDown className="ml-1 h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -187,7 +184,7 @@ export function Header() {
               asChild
               className="bg-accent-gold text-background hover:bg-accent-gold/90 text-sm font-semibold rounded-full px-5 transition-all hover:shadow-[0_0_20px_rgba(198,167,105,0.3)]"
             >
-              <Link href="/post">Sell Now</Link>
+              <Link href="/post">{t.nav.sellNow}</Link>
             </Button>
 
             {/* Auth - conditional rendering */}
@@ -220,7 +217,7 @@ export function Header() {
                       className="flex items-center gap-2 cursor-pointer"
                     >
                       <LayoutDashboard className="h-4 w-4" />
-                      <span>Dashboard</span>
+                      <span>{t.nav.dashboard}</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
@@ -229,7 +226,7 @@ export function Header() {
                       className="flex items-center gap-2 cursor-pointer"
                     >
                       <ListOrdered className="h-4 w-4" />
-                      <span>My Listings</span>
+                      <span>{t.nav.myListings}</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
@@ -238,7 +235,7 @@ export function Header() {
                       className="flex items-center gap-2 cursor-pointer"
                     >
                       <Heart className="h-4 w-4" />
-                      <span>Favorites</span>
+                      <span>{t.nav.favorites}</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
@@ -247,7 +244,7 @@ export function Header() {
                       className="flex items-center gap-2 cursor-pointer"
                     >
                       <MessageSquare className="h-4 w-4" />
-                      <span>Messages</span>
+                      <span>{t.nav.messages}</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
@@ -256,7 +253,7 @@ export function Header() {
                       className="flex items-center gap-2 cursor-pointer"
                     >
                       <Settings className="h-4 w-4" />
-                      <span>Settings</span>
+                      <span>{t.nav.settings}</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator className="bg-white/10" />
@@ -265,7 +262,7 @@ export function Header() {
                     className="flex items-center gap-2 cursor-pointer text-red-400 focus:text-red-400"
                   >
                     <LogOut className="h-4 w-4" />
-                    <span>Sign Out</span>
+                    <span>{t.nav.signOut}</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -275,7 +272,7 @@ export function Header() {
                 asChild
                 className="text-sm text-muted-foreground hover:text-soft-white"
               >
-                <Link href="/sign-in">Sign In</Link>
+                <Link href="/sign-in">{t.nav.signIn}</Link>
               </Button>
             )}
           </div>
@@ -311,7 +308,7 @@ export function Header() {
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   type="text"
-                  placeholder="Search listings..."
+                  placeholder={t.common.searchListings}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-9 border-white/10 bg-white/5 text-soft-white placeholder:text-muted-foreground/60 focus:border-accent-gold rounded-full"
@@ -349,18 +346,18 @@ export function Header() {
               className="rounded-md px-4 py-3 text-sm text-muted-foreground transition-colors hover:bg-elevated hover:text-soft-white"
               onClick={() => setMobileOpen(false)}
             >
-              Browse Marketplace
+              {t.nav.browseMarketplace}
             </Link>
             <Link
               href="/post"
               className="rounded-md px-4 py-3 text-sm text-accent-gold font-medium transition-colors hover:bg-elevated"
               onClick={() => setMobileOpen(false)}
             >
-              Sell Now
+              {t.nav.sellNow}
             </Link>
             <Separator className="my-2 bg-white/[0.08]" />
             <p className="px-4 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              Categories
+              {t.nav.categories}
             </p>
             {categories.map((cat) => {
               const Icon = iconMap[cat.icon] || Briefcase;
@@ -398,7 +395,7 @@ export function Header() {
                     href="/dashboard"
                     onClick={() => setMobileOpen(false)}
                   >
-                    Dashboard
+                    {t.nav.dashboard}
                   </Link>
                 </Button>
                 <Button
@@ -410,7 +407,7 @@ export function Header() {
                     href="/messages"
                     onClick={() => setMobileOpen(false)}
                   >
-                    Messages
+                    {t.nav.messages}
                   </Link>
                 </Button>
                 <Button
@@ -422,7 +419,7 @@ export function Header() {
                     href="/dashboard/settings"
                     onClick={() => setMobileOpen(false)}
                   >
-                    Settings
+                    {t.nav.settings}
                   </Link>
                 </Button>
                 <Button
@@ -433,7 +430,7 @@ export function Header() {
                     handleSignOut();
                   }}
                 >
-                  Sign Out
+                  {t.nav.signOut}
                 </Button>
               </>
             ) : (
@@ -444,7 +441,7 @@ export function Header() {
                   className="justify-start text-sm text-muted-foreground hover:text-soft-white"
                 >
                   <Link href="/sign-in" onClick={() => setMobileOpen(false)}>
-                    Sign In
+                    {t.nav.signIn}
                   </Link>
                 </Button>
                 <Button

@@ -10,17 +10,19 @@ import {
   User,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const navItems = [
-  { label: "Home", icon: House, href: "/" },
-  { label: "Browse", icon: Search, href: "/marketplace" },
-  { label: "Post", icon: PlusCircle, href: "/post" },
-  { label: "Messages", icon: MessageSquare, href: "/messages" },
-  { label: "Profile", icon: User, href: "/dashboard" },
-];
+import { useTranslation } from "@/hooks/use-translation";
 
 export function MobileNav() {
   const pathname = usePathname();
+  const { t } = useTranslation();
+
+  const navItems = [
+    { label: t.nav.home, icon: House, href: "/" },
+    { label: t.nav.browse, icon: Search, href: "/marketplace" },
+    { label: t.nav.sell, icon: PlusCircle, href: "/post" },
+    { label: t.nav.messages, icon: MessageSquare, href: "/messages" },
+    { label: t.nav.profile, icon: User, href: "/dashboard" },
+  ];
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 block border-t border-white/[0.08] bg-background/95 backdrop-blur-md md:hidden">

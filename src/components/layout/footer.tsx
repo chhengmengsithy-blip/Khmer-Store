@@ -1,55 +1,60 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
 import { Globe, Send, Camera } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/shared/logo";
-
-const footerLinks = {
-  Marketplace: [
-    { label: "Browse", href: "/marketplace" },
-    { label: "Categories", href: "/marketplace" },
-    { label: "Post Listing", href: "/post" },
-    { label: "Featured", href: "/marketplace?sort=featured" },
-  ],
-  Company: [
-    { label: "About", href: "/about" },
-    { label: "Contact", href: "/contact" },
-    { label: "Careers", href: "#" },
-    { label: "Press", href: "#" },
-  ],
-  Support: [
-    { label: "Help Center", href: "#" },
-    { label: "Safety Tips", href: "/about" },
-    { label: "Terms", href: "/terms" },
-    { label: "Privacy", href: "/privacy" },
-  ],
-};
+import { useTranslation } from "@/hooks/use-translation";
 
 export function Footer() {
+  const { t } = useTranslation();
+
+  const footerLinks = {
+    [t.footer.marketplace]: [
+      { label: t.footer.browse, href: "/marketplace" },
+      { label: t.footer.categoriesLink, href: "/marketplace" },
+      { label: t.footer.postListing, href: "/post" },
+      { label: t.footer.featured, href: "/marketplace?sort=featured" },
+    ],
+    [t.footer.company]: [
+      { label: t.footer.about, href: "/about" },
+      { label: t.footer.contact, href: "/contact" },
+      { label: t.footer.careers, href: "#" },
+      { label: t.footer.press, href: "#" },
+    ],
+    [t.footer.support]: [
+      { label: t.footer.helpCenter, href: "#" },
+      { label: t.footer.safetyTips, href: "/about" },
+      { label: t.footer.terms, href: "/terms" },
+      { label: t.footer.privacy, href: "/privacy" },
+    ],
+  };
+
   return (
     <footer className="relative border-t border-white/[0.08] bg-surface">
       {/* Gradient separator at top */}
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent" />
-      {/* Newsletter Section - UI scaffold only, no backend submission handler yet */}
+      {/* Newsletter Section */}
       <div className="mx-auto max-w-7xl px-6 pt-12 pb-8">
         <div className="flex flex-col items-center gap-4 rounded-xl border border-white/[0.06] bg-elevated/50 p-8 text-center sm:flex-row sm:text-left">
           <div className="flex-1">
             <h3 className="text-lg font-semibold text-soft-white">
-              Stay updated
+              {t.footer.stayUpdated}
             </h3>
             <p className="mt-1 text-sm text-muted-foreground">
-              Get the latest listings and marketplace news delivered to your inbox.
+              {t.footer.stayUpdatedDesc}
             </p>
           </div>
           <div className="flex w-full max-w-sm gap-2">
             <Input
               type="email"
-              placeholder="Enter your email"
+              placeholder={t.footer.enterEmail}
               className="border-white/10 bg-white/5 text-soft-white placeholder:text-muted-foreground/60"
             />
             <Button className="shrink-0 bg-accent-gold text-background hover:bg-accent-gold/90">
-              Subscribe
+              {t.common.subscribe}
             </Button>
           </div>
         </div>
@@ -64,8 +69,7 @@ export function Footer() {
               <Logo />
             </Link>
             <p className="mt-3 max-w-xs text-sm text-muted-foreground">
-              Cambodia&apos;s premier marketplace for buying and selling. Connect
-              with buyers and sellers across the country.
+              {t.footer.brandDescription}
             </p>
             <div className="mt-5 flex items-center gap-3">
               <a
@@ -117,11 +121,11 @@ export function Footer() {
       <div className="border-t border-white/[0.08]">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 py-6 sm:flex-row">
           <p className="text-xs text-muted-foreground">
-            &copy; {new Date().getFullYear()} Khmer Store. All rights reserved.
+            &copy; {new Date().getFullYear()} {t.footer.allRightsReserved}
           </p>
           <div className="flex items-center gap-4">
             <span className="text-xs text-muted-foreground">
-              Payment methods accepted
+              {t.footer.paymentMethods}
             </span>
             <span className="text-xs text-muted-foreground">|</span>
             <span className="text-xs text-muted-foreground">EN / KH</span>
