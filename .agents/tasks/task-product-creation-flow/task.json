@@ -2,7 +2,7 @@
   "task_id": "task-product-creation-flow",
   "task_description": "Implement the full product creation flow so users who create accounts can post products. This includes a createProduct server action, wiring the form component, and a become-a-seller registration flow since new users are buyers by default and need a sellers record for the RLS INSERT policy.",
   "status": "completed",
-  "feature_order": ["FEAT-001"],
+  "feature_order": ["FEAT-001", "FEAT-002"],
   "blocked_reason": null,
   "verification": {
     "build": "pass",

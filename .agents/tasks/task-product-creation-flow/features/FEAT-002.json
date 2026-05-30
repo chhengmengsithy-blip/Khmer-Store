@@ -2,7 +2,7 @@
   "id": "FEAT-002",
   "type": "fix",
   "description": "Address semantic review issues: stale cookie after seller registration, category/condition not persisted, text length validation, slug collision for non-Latin titles, and role escalation safeguard comment",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "In registerAsSeller (product-actions.ts), after role upgrade, refresh the user-role cookie by importing cookies from next/headers and setting it directly.",
     "In seller-product-form.tsx handleSubmit, add category and condition to FormData. In createProduct, read them and store category in metadata.category and condition in metadata.condition.",
@@ -24,5 +24,5 @@
     "Run: unset NODE_OPTIONS && npx tsc --noEmit"
   ],
   "blocked_reason": null,
-  "findings": null
+  "findings": "All 5 review issues addressed. pnpm lint and tsc --noEmit both pass cleanly. The metadata JSONB column on products table supports storing category and condition. Cookie refresh uses the same options pattern as auth-actions.ts."
 }
