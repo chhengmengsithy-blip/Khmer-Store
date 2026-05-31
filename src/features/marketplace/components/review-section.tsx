@@ -1,12 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
-import { Star, ThumbsUp } from "lucide-react";
+import { Star, ThumbsUp, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { submitReview } from "@/features/marketplace/actions/review-actions";
+import { toast } from "@/hooks/use-toast";
 
 const mockReviews = [
   {
@@ -59,15 +61,69 @@ const ratingDistribution = [
   { stars: 1, count: 1 },
 ];
 
-export function ReviewSection() {
+interface ReviewSectionProps {
+  productId?: string;
+}
+
+export function ReviewSection({ productId }: ReviewSectionProps) {
   const [showWriteReview, setShowWriteReview] = useState(false);
   const [newRating, setNewRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
+  const [comment, setComment] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const totalReviews = ratingDistribution.reduce((sum, r) => sum + r.count, 0);
   const avgRating =
     ratingDistribution.reduce((sum, r) => sum + r.stars * r.count, 0) /
     totalReviews;
+
+  const handleSubmitReview = async () => {
+    if (newRating < 1) {
+      toast({
+        title: "Rating required",
+        description: "Please select a star rating before submitting.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!productId) {
+      toast({
+        title: "Error",
+        description: "Product not found.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const result = await submitReview(productId, newRating, comment);
+      if (result.error) {
+        toast({
+          title: "Error",
+          description: result.error,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Review submitted",
+          description: "Thank you for your review!",
+        });
+        setNewRating(0);
+        setComment("");
+        setShowWriteReview(false);
+      }
+    } catch {
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -145,6 +201,7 @@ export function ReviewSection() {
                 onMouseEnter={() => setHoverRating(i + 1)}
                 onMouseLeave={() => setHoverRating(0)}
                 onClick={() => setNewRating(i + 1)}
+                type="button"
               >
                 <Star
                   className={cn(
@@ -160,9 +217,17 @@ export function ReviewSection() {
           <textarea
             placeholder="Share your experience with this product..."
             className="w-full min-h-[100px] rounded-lg border border-white/10 bg-elevated px-3 py-2 text-sm text-soft-white placeholder:text-muted-foreground focus:border-accent-gold/30 focus:outline-none"
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
           />
           <div className="flex gap-2">
-            <Button className="bg-accent-gold text-background hover:bg-accent-gold/90" size="sm">
+            <Button
+              className="bg-accent-gold text-background hover:bg-accent-gold/90"
+              size="sm"
+              onClick={handleSubmitReview}
+              disabled={submitting}
+            >
+              {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Submit Review
             </Button>
             <Button

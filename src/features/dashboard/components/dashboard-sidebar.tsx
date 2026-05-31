@@ -12,6 +12,7 @@ import {
   Settings,
   ShieldCheck,
   LogOut,
+  Heart,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
@@ -26,6 +27,11 @@ const navItems = [
     label: "Orders",
     href: "/dashboard/orders",
     icon: ShoppingBag,
+  },
+  {
+    label: "Favorites",
+    href: "/dashboard/favorites",
+    icon: Heart,
   },
   {
     label: "Products",

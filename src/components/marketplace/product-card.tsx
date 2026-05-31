@@ -2,9 +2,10 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Heart, Star, ShoppingBag } from "lucide-react";
+import { Heart, Star, ShoppingBag, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { toggleFavorite } from "@/features/marketplace/actions/favorite-actions";
 
 interface Product {
   id: string;
@@ -17,12 +18,35 @@ interface Product {
 
 interface ProductCardProps {
   product: Product;
+  initialFavorited?: boolean;
 }
 
 const premiumEasing: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
-export function ProductCard({ product }: ProductCardProps) {
-  const [isFavorited, setIsFavorited] = useState(false);
+export function ProductCard({ product, initialFavorited = false }: ProductCardProps) {
+  const [isFavorited, setIsFavorited] = useState(initialFavorited);
+  const [favoriteLoading, setFavoriteLoading] = useState(false);
+
+  const handleToggleFavorite = async () => {
+    // Optimistic toggle
+    setIsFavorited((prev) => !prev);
+    setFavoriteLoading(true);
+
+    try {
+      const result = await toggleFavorite(product.id);
+      if (result.error) {
+        // Revert optimistic update on error
+        setIsFavorited((prev) => !prev);
+      } else {
+        setIsFavorited(result.isFavorited);
+      }
+    } catch {
+      // Revert optimistic update on error
+      setIsFavorited((prev) => !prev);
+    } finally {
+      setFavoriteLoading(false);
+    }
+  };
 
   return (
     <motion.div
@@ -50,23 +74,28 @@ export function ProductCard({ product }: ProductCardProps) {
 
         {/* Favorite Button */}
         <button
-          onClick={() => setIsFavorited(!isFavorited)}
+          onClick={handleToggleFavorite}
+          disabled={favoriteLoading}
           className="absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full bg-black/40 backdrop-blur-sm transition-colors hover:bg-black/60"
           aria-label="Add to favorites"
         >
-          <motion.div
-            animate={isFavorited ? { scale: [1, 1.3, 1] } : {}}
-            transition={{ duration: 0.3 }}
-          >
-            <Heart
-              className={cn(
-                "h-4 w-4 transition-colors",
-                isFavorited
-                  ? "fill-accent-gold text-accent-gold"
-                  : "text-white/70"
-              )}
-            />
-          </motion.div>
+          {favoriteLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin text-white/70" />
+          ) : (
+            <motion.div
+              animate={isFavorited ? { scale: [1, 1.3, 1] } : {}}
+              transition={{ duration: 0.3 }}
+            >
+              <Heart
+                className={cn(
+                  "h-4 w-4 transition-colors",
+                  isFavorited
+                    ? "fill-accent-gold text-accent-gold"
+                    : "text-white/70"
+                )}
+              />
+            </motion.div>
+          )}
         </button>
       </div>
 

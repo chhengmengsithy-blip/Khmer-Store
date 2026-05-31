@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import {
   Star,
   ShieldCheck,
@@ -8,6 +8,7 @@ import {
   Package,
   Heart,
   Share2,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +17,9 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ImageGallery } from "./image-gallery";
 import { ReviewSection } from "./review-section";
 import { ProductCard } from "@/components/marketplace/product-card";
+import { toggleFavorite } from "@/features/marketplace/actions/favorite-actions";
+import { toast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 const mockProduct = {
   id: "1",
@@ -47,6 +51,39 @@ const relatedProducts = [
 ];
 
 export function ProductDetail() {
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [favoriteLoading, setFavoriteLoading] = useState(false);
+
+  const handleToggleFavorite = async () => {
+    setFavoriteLoading(true);
+    try {
+      const result = await toggleFavorite(mockProduct.id);
+      if (result.error) {
+        toast({
+          title: "Error",
+          description: result.error,
+          variant: "destructive",
+        });
+      } else {
+        setIsFavorited(result.isFavorited);
+        toast({
+          title: result.isFavorited ? "Added to Wishlist" : "Removed from Wishlist",
+          description: result.isFavorited
+            ? "This product has been added to your wishlist."
+            : "This product has been removed from your wishlist.",
+        });
+      }
+    } catch {
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setFavoriteLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-12">
       {/* Main Product Section */}
@@ -125,9 +162,19 @@ export function ProductDetail() {
             </Button>
           </div>
           <div className="flex gap-3">
-            <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-accent-gold gap-2">
-              <Heart className="h-4 w-4" />
-              Add to Wishlist
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground hover:text-accent-gold gap-2"
+              onClick={handleToggleFavorite}
+              disabled={favoriteLoading}
+            >
+              {favoriteLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Heart className={cn("h-4 w-4", isFavorited && "fill-accent-gold text-accent-gold")} />
+              )}
+              {isFavorited ? "In Wishlist" : "Add to Wishlist"}
             </Button>
             <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-soft-white gap-2">
               <Share2 className="h-4 w-4" />
@@ -194,7 +241,7 @@ export function ProductDetail() {
       </div>
 
       {/* Reviews Section */}
-      <ReviewSection />
+      <ReviewSection productId={mockProduct.id} />
 
       {/* Related Products */}
       <div>

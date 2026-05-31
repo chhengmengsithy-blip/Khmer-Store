@@ -24,6 +24,10 @@ import { CartSummary } from "./cart-summary";
 import { PaymentMethodSelector } from "./payment-method-selector";
 import { useCartStore } from "@/stores/cart-store";
 import { createPaymentIntent } from "@/features/checkout/actions/checkout-actions";
+import {
+  createPayPalOrder,
+  capturePayPalOrder,
+} from "@/features/checkout/actions/paypal-actions";
 import { cn } from "@/lib/utils";
 
 const stripePromise = loadStripe(
@@ -53,6 +57,8 @@ export function CheckoutFlow() {
   const [paymentMethod, setPaymentMethod] = useState("card");
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [orderId, setOrderId] = useState<string | null>(null);
+  const [approvalUrl, setApprovalUrl] = useState<string | null>(null);
+  const [paypalOrderId, setPaypalOrderId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [shippingInfo, setShippingInfo] = useState<ShippingInfo>({
@@ -96,29 +102,59 @@ export function CheckoutFlow() {
 
     const totalAmount = total();
 
-    // createPaymentIntent now creates the order (pending) first, then the PaymentIntent.
-    // The order_id is included in PaymentIntent metadata for webhook lookup.
-    const result = await createPaymentIntent(
-      cartItems,
-      totalAmount,
-      getShippingAddress()
-    );
+    if (paymentMethod === "paypal") {
+      // PayPal flow
+      const result = await createPayPalOrder(
+        cartItems,
+        totalAmount,
+        getShippingAddress()
+      );
 
-    if (result.error) {
-      setError(result.error);
+      if (result.error) {
+        setError(result.error);
+        setLoading(false);
+        return;
+      }
+
+      if (result.approvalUrl) {
+        setApprovalUrl(result.approvalUrl);
+      }
+      if (result.orderId) {
+        setOrderId(result.orderId);
+        // Extract PayPal order ID from the approval URL
+        const url = new URL(result.approvalUrl || "");
+        const token = url.searchParams.get("token");
+        if (token) {
+          setPaypalOrderId(token);
+        }
+      }
+
       setLoading(false);
-      return;
-    }
+      setCurrentStep(3);
+    } else {
+      // Stripe flow
+      const result = await createPaymentIntent(
+        cartItems,
+        totalAmount,
+        getShippingAddress()
+      );
 
-    if (result.clientSecret) {
-      setClientSecret(result.clientSecret);
-    }
-    if (result.orderId) {
-      setOrderId(result.orderId);
-    }
+      if (result.error) {
+        setError(result.error);
+        setLoading(false);
+        return;
+      }
 
-    setLoading(false);
-    setCurrentStep(3);
+      if (result.clientSecret) {
+        setClientSecret(result.clientSecret);
+      }
+      if (result.orderId) {
+        setOrderId(result.orderId);
+      }
+
+      setLoading(false);
+      setCurrentStep(3);
+    }
   };
 
   // Payment succeeded - the order was already created in "pending" status before payment.
@@ -220,7 +256,19 @@ export function CheckoutFlow() {
                   />
                 </Elements>
               )}
-              {currentStep === 3 && !clientSecret && (
+              {currentStep === 3 && paymentMethod === "paypal" && approvalUrl && (
+                <StepPayPalPayment
+                  approvalUrl={approvalUrl}
+                  paypalOrderId={paypalOrderId}
+                  supabaseOrderId={orderId}
+                  onSuccess={() => {
+                    clearCart();
+                    setCurrentStep(4);
+                  }}
+                  onError={(msg) => setError(msg)}
+                />
+              )}
+              {currentStep === 3 && !clientSecret && paymentMethod !== "paypal" && (
                 <StepPayment
                   selected={paymentMethod}
                   onSelect={setPaymentMethod}
@@ -440,6 +488,99 @@ function StepStripePayment({
           {processing ? "Processing..." : "Place Order"}
         </Button>
       </form>
+    </div>
+  );
+}
+
+function StepPayPalPayment({
+  approvalUrl,
+  paypalOrderId,
+  supabaseOrderId,
+  onSuccess,
+  onError,
+}: {
+  approvalUrl: string;
+  paypalOrderId: string | null;
+  supabaseOrderId: string | null;
+  onSuccess: () => void;
+  onError: (message: string) => void;
+}) {
+  const [processing, setProcessing] = useState(false);
+  const [paypalWindowOpened, setPaypalWindowOpened] = useState(false);
+
+  const handleOpenPayPal = () => {
+    window.open(approvalUrl, "_blank", "noopener,noreferrer");
+    setPaypalWindowOpened(true);
+  };
+
+  const handleCompletePayment = async () => {
+    if (!paypalOrderId || !supabaseOrderId) {
+      onError("Missing order information. Please try again.");
+      return;
+    }
+
+    setProcessing(true);
+    try {
+      const result = await capturePayPalOrder(paypalOrderId, supabaseOrderId);
+      if (result.error) {
+        onError(result.error);
+      } else {
+        onSuccess();
+      }
+    } catch {
+      onError("Failed to complete payment. Please try again.");
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <h2 className="text-lg font-semibold text-soft-white">
+        Pay with PayPal
+      </h2>
+      <p className="text-sm text-muted-foreground">
+        You will be redirected to PayPal to complete your payment securely.
+      </p>
+      <div className="rounded-xl border border-white/[0.06] bg-surface p-6 space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#0070ba]/10">
+            <span className="text-lg font-bold text-[#0070ba]">P</span>
+          </div>
+          <div>
+            <p className="text-sm font-medium text-soft-white">PayPal Checkout</p>
+            <p className="text-xs text-muted-foreground">
+              Secure payment via PayPal
+            </p>
+          </div>
+        </div>
+
+        {!paypalWindowOpened ? (
+          <Button
+            onClick={handleOpenPayPal}
+            className="w-full bg-[#0070ba] text-white hover:bg-[#005ea6]"
+          >
+            Open PayPal
+          </Button>
+        ) : (
+          <div className="space-y-3">
+            <p className="text-xs text-muted-foreground text-center">
+              After completing payment in the PayPal window, click below to
+              confirm your order.
+            </p>
+            <Button
+              onClick={handleCompletePayment}
+              disabled={processing}
+              className="w-full bg-accent-gold text-background hover:bg-accent-gold/90"
+            >
+              {processing && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
+              {processing ? "Confirming..." : "Complete Payment"}
+            </Button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
