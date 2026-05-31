@@ -135,22 +135,28 @@ export async function middleware(request: NextRequest) {
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
     const rateLimitKey = `${ip}:${pathname}`;
     const config = getRateLimitConfigForPath(pathname);
-    const result = await checkRateLimit(rateLimitKey, config);
 
-    // Add rate limit headers to the response
-    const rateLimitHeaders = getRateLimitHeaders(result);
-    for (const [key, value] of Object.entries(rateLimitHeaders)) {
-      response.headers.set(key, value);
-    }
+    try {
+      const result = await checkRateLimit(rateLimitKey, config);
 
-    if (!result.allowed) {
-      return NextResponse.json(
-        { error: "Too many requests" },
-        {
-          status: 429,
-          headers: rateLimitHeaders,
-        }
-      );
+      // Add rate limit headers to the response
+      const rateLimitHeaders = getRateLimitHeaders(result);
+      for (const [key, value] of Object.entries(rateLimitHeaders)) {
+        response.headers.set(key, value);
+      }
+
+      if (!result.allowed) {
+        return NextResponse.json(
+          { error: "Too many requests" },
+          {
+            status: 429,
+            headers: rateLimitHeaders,
+          }
+        );
+      }
+    } catch (error) {
+      // If Redis is unavailable, log a warning and allow the request through
+      console.warn("[rate-limiter] Redis error, allowing request through:", error);
     }
   }
 

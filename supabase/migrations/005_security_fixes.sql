@@ -11,8 +11,20 @@ RETURNS TRIGGER AS $$
 DECLARE
   caller_role TEXT;
 BEGIN
+  -- Service-role connections (auth.uid() IS NULL) bypass this trigger
+  IF auth.uid() IS NULL THEN
+    RETURN NEW;
+  END IF;
+
   -- If role is not being changed, allow the update
   IF NEW.role IS NOT DISTINCT FROM OLD.role THEN
+    RETURN NEW;
+  END IF;
+
+  -- Allow buyer -> seller transition when the user is updating their own row
+  IF OLD.auth_user_id = auth.uid()
+     AND OLD.role = 'buyer'
+     AND NEW.role = 'seller' THEN
     RETURN NEW;
   END IF;
 
@@ -28,7 +40,7 @@ BEGIN
 
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = '';
 
 DROP TRIGGER IF EXISTS trg_prevent_role_escalation ON users_extended;
 CREATE TRIGGER trg_prevent_role_escalation

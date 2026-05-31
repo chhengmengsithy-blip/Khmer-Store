@@ -16,8 +16,6 @@ export interface RateLimitConfig {
   maxTokens: number;
   /** Time window in milliseconds for token refill */
   refillInterval: number;
-  /** Number of tokens added per refill interval */
-  refillRate: number;
 }
 
 export interface RateLimitResult {
@@ -33,27 +31,22 @@ export const RATE_LIMIT_CONFIGS: Record<string, RateLimitConfig> = {
   api_general: {
     maxTokens: 100,
     refillInterval: 60_000, // 1 minute
-    refillRate: 100,
   },
   api_auth: {
     maxTokens: 5,
     refillInterval: 900_000, // 15 minutes
-    refillRate: 5,
   },
   api_payment: {
     maxTokens: 10,
     refillInterval: 60_000, // 1 minute
-    refillRate: 10,
   },
   api_upload: {
     maxTokens: 20,
     refillInterval: 3600_000, // 1 hour
-    refillRate: 20,
   },
   api_webhook: {
     maxTokens: 200,
     refillInterval: 60_000, // 1 minute
-    refillRate: 200,
   },
 };
 
