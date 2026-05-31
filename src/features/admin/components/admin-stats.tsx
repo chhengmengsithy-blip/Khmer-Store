@@ -11,6 +11,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface StatCardProps {
   title: string;
@@ -49,7 +50,37 @@ function StatCard({ title, value, change, changeType, icon: Icon }: StatCardProp
   );
 }
 
-const statsData: StatCardProps[] = [
+function StatCardSkeleton() {
+  return (
+    <Card className="border-white/[0.06] bg-white/[0.02]">
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-7 w-16" />
+            <Skeleton className="h-3 w-20" />
+          </div>
+          <Skeleton className="h-11 w-11 rounded-lg" />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+interface AdminStatsData {
+  totalUsers?: number;
+  totalOrders?: number;
+  revenue?: number;
+  activeListings?: number;
+  recentSignups?: number;
+}
+
+interface AdminStatsProps {
+  data?: AdminStatsData;
+  loading?: boolean;
+}
+
+const mockStatsData: StatCardProps[] = [
   {
     title: "Total Users",
     value: "12,847",
@@ -94,10 +125,69 @@ const statsData: StatCardProps[] = [
   },
 ];
 
-export function AdminStats() {
+function buildStatsFromData(data: AdminStatsData): StatCardProps[] {
+  return [
+    {
+      title: "Total Users",
+      value: (data.totalUsers ?? 0).toLocaleString(),
+      change: data.recentSignups ? `+${data.recentSignups} this week` : "No new signups",
+      changeType: data.recentSignups ? "positive" : "neutral",
+      icon: Users,
+    },
+    {
+      title: "Pending Verifications",
+      value: "28",
+      change: "5 urgent (>48h)",
+      changeType: "negative",
+      icon: ShieldCheck,
+    },
+    {
+      title: "Active Disputes",
+      value: "7",
+      change: "-2 from yesterday",
+      changeType: "positive",
+      icon: AlertTriangle,
+    },
+    {
+      title: "Total Revenue",
+      value: `$${(data.revenue ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      change: `${data.totalOrders ?? 0} total orders`,
+      changeType: "positive",
+      icon: DollarSign,
+    },
+    {
+      title: "Fraud Alerts",
+      value: "3",
+      change: "1 high priority",
+      changeType: "negative",
+      icon: ShieldAlert,
+    },
+    {
+      title: "Active Listings",
+      value: (data.activeListings ?? 0).toLocaleString(),
+      change: "Published products",
+      changeType: "positive",
+      icon: Package,
+    },
+  ];
+}
+
+export function AdminStats({ data, loading }: AdminStatsProps) {
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <StatCardSkeleton key={i} />
+        ))}
+      </div>
+    );
+  }
+
+  const statsToShow = data ? buildStatsFromData(data) : mockStatsData;
+
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {statsData.map((stat) => (
+      {statsToShow.map((stat) => (
         <StatCard key={stat.title} {...stat} />
       ))}
     </div>
