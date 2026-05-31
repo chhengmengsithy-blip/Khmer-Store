@@ -1,17 +1,15 @@
 /**
- * Rate Limiter - Development / Single-Instance Use Only
+ * Rate Limiter - Upstash Redis-backed sliding window implementation
  *
- * In-memory token bucket rate limiter, configurable per endpoint.
- * Bucket state is stored in a per-process Map, which means:
- * - State is lost on process restart or redeployment
- * - In serverless environments (e.g., Vercel), each Lambda instance maintains
- *   its own isolated state, so rate limits are not enforced globally
- * - Suitable for development, testing, and single-instance deployments only
+ * Uses @upstash/ratelimit with a Redis backend for distributed rate limiting.
+ * State is shared across all instances and survives restarts.
  *
- * TODO: For production multi-instance deployments, replace with a Redis-backed
- * rate limiter (e.g., Upstash @upstash/ratelimit or ioredis + sliding window)
- * to share state across all instances and survive restarts.
+ * Requires UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN env vars.
+ * If env vars are missing, falls back to allowing all requests (with a warning).
  */
+
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
 
 export interface RateLimitConfig {
   /** Maximum number of requests allowed in the window */
@@ -28,11 +26,6 @@ export interface RateLimitResult {
   limit: number;
   resetAt: number; // Unix timestamp when tokens will be fully replenished
   retryAfter?: number; // Seconds until next available request
-}
-
-interface TokenBucket {
-  tokens: number;
-  lastRefill: number;
 }
 
 /** Default configurations for common endpoint types */
@@ -64,72 +57,108 @@ export const RATE_LIMIT_CONFIGS: Record<string, RateLimitConfig> = {
   },
 };
 
-// In-memory store - per-process only. Each serverless invocation or new process
-// starts with an empty map. See module-level comment for production alternatives.
-// TODO: Replace with Redis (Upstash or ioredis) for production use.
-const buckets = new Map<string, TokenBucket>();
+// Track whether we have already warned about missing env vars
+let warnedMissingEnv = false;
 
-function getOrCreateBucket(key: string, config: RateLimitConfig): TokenBucket {
-  const existing = buckets.get(key);
-  if (existing) return existing;
-
-  const bucket: TokenBucket = {
-    tokens: config.maxTokens,
-    lastRefill: Date.now(),
-  };
-  buckets.set(key, bucket);
-  return bucket;
+/**
+ * Check if Upstash env vars are configured.
+ */
+function isUpstashConfigured(): boolean {
+  return !!(
+    process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
+  );
 }
 
-function refillTokens(bucket: TokenBucket, config: RateLimitConfig): void {
-  const now = Date.now();
-  const elapsed = now - bucket.lastRefill;
-  const refillCount = Math.floor(elapsed / config.refillInterval) * config.refillRate;
+/**
+ * Create a Redis client for Upstash.
+ * Only call when env vars are confirmed present.
+ */
+function createRedisClient(): Redis {
+  return new Redis({
+    url: process.env.UPSTASH_REDIS_REST_URL!,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+  });
+}
 
-  if (refillCount > 0) {
-    bucket.tokens = Math.min(config.maxTokens, bucket.tokens + refillCount);
-    bucket.lastRefill = now;
-  }
+/**
+ * Cache of Ratelimit instances keyed by config signature.
+ * Each unique combination of maxTokens + refillInterval gets its own instance.
+ */
+const ratelimitCache = new Map<string, Ratelimit>();
+
+function getConfigKey(config: RateLimitConfig): string {
+  return `${config.maxTokens}:${config.refillInterval}`;
+}
+
+function getRatelimitInstance(config: RateLimitConfig): Ratelimit {
+  const key = getConfigKey(config);
+  const cached = ratelimitCache.get(key);
+  if (cached) return cached;
+
+  const windowMs = config.refillInterval;
+  const windowStr = `${Math.round(windowMs / 1000)} s` as `${number} s`;
+
+  const instance = new Ratelimit({
+    redis: createRedisClient(),
+    limiter: Ratelimit.slidingWindow(config.maxTokens, windowStr),
+    prefix: `ratelimit:${key}`,
+  });
+
+  ratelimitCache.set(key, instance);
+  return instance;
 }
 
 /**
  * Check if a request is allowed under the rate limit.
  * The key typically combines the identifier (IP/user ID) and endpoint.
  */
-export function checkRateLimit(
+export async function checkRateLimit(
   key: string,
   config: RateLimitConfig = RATE_LIMIT_CONFIGS.api_general
-): RateLimitResult {
-  const bucket = getOrCreateBucket(key, config);
-  refillTokens(bucket, config);
-
-  const resetAt = bucket.lastRefill + config.refillInterval;
-
-  if (bucket.tokens > 0) {
-    bucket.tokens -= 1;
+): Promise<RateLimitResult> {
+  if (!isUpstashConfigured()) {
+    if (!warnedMissingEnv) {
+      console.warn(
+        "[rate-limiter] UPSTASH_REDIS_REST_URL or UPSTASH_REDIS_REST_TOKEN is not set. " +
+          "Rate limiting is disabled. All requests will be allowed."
+      );
+      warnedMissingEnv = true;
+    }
     return {
       allowed: true,
-      remaining: bucket.tokens,
+      remaining: config.maxTokens,
       limit: config.maxTokens,
-      resetAt,
+      resetAt: Date.now() + config.refillInterval,
     };
   }
 
-  const retryAfter = Math.ceil((config.refillInterval - (Date.now() - bucket.lastRefill)) / 1000);
+  const ratelimit = getRatelimitInstance(config);
+  const result = await ratelimit.limit(key);
 
-  return {
-    allowed: false,
-    remaining: 0,
-    limit: config.maxTokens,
-    resetAt,
-    retryAfter: Math.max(1, retryAfter),
+  const rateLimitResult: RateLimitResult = {
+    allowed: result.success,
+    remaining: result.remaining,
+    limit: result.limit,
+    resetAt: result.reset,
   };
+
+  if (!result.success) {
+    const retryAfter = Math.max(
+      1,
+      Math.ceil((result.reset - Date.now()) / 1000)
+    );
+    rateLimitResult.retryAfter = retryAfter;
+  }
+
+  return rateLimitResult;
 }
 
 /**
  * Create rate limit headers for the response.
  */
-export function getRateLimitHeaders(result: RateLimitResult): Record<string, string> {
+export function getRateLimitHeaders(
+  result: RateLimitResult
+): Record<string, string> {
   const headers: Record<string, string> = {
     "X-RateLimit-Limit": result.limit.toString(),
     "X-RateLimit-Remaining": result.remaining.toString(),
@@ -145,14 +174,17 @@ export function getRateLimitHeaders(result: RateLimitResult): Record<string, str
 
 /**
  * Reset the rate limit for a specific key.
+ * With Upstash, TTL-based expiration handles cleanup automatically.
  */
-export function resetRateLimit(key: string): void {
-  buckets.delete(key);
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function resetRateLimit(_key: string): void {
+  // No-op: Upstash handles TTL-based expiration automatically
 }
 
 /**
- * Clear all rate limit buckets (useful for testing).
+ * Clear all rate limit buckets.
+ * With Upstash, TTL-based expiration handles cleanup automatically.
  */
 export function clearAllRateLimits(): void {
-  buckets.clear();
+  // No-op: Upstash handles TTL-based expiration automatically
 }

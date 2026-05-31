@@ -1,6 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 
 interface ActionResult {
@@ -112,6 +113,17 @@ export async function createProduct(formData: FormData): Promise<ActionResult> {
     metadata.condition = condition;
   }
 
+  // Look up the category_id by slug if a category was provided
+  let categoryId: string | null = null;
+  if (category) {
+    const { data: categoryRow } = await supabase
+      .from("categories")
+      .select("id")
+      .eq("slug", category)
+      .single();
+    categoryId = categoryRow?.id || null;
+  }
+
   // Insert the product
   const { data: product, error: insertError } = await supabase
     .from("products")
@@ -123,6 +135,8 @@ export async function createProduct(formData: FormData): Promise<ActionResult> {
       price,
       stock,
       status,
+      category_id: categoryId,
+      condition: condition || null,
       metadata: Object.keys(metadata).length > 0 ? metadata : null,
     })
     .select("id")
@@ -251,6 +265,9 @@ export async function registerAsSeller(
       path: "/",
       maxAge: 60 * 60 * 24 * 7,
     });
+
+    revalidatePath("/", "layout");
+    revalidatePath("/dashboard", "layout");
   }
 
   return { success: true };

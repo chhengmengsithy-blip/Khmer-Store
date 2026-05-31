@@ -135,7 +135,7 @@ export async function middleware(request: NextRequest) {
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
     const rateLimitKey = `${ip}:${pathname}`;
     const config = getRateLimitConfigForPath(pathname);
-    const result = checkRateLimit(rateLimitKey, config);
+    const result = await checkRateLimit(rateLimitKey, config);
 
     // Add rate limit headers to the response
     const rateLimitHeaders = getRateLimitHeaders(result);
