@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { ensureUserExtended } from "@/features/auth/utils/ensure-user-extended";
 
 /** Cookie options for the user-role cookie. */
 const ROLE_COOKIE_OPTIONS = {
@@ -46,18 +47,10 @@ export async function GET(request: Request) {
       } = await supabase.auth.getUser();
 
       if (user) {
-        const { data } = await supabase
-          .from("users_extended")
-          .select("role")
-          .eq("auth_user_id", user.id)
-          .single();
+        const role = await ensureUserExtended(supabase, user.id);
 
         const cookieStore = await cookies();
-        cookieStore.set(
-          "user-role",
-          data?.role ?? "buyer",
-          ROLE_COOKIE_OPTIONS
-        );
+        cookieStore.set("user-role", role, ROLE_COOKIE_OPTIONS);
       }
 
       return NextResponse.redirect(`${origin}${next}`);
