@@ -1,0 +1,26 @@
+{
+  "project_type": "Next.js 16 App Router marketplace with Supabase backend",
+  "language": "TypeScript",
+  "build_system": "pnpm with next build",
+  "test_framework": "No test framework configured (no test files or test runner in package.json)",
+  "build_command": "pnpm build",
+  "test_command": "pnpm lint && npx tsc --noEmit",
+  "verification_instructions": "Run pnpm lint and tsc --noEmit to confirm no type errors or lint failures",
+  "snapshot_or_generated_files": null,
+  "setup_instructions": "pnpm install (already done - node_modules exists)",
+  "environment_constraints": "COMMON_DEPENDENCIES network - can install packages. No Supabase instance for integration testing. Node v22, pnpm available.",
+  "contribution_requirements": "Branch is fix/signup-email-confirmation-callback. Follow existing patterns in src/features/auth/actions/ for server actions.",
+  "key_patterns": "Server actions use 'use server' directive, createClient() from @/lib/supabase/server, return {error?: string} or redirect. Form components are client components using React state. Features organized in src/features/<domain>/components/ and src/features/<domain>/actions/. UI components in src/components/ui/. DB types defined in src/lib/supabase/database.types.ts.",
+  "relevant_files": [
+    "src/features/dashboard/components/seller-product-form.tsx",
+    "src/features/auth/actions/auth-actions.ts",
+    "src/lib/supabase/server.ts",
+    "src/lib/supabase/database.types.ts",
+    "src/constants/roles.ts",
+    "src/app/dashboard/products/new/page.tsx",
+    "src/app/dashboard/products/page.tsx",
+    "supabase/migrations/001_initial_schema.sql",
+    "supabase/migrations/003_rls_policies.sql"
+  ],
+  "directory_structure": "src/features/<domain>/{actions,components}/ for feature code, src/app/ for routes, src/lib/supabase/ for DB client and types, src/constants/ for roles/permissions, src/components/ui/ for shared UI primitives"
+}

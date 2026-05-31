@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createHmac, timingSafeEqual } from "crypto";
+import { createClient } from "@supabase/supabase-js";
 
 /**
  * Stripe Webhook Handler
@@ -7,9 +8,24 @@ import { createHmac, timingSafeEqual } from "crypto";
  * Processes Stripe webhook events with HMAC-SHA256 signature verification.
  * Events handled: payment_intent.succeeded, payment_intent.failed,
  * charge.refunded, charge.dispute.created
+ *
+ * Order lifecycle:
+ * 1. Client calls createPaymentIntent which creates an order with status "pending"
+ *    and includes order_id in PaymentIntent metadata.
+ * 2. On payment_intent.succeeded, this webhook updates the order to "confirmed"
+ *    using the order_id from metadata directly (no LIKE queries).
+ * 3. On failure/refund/dispute, the webhook updates the order status accordingly.
  */
 
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || "";
+
+// Use a service-role client for webhook handling (no user session available)
+function getServiceClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
 
 /**
  * Verify the Stripe webhook signature using HMAC-SHA256.
@@ -19,10 +35,7 @@ const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || "";
  * 3. Compute HMAC-SHA256 using the webhook secret
  * 4. Compare computed signature to the one in the header using timing-safe comparison
  */
-function verifyStripeSignature(
-  payload: string,
-  signature: string
-): boolean {
+function verifyStripeSignature(payload: string, signature: string): boolean {
   if (!STRIPE_WEBHOOK_SECRET || !signature) {
     return false;
   }
@@ -65,35 +78,146 @@ function verifyStripeSignature(
 }
 
 async function handlePaymentIntentSucceeded(data: Record<string, unknown>) {
-  // Process successful payment:
-  // 1. Update order status
-  // 2. Move funds to escrow
-  // 3. Notify buyer and seller
-  void data;
+  const supabase = getServiceClient();
+
+  const metadata = (data.metadata as Record<string, string>) || {};
+  const orderId = metadata.order_id;
+  const buyerId = metadata.buyer_id;
+  const sellerId = metadata.seller_id;
+  const paymentIntentId = (data.id as string) || "";
+  const amount = typeof data.amount === "number" ? data.amount / 100 : 0;
+
+  if (!orderId) {
+    throw new Error("Missing order_id in PaymentIntent metadata");
+  }
+
+  // Update existing order status to confirmed
+  const { error: updateError } = await supabase
+    .from("orders")
+    .update({
+      status: "confirmed",
+      escrow_status: "held",
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", orderId);
+
+  if (updateError) {
+    throw new Error(`Failed to update order ${orderId}: ${updateError.message}`);
+  }
+
+  // Create a transaction record
+  if (buyerId && sellerId) {
+    const { error: txError } = await supabase.from("transactions").insert({
+      payment_intent_id: paymentIntentId,
+      buyer_id: buyerId,
+      seller_id: sellerId,
+      amount,
+      status: "succeeded",
+      type: "payment",
+    });
+
+    if (txError) {
+      throw new Error(`Failed to create transaction: ${txError.message}`);
+    }
+  }
 }
 
 async function handlePaymentIntentFailed(data: Record<string, unknown>) {
-  // Handle failed payment:
-  // 1. Update order status
-  // 2. Notify buyer
-  // 3. Log for fraud monitoring if repeated
-  void data;
+  const supabase = getServiceClient();
+
+  const metadata = (data.metadata as Record<string, string>) || {};
+  const orderId = metadata.order_id;
+
+  if (!orderId) {
+    // No order to update if order_id not present
+    return;
+  }
+
+  const { error: updateError } = await supabase
+    .from("orders")
+    .update({
+      status: "cancelled",
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", orderId);
+
+  if (updateError) {
+    throw new Error(`Failed to update order ${orderId}: ${updateError.message}`);
+  }
 }
 
 async function handleChargeRefunded(data: Record<string, unknown>) {
-  // Process refund:
-  // 1. Update escrow status
-  // 2. Update order status
-  // 3. Notify both parties
-  void data;
+  const supabase = getServiceClient();
+
+  // For charge events, payment_intent is a field on the charge object
+  const paymentIntentId =
+    (data.payment_intent as string) || "";
+
+  if (!paymentIntentId) {
+    return;
+  }
+
+  // Look up the order by checking metadata via the payment_intent_id stored in notes
+  const { data: existingOrder, error: lookupError } = await supabase
+    .from("orders")
+    .select("id, notes")
+    .filter("notes", "cs", JSON.stringify({ payment_intent_id: paymentIntentId }))
+    .single();
+
+  if (lookupError || !existingOrder) {
+    // If we cannot find the order, we cannot update it. Throw to trigger retry.
+    throw new Error(
+      `Failed to find order for refund (payment_intent: ${paymentIntentId}): ${lookupError?.message || "not found"}`
+    );
+  }
+
+  const { error: updateError } = await supabase
+    .from("orders")
+    .update({
+      status: "refunded",
+      escrow_status: "released",
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", existingOrder.id);
+
+  if (updateError) {
+    throw new Error(`Failed to update order for refund: ${updateError.message}`);
+  }
 }
 
 async function handleDisputeCreated(data: Record<string, unknown>) {
-  // Handle dispute:
-  // 1. Flag order for admin review
-  // 2. Freeze escrow funds
-  // 3. Notify admin team
-  void data;
+  const supabase = getServiceClient();
+
+  const paymentIntentId = (data.payment_intent as string) || "";
+
+  if (!paymentIntentId) {
+    return;
+  }
+
+  // Look up the order by checking metadata via the payment_intent_id stored in notes
+  const { data: existingOrder, error: lookupError } = await supabase
+    .from("orders")
+    .select("id, notes")
+    .filter("notes", "cs", JSON.stringify({ payment_intent_id: paymentIntentId }))
+    .single();
+
+  if (lookupError || !existingOrder) {
+    throw new Error(
+      `Failed to find order for dispute (payment_intent: ${paymentIntentId}): ${lookupError?.message || "not found"}`
+    );
+  }
+
+  const { error: updateError } = await supabase
+    .from("orders")
+    .update({
+      escrow_status: "frozen",
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", existingOrder.id);
+
+  if (updateError) {
+    throw new Error(`Failed to update order for dispute: ${updateError.message}`);
+  }
 }
 
 export async function POST(request: Request) {
@@ -115,6 +239,7 @@ export async function POST(request: Request) {
     const eventData = event.data?.object || {};
 
     // Route event to appropriate handler
+    // Handlers throw on DB errors so the outer catch returns 500, triggering Stripe retry.
     switch (eventType) {
       case "payment_intent.succeeded":
         await handlePaymentIntentSucceeded(eventData);
@@ -135,6 +260,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ received: true }, { status: 200 });
   } catch {
+    // Return 500 so Stripe retries the webhook delivery
     return NextResponse.json(
       { error: "Webhook processing failed" },
       { status: 500 }

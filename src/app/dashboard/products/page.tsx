@@ -2,10 +2,10 @@
 
 import React from "react";
 import Link from "next/link";
-import { Plus, Eye, Pencil } from "lucide-react";
-import { FadeIn } from "@/components/animations/motion-wrapper";
+import { Plus, Eye, Pencil, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
 import { cn } from "@/lib/utils";
 
 const mockProducts = [
@@ -24,7 +24,7 @@ const statusColors: Record<string, string> = {
 
 export default function ProductsPage() {
   return (
-    <FadeIn className="space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-bold text-soft-white">Products</h2>
@@ -41,11 +41,22 @@ export default function ProductsPage() {
       </div>
 
       {/* Products Grid */}
+      {mockProducts.length === 0 ? (
+        <div className="rounded-xl border border-white/[0.06] bg-surface">
+          <EmptyState
+            icon={Package}
+            title="No products yet"
+            description="Start selling by creating your first product listing."
+            actionLabel="Add Product"
+            actionHref="/dashboard/products/new"
+          />
+        </div>
+      ) : (
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {mockProducts.map((product) => (
           <div
             key={product.id}
-            className="rounded-xl border border-white/[0.06] bg-surface p-4 space-y-3"
+            className="group rounded-xl border border-white/[0.06] bg-surface p-4 space-y-3 transition-all duration-300 hover:border-accent-gold/20 hover:shadow-lg hover:shadow-accent-gold/5 hover:-translate-y-0.5"
           >
             <div className="aspect-video rounded-lg bg-elevated" />
             <div className="flex items-start justify-between">
@@ -73,6 +84,7 @@ export default function ProductsPage() {
                 variant="ghost"
                 size="sm"
                 className="flex-1 text-xs text-muted-foreground hover:text-soft-white gap-1"
+                aria-label="View product"
               >
                 <Eye className="h-3 w-3" />
                 View
@@ -81,6 +93,7 @@ export default function ProductsPage() {
                 variant="ghost"
                 size="sm"
                 className="flex-1 text-xs text-muted-foreground hover:text-soft-white gap-1"
+                aria-label="Edit product"
               >
                 <Pencil className="h-3 w-3" />
                 Edit
@@ -89,6 +102,7 @@ export default function ProductsPage() {
           </div>
         ))}
       </div>
-    </FadeIn>
+      )}
+    </div>
   );
 }

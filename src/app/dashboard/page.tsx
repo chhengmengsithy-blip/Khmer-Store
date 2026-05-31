@@ -1,14 +1,13 @@
 "use client";
 
 import React from "react";
-import { FadeIn } from "@/components/animations/motion-wrapper";
 import { DashboardStats } from "@/features/dashboard/components/dashboard-stats";
 import { OrdersTable } from "@/features/dashboard/components/orders-table";
 import { NotificationsPanel } from "@/features/dashboard/components/notifications-panel";
 
 export default function DashboardPage() {
   return (
-    <FadeIn className="space-y-8">
+    <div className="space-y-8">
       <div>
         <h2 className="text-xl font-bold text-soft-white">Overview</h2>
         <p className="text-sm text-muted-foreground">
@@ -29,6 +28,6 @@ export default function DashboardPage() {
           <NotificationsPanel />
         </div>
       </div>
-    </FadeIn>
+    </div>
   );
 }

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useScrollPosition } from "@/hooks/use-scroll-position";
 import { cn } from "@/lib/utils";
 import { MobileNav } from "./mobile-nav";
+import { Logo } from "@/components/brand/logo";
 
 const navLinks = [
   { label: "Marketplace", href: "/marketplace" },
@@ -35,22 +36,22 @@ export function Header() {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <span className="font-playfair text-xl font-bold text-soft-white">
-            Khmer<span className="text-accent-gold">Store</span>
-          </span>
+          <Logo iconOnly className="md:hidden" size="sm" />
+          <Logo className="hidden md:inline-flex" size="md" />
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden items-center gap-1 md:flex">
+        <nav className="hidden items-center gap-1 md:flex" role="navigation" aria-label="Main navigation">
           {navLinks.map((link) => (
             <motion.a
               key={link.href}
               href={link.href}
-              className="relative px-4 py-2 text-sm text-muted-foreground transition-colors hover:text-soft-white"
+              className="group relative px-4 py-2 text-sm text-muted-foreground transition-colors hover:text-soft-white"
               whileHover={{ y: -1 }}
               transition={{ duration: 0.2, ease: premiumEasing }}
             >
               {link.label}
+              <span className="absolute bottom-0 left-1/2 h-[2px] w-0 -translate-x-1/2 bg-accent-gold transition-all duration-300 group-hover:w-full" />
             </motion.a>
           ))}
         </nav>

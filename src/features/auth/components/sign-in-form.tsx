@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SocialAuthButtons } from "./social-auth-buttons";
 import { signIn } from "../actions/auth-actions";
+import { validateEmail } from "@/lib/validation";
 
 export function SignInForm() {
   const [email, setEmail] = useState("");
@@ -15,10 +16,14 @@ export function SignInForm() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showOtp, setShowOtp] = useState(false);
+  const [emailTouched, setEmailTouched] = useState(false);
+
+  const emailError = emailTouched ? validateEmail(email) : null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setEmailTouched(true);
     setIsLoading(true);
 
     try {
@@ -107,10 +112,14 @@ export function SignInForm() {
             placeholder="your@email.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            onBlur={() => setEmailTouched(true)}
             required
             disabled={isLoading}
-            className="border-white/10 bg-white/5 text-[#F5F5F2] placeholder:text-[#A1A1AA]/60 focus:border-[#C6A769] focus:ring-[#C6A769]/20"
+            className={`bg-white/5 text-[#F5F5F2] placeholder:text-[#A1A1AA]/60 focus:border-[#C6A769] focus:ring-[#C6A769]/20 ${emailError ? "border-red-500/50" : "border-white/10"}`}
           />
+          {emailError && (
+            <p className="text-xs text-red-400 mt-1">{emailError}</p>
+          )}
         </div>
 
         <div className="space-y-2">
