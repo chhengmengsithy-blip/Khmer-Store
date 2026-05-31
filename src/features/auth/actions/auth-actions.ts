@@ -30,13 +30,20 @@ async function setUserRoleCookie(userId: string): Promise<void> {
     .eq("auth_user_id", userId)
     .single();
 
-  const cookieStore = await cookies();
-  if (data?.role) {
-    cookieStore.set("user-role", data.role, ROLE_COOKIE_OPTIONS);
-  } else {
-    // Default role for users whose users_extended row hasn't been created yet
-    cookieStore.set("user-role", "buyer", ROLE_COOKIE_OPTIONS);
+  let role = data?.role;
+
+  // Auto-create users_extended row if it does not exist
+  if (!role) {
+    const { data: inserted } = await supabase
+      .from("users_extended")
+      .insert({ auth_user_id: userId, role: "buyer" })
+      .select("role")
+      .single();
+    role = inserted?.role ?? "buyer";
   }
+
+  const cookieStore = await cookies();
+  cookieStore.set("user-role", role, ROLE_COOKIE_OPTIONS);
 }
 
 /**

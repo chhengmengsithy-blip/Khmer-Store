@@ -52,12 +52,20 @@ export async function GET(request: Request) {
           .eq("auth_user_id", user.id)
           .single();
 
+        let role = data?.role;
+
+        // Auto-create users_extended row if it does not exist
+        if (!role) {
+          const { data: inserted } = await supabase
+            .from("users_extended")
+            .insert({ auth_user_id: user.id, role: "buyer" })
+            .select("role")
+            .single();
+          role = inserted?.role ?? "buyer";
+        }
+
         const cookieStore = await cookies();
-        cookieStore.set(
-          "user-role",
-          data?.role ?? "buyer",
-          ROLE_COOKIE_OPTIONS
-        );
+        cookieStore.set("user-role", role, ROLE_COOKIE_OPTIONS);
       }
 
       return NextResponse.redirect(`${origin}${next}`);

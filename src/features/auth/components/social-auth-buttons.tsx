@@ -1,29 +1,61 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import { createClient } from "@/lib/supabase/client";
 
 interface SocialAuthButtonsProps {
-  onGoogleClick?: () => void;
-  onFacebookClick?: () => void;
   onPhoneClick?: () => void;
   disabled?: boolean;
 }
 
 export function SocialAuthButtons({
-  onGoogleClick,
-  onFacebookClick,
   onPhoneClick,
   disabled = false,
 }: SocialAuthButtonsProps) {
+  const [error, setError] = useState<string | null>(null);
+
+  const handleGoogleSignIn = async () => {
+    setError(null);
+    const supabase = createClient();
+    const { error: oauthError } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+    if (oauthError) {
+      setError(oauthError.message);
+    }
+  };
+
+  const handleFacebookSignIn = async () => {
+    setError(null);
+    const supabase = createClient();
+    const { error: oauthError } = await supabase.auth.signInWithOAuth({
+      provider: "facebook",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+    if (oauthError) {
+      setError(oauthError.message);
+    }
+  };
+
   return (
     <div className="grid gap-3">
+      {error && (
+        <p className="text-sm text-red-400 text-center">{error}</p>
+      )}
+
       <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
         <Button
           type="button"
           variant="outline"
           className="w-full border-white/10 bg-white/5 hover:bg-white/10 hover:border-[#C6A769]/50 transition-all duration-300"
-          onClick={onGoogleClick}
+          onClick={handleGoogleSignIn}
           disabled={disabled}
         >
           <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
@@ -53,7 +85,7 @@ export function SocialAuthButtons({
           type="button"
           variant="outline"
           className="w-full border-white/10 bg-white/5 hover:bg-white/10 hover:border-[#C6A769]/50 transition-all duration-300"
-          onClick={onFacebookClick}
+          onClick={handleFacebookSignIn}
           disabled={disabled}
         >
           <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" fill="#1877F2">
