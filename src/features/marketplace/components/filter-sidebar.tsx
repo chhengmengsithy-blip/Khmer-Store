@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 
-interface FilterState {
+export interface FilterState {
   category: string | null;
   priceMin: string;
   priceMax: string;
@@ -16,6 +16,21 @@ interface FilterState {
   verifiedOnly: boolean;
   minRating: number | null;
   sort: string;
+}
+
+export const defaultFilterState: FilterState = {
+  category: null,
+  priceMin: "",
+  priceMax: "",
+  condition: null,
+  verifiedOnly: false,
+  minRating: null,
+  sort: "newest",
+};
+
+interface FilterSidebarProps {
+  filters: FilterState;
+  onFiltersChange: (filters: FilterState) => void;
 }
 
 const categories = [
@@ -36,17 +51,7 @@ const sortOptions = [
   { value: "popular", label: "Most Popular" },
 ];
 
-export function FilterSidebar() {
-  const [filters, setFilters] = useState<FilterState>({
-    category: null,
-    priceMin: "",
-    priceMax: "",
-    condition: null,
-    verifiedOnly: false,
-    minRating: null,
-    sort: "newest",
-  });
-
+export function FilterSidebar({ filters, onFiltersChange }: FilterSidebarProps) {
   const [expandedSections, setExpandedSections] = useState<
     Record<string, boolean>
   >({
@@ -62,6 +67,10 @@ export function FilterSidebar() {
     setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
   };
 
+  const updateFilter = (update: Partial<FilterState>) => {
+    onFiltersChange({ ...filters, ...update });
+  };
+
   return (
     <aside className="w-full space-y-6 lg:w-64">
       {/* Category */}
@@ -75,10 +84,9 @@ export function FilterSidebar() {
             <button
               key={cat.id}
               onClick={() =>
-                setFilters((prev) => ({
-                  ...prev,
-                  category: prev.category === cat.id ? null : cat.id,
-                }))
+                updateFilter({
+                  category: filters.category === cat.id ? null : cat.id,
+                })
               }
               className={cn(
                 "flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors",
@@ -107,9 +115,7 @@ export function FilterSidebar() {
             placeholder="Min"
             type="number"
             value={filters.priceMin}
-            onChange={(e) =>
-              setFilters((prev) => ({ ...prev, priceMin: e.target.value }))
-            }
+            onChange={(e) => updateFilter({ priceMin: e.target.value })}
             className="h-9 bg-surface border-white/10"
           />
           <span className="text-muted-foreground">-</span>
@@ -117,9 +123,7 @@ export function FilterSidebar() {
             placeholder="Max"
             type="number"
             value={filters.priceMax}
-            onChange={(e) =>
-              setFilters((prev) => ({ ...prev, priceMax: e.target.value }))
-            }
+            onChange={(e) => updateFilter({ priceMax: e.target.value })}
             className="h-9 bg-surface border-white/10"
           />
         </div>
@@ -138,10 +142,9 @@ export function FilterSidebar() {
             <button
               key={cond}
               onClick={() =>
-                setFilters((prev) => ({
-                  ...prev,
-                  condition: prev.condition === cond ? null : cond,
-                }))
+                updateFilter({
+                  condition: filters.condition === cond ? null : cond,
+                })
               }
               className={cn(
                 "rounded-full border px-3 py-1.5 text-xs transition-colors",
@@ -165,12 +168,7 @@ export function FilterSidebar() {
         onToggle={() => toggleSection("seller")}
       >
         <button
-          onClick={() =>
-            setFilters((prev) => ({
-              ...prev,
-              verifiedOnly: !prev.verifiedOnly,
-            }))
-          }
+          onClick={() => updateFilter({ verifiedOnly: !filters.verifiedOnly })}
           className={cn(
             "flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors",
             filters.verifiedOnly
@@ -196,10 +194,9 @@ export function FilterSidebar() {
             <button
               key={rating}
               onClick={() =>
-                setFilters((prev) => ({
-                  ...prev,
-                  minRating: prev.minRating === rating ? null : rating,
-                }))
+                updateFilter({
+                  minRating: filters.minRating === rating ? null : rating,
+                })
               }
               className={cn(
                 "flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors",
@@ -239,9 +236,7 @@ export function FilterSidebar() {
           {sortOptions.map((opt) => (
             <button
               key={opt.value}
-              onClick={() =>
-                setFilters((prev) => ({ ...prev, sort: opt.value }))
-              }
+              onClick={() => updateFilter({ sort: opt.value })}
               className={cn(
                 "flex w-full items-center rounded-lg px-3 py-2 text-sm transition-colors",
                 filters.sort === opt.value
@@ -259,17 +254,7 @@ export function FilterSidebar() {
       <Button
         variant="outline"
         className="w-full border-white/10 text-muted-foreground hover:text-soft-white"
-        onClick={() =>
-          setFilters({
-            category: null,
-            priceMin: "",
-            priceMax: "",
-            condition: null,
-            verifiedOnly: false,
-            minRating: null,
-            sort: "newest",
-          })
-        }
+        onClick={() => onFiltersChange(defaultFilterState)}
       >
         Reset Filters
       </Button>

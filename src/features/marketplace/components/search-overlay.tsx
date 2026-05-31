@@ -41,9 +41,10 @@ const categoryItems = [
 interface SearchOverlayProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSearch: (query: string) => void;
 }
 
-export function SearchOverlay({ open, onOpenChange }: SearchOverlayProps) {
+export function SearchOverlay({ open, onOpenChange, onSearch }: SearchOverlayProps) {
   const [query, setQuery] = useState("");
 
   useEffect(() => {
@@ -60,6 +61,12 @@ export function SearchOverlay({ open, onOpenChange }: SearchOverlayProps) {
     document.addEventListener("keydown", down);
     return () => document.removeEventListener("keydown", down);
   }, [open, onOpenChange]);
+
+  const handleSelect = (value: string) => {
+    onSearch(value);
+    setQuery("");
+    onOpenChange(false);
+  };
 
   return (
     <AnimatePresence>
@@ -85,6 +92,11 @@ export function SearchOverlay({ open, onOpenChange }: SearchOverlayProps) {
                 placeholder="Search products, sellers, categories..."
                 value={query}
                 onValueChange={setQuery}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && query.trim()) {
+                    handleSelect(query.trim());
+                  }
+                }}
               />
               <CommandList className="max-h-[400px]">
                 <CommandEmpty>No results found.</CommandEmpty>
@@ -93,7 +105,11 @@ export function SearchOverlay({ open, onOpenChange }: SearchOverlayProps) {
                   <>
                     <CommandGroup heading="Recent Searches">
                       {recentSearches.map((item) => (
-                        <CommandItem key={item} className="gap-3">
+                        <CommandItem
+                          key={item}
+                          className="gap-3"
+                          onSelect={() => handleSelect(item)}
+                        >
                           <Clock className="h-4 w-4 text-muted-foreground" />
                           <span>{item}</span>
                         </CommandItem>
@@ -104,7 +120,11 @@ export function SearchOverlay({ open, onOpenChange }: SearchOverlayProps) {
 
                     <CommandGroup heading="Trending">
                       {trendingSearches.map((item) => (
-                        <CommandItem key={item} className="gap-3">
+                        <CommandItem
+                          key={item}
+                          className="gap-3"
+                          onSelect={() => handleSelect(item)}
+                        >
                           <TrendingUp className="h-4 w-4 text-accent-gold" />
                           <span>{item}</span>
                         </CommandItem>
@@ -115,7 +135,11 @@ export function SearchOverlay({ open, onOpenChange }: SearchOverlayProps) {
 
                     <CommandGroup heading="Categories">
                       {categoryItems.map((cat) => (
-                        <CommandItem key={cat.slug} className="gap-3">
+                        <CommandItem
+                          key={cat.slug}
+                          className="gap-3"
+                          onSelect={() => handleSelect(cat.name)}
+                        >
                           <Tag className="h-4 w-4 text-muted-foreground" />
                           <span>{cat.name}</span>
                         </CommandItem>
