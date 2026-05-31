@@ -11,6 +11,7 @@ interface PayPalResult {
   success?: boolean;
   orderId?: string;
   approvalUrl?: string;
+  paypalOrderId?: string;
   error?: string;
 }
 
@@ -183,6 +184,7 @@ export async function createPayPalOrder(
       success: true,
       orderId: order.id,
       approvalUrl: approvalLink?.href || undefined,
+      paypalOrderId: paypalData.id,
     };
   } catch (err) {
     // If PayPal fails, cancel the pending order
@@ -201,6 +203,40 @@ export async function capturePayPalOrder(
   paypalOrderId: string,
   supabaseOrderId: string
 ): Promise<PayPalResult> {
+  const supabase = await createClient();
+
+  // Authenticate user
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return { error: "You must be signed in to complete payment." };
+  }
+
+  // Get users_extended id
+  const { data: extUser } = await supabase
+    .from("users_extended")
+    .select("id")
+    .eq("auth_user_id", user.id)
+    .single();
+
+  if (!extUser) {
+    return { error: "User profile not found." };
+  }
+
+  // Verify order ownership
+  const { data: order } = await supabase
+    .from("orders")
+    .select("id, buyer_id, notes")
+    .eq("id", supabaseOrderId)
+    .single();
+
+  if (!order || order.buyer_id !== extUser.id) {
+    return { error: "Order not found or unauthorized." };
+  }
+
   try {
     const accessToken = await getPayPalAccessToken();
 
@@ -223,7 +259,6 @@ export async function capturePayPalOrder(
 
     if (data.status === "COMPLETED") {
       // Update supabase order status to 'confirmed'
-      const supabase = await createClient();
       await supabase
         .from("orders")
         .update({ status: "confirmed", escrow_status: "held" })

@@ -6,8 +6,7 @@ export default function NotFound() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-[#0F1115] px-4">
       <div
-        className="flex flex-col items-center text-center"
-        style={{ animation: "fade-in 0.5s ease-out, slide-in-from-bottom 0.5s ease-out" }}
+        className="flex flex-col items-center text-center animate-fade-in"
       >
         {/* Decorative icons */}
         <div className="mb-8 flex items-center gap-4">

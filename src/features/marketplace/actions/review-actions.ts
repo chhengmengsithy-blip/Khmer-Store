@@ -79,12 +79,19 @@ export async function submitReview(
     return { error: "Rating must be between 1 and 5." };
   }
 
+  // Validate comment length
+  if (comment && comment.trim().length > 2000) {
+    return { error: "Comment must be 2000 characters or fewer." };
+  }
+  // Trim and treat whitespace-only comments as empty
+  const trimmedComment = comment ? comment.trim() : "";
+
   // Insert into reviews
   const { error: insertError } = await supabase.from("reviews").insert({
     product_id: productId,
     user_id: extUser.id,
     rating,
-    comment,
+    comment: trimmedComment,
     verified_purchase: verifiedPurchase,
   });
 

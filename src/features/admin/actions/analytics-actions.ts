@@ -26,6 +26,43 @@ export interface AdminAnalytics {
 export async function getAdminAnalytics(): Promise<AdminAnalytics> {
   const supabase = await createClient();
 
+  // Authenticate user
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return {
+      totalUsers: 0,
+      totalOrders: 0,
+      totalRevenue: 0,
+      activeListings: 0,
+      recentSignups: 0,
+      topProducts: [],
+      recentOrders: [],
+    };
+  }
+
+  // Check admin role
+  const { data: extUser } = await supabase
+    .from("users_extended")
+    .select("role")
+    .eq("auth_user_id", user.id)
+    .single();
+
+  if (!extUser || extUser.role !== "admin") {
+    return {
+      totalUsers: 0,
+      totalOrders: 0,
+      totalRevenue: 0,
+      activeListings: 0,
+      recentSignups: 0,
+      topProducts: [],
+      recentOrders: [],
+    };
+  }
+
   // Query total users count
   const { count: totalUsers } = await supabase
     .from("users_extended")
@@ -91,6 +128,28 @@ export interface DailyRevenue {
 
 export async function getRevenueByDay(days = 7): Promise<DailyRevenue[]> {
   const supabase = await createClient();
+
+  // Authenticate user
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return [];
+  }
+
+  // Check admin role
+  const { data: extUser } = await supabase
+    .from("users_extended")
+    .select("role")
+    .eq("auth_user_id", user.id)
+    .single();
+
+  if (!extUser || extUser.role !== "admin") {
+    return [];
+  }
+
   const startDate = new Date(
     Date.now() - days * 24 * 60 * 60 * 1000
   ).toISOString();

@@ -121,12 +121,9 @@ export function CheckoutFlow() {
       }
       if (result.orderId) {
         setOrderId(result.orderId);
-        // Extract PayPal order ID from the approval URL
-        const url = new URL(result.approvalUrl || "");
-        const token = url.searchParams.get("token");
-        if (token) {
-          setPaypalOrderId(token);
-        }
+      }
+      if (result.paypalOrderId) {
+        setPaypalOrderId(result.paypalOrderId);
       }
 
       setLoading(false);
