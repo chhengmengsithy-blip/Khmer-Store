@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { headers, cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { ensureUserExtended } from "@/features/auth/utils/ensure-user-extended";
 
 interface AuthResult {
   error?: string;
@@ -24,23 +25,7 @@ const ROLE_COOKIE_OPTIONS = {
  */
 async function setUserRoleCookie(userId: string): Promise<void> {
   const supabase = await createClient();
-  const { data } = await supabase
-    .from("users_extended")
-    .select("role")
-    .eq("auth_user_id", userId)
-    .single();
-
-  let role = data?.role;
-
-  // Auto-create users_extended row if it does not exist
-  if (!role) {
-    const { data: inserted } = await supabase
-      .from("users_extended")
-      .insert({ auth_user_id: userId, role: "buyer" })
-      .select("role")
-      .single();
-    role = inserted?.role ?? "buyer";
-  }
+  const role = await ensureUserExtended(supabase, userId);
 
   const cookieStore = await cookies();
   cookieStore.set("user-role", role, ROLE_COOKIE_OPTIONS);
