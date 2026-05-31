@@ -154,6 +154,7 @@ export type Database = {
           description: string;
           price: number;
           currency: string;
+          condition: string | null;
           status: ProductStatus;
           stock: number;
           featured: boolean;
@@ -172,6 +173,7 @@ export type Database = {
           description?: string;
           price: number;
           currency?: string;
+          condition?: string | null;
           status?: ProductStatus;
           stock?: number;
           featured?: boolean;
@@ -190,6 +192,7 @@ export type Database = {
           description?: string;
           price?: number;
           currency?: string;
+          condition?: string | null;
           status?: ProductStatus;
           stock?: number;
           featured?: boolean;
